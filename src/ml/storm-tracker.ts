@@ -214,8 +214,21 @@ export class StormTracker {
     });
   }
 
+  private static isPointInPolygon(pt: Coordinates, poly: Coordinates[]): boolean {
+    if (!poly || poly.length < 3) return false;
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const xi = poly[i].lat, yi = poly[i].lng;
+      const xj = poly[j].lat, yj = poly[j].lng;
+      const intersect = ((yi > pt.lng) !== (yj > pt.lng)) &&
+        (pt.lat < (xj - xi) * (pt.lng - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
   /**
-   * Valuta il rischio immediato e l'ETA d'impatto per una coordinata target
+   * Valuta il rischio immediato e l'ETA d'impatto per una coordinata target in modo coerente
    */
   public static assessLocationRisk(
     targetName: string,
@@ -226,20 +239,45 @@ export class StormTracker {
       return {
         locationName: targetName,
         coords: targetCoords,
-        hailProbability: 5,
+        hailProbability: 0,
         estimatedDiameterCm: 0,
         severityLevel: 'none',
         nearestStormDistanceKm: 999,
         estimatedArrivalMinutes: null,
         stormHeading: 'Nessuna attività rilevata',
-        advisoryText: 'Nessuna minaccia temporalesca convettiva nel raggio di 100 km.'
+        advisoryText: 'Condizioni stabili: nessun temporale convettivo attivo nell\'area.'
       };
     }
 
-    // Trova la cella più vicina o più pericolosa in avvicinamento
-    let closestCell: StormCell | null = null;
-    let minDistance = Infinity;
+    // 1. Controlla se il punto cliccato si trova DIRETTAMENTE DENTRO il poligono o a meno di 14 km dal centroide di una cella
+    const directHitCell = stormCells.find(c =>
+      this.isPointInPolygon(targetCoords, c.polygon) ||
+      calculateHaversineDistanceKm(c.centroid, targetCoords) <= 14
+    );
+
+    if (directHitCell) {
+      const dist = calculateHaversineDistanceKm(directHitCell.centroid, targetCoords);
+      return {
+        locationName: targetName,
+        coords: targetCoords,
+        hailProbability: directHitCell.pohPercentage,
+        estimatedDiameterCm: directHitCell.meshDiameterCm,
+        severityLevel: directHitCell.severity,
+        nearestStormDistanceKm: Math.round(dist),
+        estimatedArrivalMinutes: 0,
+        stormHeading: `${directHitCell.velocity.speedKmh} km/h verso ${Math.round(directHitCell.velocity.directionDeg)}°`,
+        advisoryText: `🚨 TEMPORALE CON GRANDINE IN CORSO SOPRA LA TUA ZONA: Rilevati ${directHitCell.maxDbz} dBZ (${directHitCell.name}) con chicchi stimati di ${directHitCell.meshDiameterCm} cm. Mettersi subito al riparo!`
+      };
+    }
+
+    // 2. Controlla celle in arrivo lungo la traiettoria di nowcast
+    let incomingCell: StormCell | null = null;
     let minETA: number | null = null;
+    let incomingDist: number = Infinity;
+
+    // 3. Trova anche la cella in assoluto più vicina
+    let closestCell: StormCell = stormCells[0];
+    let minDistance = Infinity;
 
     for (const cell of stormCells) {
       const dist = calculateHaversineDistanceKm(cell.centroid, targetCoords);
@@ -248,57 +286,79 @@ export class StormTracker {
         closestCell = cell;
       }
 
-      // Verifica se la cella è in rotta di collisione verso il target
+      // Verifica rotta verso il target
       const bearingToTarget = calculateBearingDeg(cell.centroid, targetCoords);
       const angleDiff = Math.abs((cell.velocity.directionDeg - bearingToTarget + 180) % 360 - 180);
 
-      // Se l'angolo di scostamento è inferiore a 35 gradi, la cella sta puntando verso il target
-      if (angleDiff <= 35 && cell.velocity.speedKmh > 5) {
+      // Angolo di tolleranza di 40 gradi
+      if (angleDiff <= 40 && cell.velocity.speedKmh > 5) {
         const etaMinutes = Math.round((dist / cell.velocity.speedKmh) * 60);
         if (etaMinutes <= 90) {
           if (minETA === null || etaMinutes < minETA) {
             minETA = etaMinutes;
-            closestCell = cell;
+            incomingCell = cell;
+            incomingDist = dist;
           }
         }
       }
     }
 
-    if (!closestCell) {
+    if (incomingCell && minETA !== null && minETA <= 60) {
       return {
         locationName: targetName,
         coords: targetCoords,
-        hailProbability: 0,
-        estimatedDiameterCm: 0,
-        severityLevel: 'none',
-        nearestStormDistanceKm: 999,
-        estimatedArrivalMinutes: null,
-        stormHeading: 'N/A',
-        advisoryText: 'Nessuna cella rilevata.'
+        hailProbability: Math.max(30, Math.round(incomingCell.pohPercentage * (1 - incomingDist / 120))),
+        estimatedDiameterCm: incomingCell.meshDiameterCm,
+        severityLevel: incomingCell.severity,
+        nearestStormDistanceKm: Math.round(incomingDist),
+        estimatedArrivalMinutes: minETA,
+        stormHeading: `${incomingCell.velocity.speedKmh} km/h verso ${Math.round(incomingCell.velocity.directionDeg)}°`,
+        advisoryText: `⚠️ ALLERTA GRANDINE: ${incomingCell.name} (${incomingCell.maxDbz} dBZ) in arrivo su ${targetName} in circa ${minETA} minuti. Chicchi stimati MESH: ${incomingCell.meshDiameterCm} cm.`
       };
     }
 
-    const headingText = `${closestCell.velocity.speedKmh} km/h verso ${Math.round(closestCell.velocity.directionDeg)}°`;
-    let advisory = '';
-
-    if (minETA !== null && minETA <= 60) {
-      advisory = `⚠️ ATTENZIONE: ${closestCell.name} con riflettività ${closestCell.maxDbz} dBZ in arrivo su ${targetName} in circa ${minETA} minuti. Stima grandine MESH: ${closestCell.meshDiameterCm} cm.`;
-    } else if (minDistance < 25) {
-      advisory = `🟡 Cella temporalesca nelle immediate vicinanze (${minDistance} km a ${closestCell.name}). Rischio grandine locale.`;
-    } else {
-      advisory = `🟢 Cella attiva a ${minDistance} km (${closestCell.name}), traiettoria non direttamente incidente al momento.`;
+    // Se vicina (< 30 km) ma non in traiettoria diretta
+    if (minDistance <= 30) {
+      const severity = closestCell.severity === 'destructive' ? 'severe' : closestCell.severity === 'severe' ? 'moderate' : 'minor';
+      return {
+        locationName: targetName,
+        coords: targetCoords,
+        hailProbability: Math.round(closestCell.pohPercentage * 0.65),
+        estimatedDiameterCm: +(closestCell.meshDiameterCm * 0.75).toFixed(1),
+        severityLevel: severity,
+        nearestStormDistanceKm: Math.round(minDistance),
+        estimatedArrivalMinutes: null,
+        stormHeading: `${closestCell.velocity.speedKmh} km/h verso ${Math.round(closestCell.velocity.directionDeg)}°`,
+        advisoryText: `🟡 Cella convettiva attiva a ${Math.round(minDistance)} km (${closestCell.name}). Possibili raffiche di vento e piogge intense nelle vicinanze.`
+      };
     }
 
+    // Se a distanza media (30 - 65 km)
+    if (minDistance <= 65) {
+      return {
+        locationName: targetName,
+        coords: targetCoords,
+        hailProbability: 20,
+        estimatedDiameterCm: +(closestCell.meshDiameterCm * 0.4).toFixed(1),
+        severityLevel: 'minor',
+        nearestStormDistanceKm: Math.round(minDistance),
+        estimatedArrivalMinutes: null,
+        stormHeading: `${closestCell.velocity.speedKmh} km/h verso ${Math.round(closestCell.velocity.directionDeg)}°`,
+        advisoryText: `☁️ Temporale a ${Math.round(minDistance)} km (${closestCell.name}). Nessun impatto diretto atteso sulla tua posizione.`
+      };
+    }
+
+    // Distanza elevata (> 65 km): rischio nullo
     return {
       locationName: targetName,
       coords: targetCoords,
-      hailProbability: closestCell.pohPercentage,
-      estimatedDiameterCm: closestCell.meshDiameterCm,
-      severityLevel: closestCell.severity,
-      nearestStormDistanceKm: minDistance,
-      estimatedArrivalMinutes: minETA,
-      stormHeading: headingText,
-      advisoryText: advisory
+      hailProbability: 0,
+      estimatedDiameterCm: 0,
+      severityLevel: 'none',
+      nearestStormDistanceKm: Math.round(minDistance),
+      estimatedArrivalMinutes: null,
+      stormHeading: 'N/A',
+      advisoryText: `🟢 Condizioni stabili: nessuna cella temporalesca nel raggio di ${Math.round(minDistance)} km.`
     };
   }
 }
