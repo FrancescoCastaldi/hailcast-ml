@@ -629,14 +629,21 @@
           <!-- Tab 1: Form Configurazione -->
           <div class="notif-tab-panel active" id="tabConfigPanel">
             <form id="notificationForm" class="notification-form">
+              <input type="hidden" id="alertSubId" value="" />
               <div class="notification-desc-box">
                 <span class="desc-icon">🛰️</span>
                 <p>Ricevi un avviso immediato via <strong>Email</strong> e <strong>Notifica Browser</strong> quando il radar e i modelli AI rilevano grandine o nubifragi in rotta verso la tua zona.</p>
               </div>
 
-              <div class="form-group">
-                <label for="alertEmailInput">La tua Email per gli Avvisi:</label>
-                <input type="email" id="alertEmailInput" placeholder="nome@esempio.com" required />
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="alertLabelInput">Etichetta Allerta (Opzionale):</label>
+                  <input type="text" id="alertLabelInput" placeholder="Es. 🏠 Casa, 🏢 Ufficio, 🚗 Auto..." />
+                </div>
+                <div class="form-group half">
+                  <label for="alertEmailInput">Email di Ricezione:</label>
+                  <input type="email" id="alertEmailInput" placeholder="nome@esempio.com" required />
+                </div>
               </div>
 
               <div class="form-group">
@@ -690,7 +697,7 @@
 
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="btnCancelNotification">Chiudi</button>
-                <button type="submit" class="btn btn-primary">Salva & Attiva Allerta 🔔</button>
+                <button type="submit" class="btn btn-primary" id="btnSubmitAlert">Salva & Attiva Allerta 🔔</button>
               </div>
             </form>
           </div>
@@ -699,6 +706,7 @@
           <div class="notif-tab-panel" id="tabActivePanel" style="display: none;">
             <div class="active-alerts-header">
               <p class="tab-subtitle">Tutte le località attualmente monitorate dal sistema in tempo reale:</p>
+              <button class="btn btn-primary btn-xs" id="btnAddNewAlert">➕ Nuova Allerta</button>
             </div>
             <div class="active-alerts-list" id="activeAlertsListContainer"></div>
           </div>

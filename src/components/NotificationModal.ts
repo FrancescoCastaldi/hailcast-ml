@@ -1,9 +1,98 @@
 import { AlertSubscription, Coordinates } from '../types/meteorology';
 import { AlertNotificationService } from '../services/alert-notification-service';
 
+const ITALIAN_TOWNS_GEO: Record<string, Coordinates> = {
+  'verona': { lat: 45.438, lng: 10.991 },
+  'desenzano': { lat: 45.470, lng: 10.536 },
+  'peschiera': { lat: 45.438, lng: 10.692 },
+  'gardone': { lat: 45.620, lng: 10.560 },
+  'salò': { lat: 45.608, lng: 10.528 },
+  'sirmione': { lat: 45.492, lng: 10.607 },
+  'bardolino': { lat: 45.548, lng: 10.720 },
+  'lazise': { lat: 45.505, lng: 10.732 },
+  'torri': { lat: 45.609, lng: 10.686 },
+  'malcesine': { lat: 45.764, lng: 10.808 },
+  'riva': { lat: 45.885, lng: 10.841 },
+  'affi': { lat: 45.553, lng: 10.796 },
+  'bussolengo': { lat: 45.474, lng: 10.846 },
+  'villafranca': { lat: 45.351, lng: 10.843 },
+  'valeggio': { lat: 45.354, lng: 10.734 },
+  'sommacampagna': { lat: 45.405, lng: 10.826 },
+  'san bonifacio': { lat: 45.398, lng: 11.277 },
+  'legnago': { lat: 45.193, lng: 11.310 },
+  'milano': { lat: 45.464, lng: 9.189 },
+  'brescia': { lat: 45.541, lng: 10.211 },
+  'bergamo': { lat: 45.698, lng: 9.677 },
+  'monza': { lat: 45.584, lng: 9.274 },
+  'como': { lat: 45.808, lng: 9.085 },
+  'varese': { lat: 45.820, lng: 8.825 },
+  'mantova': { lat: 45.156, lng: 10.791 },
+  'cremona': { lat: 45.133, lng: 10.022 },
+  'pavia': { lat: 45.185, lng: 9.155 },
+  'vicenza': { lat: 45.545, lng: 11.535 },
+  'padova': { lat: 45.406, lng: 11.876 },
+  'treviso': { lat: 45.666, lng: 12.243 },
+  'venezia': { lat: 45.440, lng: 12.315 },
+  'trento': { lat: 46.067, lng: 11.121 },
+  'bolzano': { lat: 46.498, lng: 11.354 },
+  'udine': { lat: 46.063, lng: 13.235 },
+  'pordenone': { lat: 45.956, lng: 12.660 },
+  'trieste': { lat: 45.649, lng: 13.776 },
+  'torino': { lat: 45.070, lng: 7.686 },
+  'novara': { lat: 45.446, lng: 8.620 },
+  'alessandria': { lat: 44.912, lng: 8.615 },
+  'asti': { lat: 44.900, lng: 8.206 },
+  'cuneo': { lat: 44.384, lng: 7.542 },
+  'genova': { lat: 44.405, lng: 8.946 },
+  'bologna': { lat: 44.494, lng: 11.342 },
+  'modena': { lat: 44.647, lng: 10.925 },
+  'reggio emilia': { lat: 44.698, lng: 10.631 },
+  'parma': { lat: 44.801, lng: 10.327 },
+  'piacenza': { lat: 45.052, lng: 9.692 },
+  'ferrara': { lat: 44.838, lng: 11.619 },
+  'ravenna': { lat: 44.418, lng: 12.203 },
+  'forlì': { lat: 44.222, lng: 12.040 },
+  'cesena': { lat: 44.139, lng: 12.243 },
+  'rimini': { lat: 44.059, lng: 12.568 },
+  'firenze': { lat: 43.769, lng: 11.255 },
+  'pisa': { lat: 43.722, lng: 10.401 },
+  'livorno': { lat: 43.548, lng: 10.310 },
+  'lucca': { lat: 43.842, lng: 10.502 },
+  'arezzo': { lat: 43.463, lng: 11.879 },
+  'siena': { lat: 43.318, lng: 11.330 },
+  'ancona': { lat: 43.615, lng: 13.518 },
+  'pesaro': { lat: 43.912, lng: 12.915 },
+  'perugia': { lat: 43.110, lng: 12.390 },
+  'terni': { lat: 42.564, lng: 12.641 },
+  'roma': { lat: 41.902, lng: 12.496 },
+  'latina': { lat: 41.467, lng: 12.903 },
+  'viterbo': { lat: 42.417, lng: 12.104 },
+  'frosinone': { lat: 41.643, lng: 13.351 },
+  'pescara': { lat: 42.461, lng: 14.216 },
+  'l\'aquila': { lat: 42.349, lng: 13.399 },
+  'napoli': { lat: 40.851, lng: 14.268 },
+  'salerno': { lat: 40.682, lng: 14.768 },
+  'caserta': { lat: 41.072, lng: 14.332 },
+  'bari': { lat: 41.117, lng: 16.871 },
+  'foggia': { lat: 41.462, lng: 15.544 },
+  'lecce': { lat: 40.354, lng: 18.174 },
+  'taranto': { lat: 40.476, lng: 17.229 },
+  'potenza': { lat: 40.640, lng: 15.805 },
+  'catanzaro': { lat: 38.909, lng: 16.587 },
+  'reggio calabria': { lat: 38.111, lng: 15.647 },
+  'cosenza': { lat: 39.300, lng: 16.250 },
+  'palermo': { lat: 38.115, lng: 13.361 },
+  'catania': { lat: 37.507, lng: 15.087 },
+  'messina': { lat: 38.193, lng: 15.554 },
+  'cagliari': { lat: 39.223, lng: 9.121 },
+  'sassari': { lat: 40.725, lng: 8.560 }
+};
+
 export class NotificationModalComponent {
   private modalBackdrop: HTMLElement;
   private form: HTMLFormElement;
+  private subIdInput: HTMLInputElement;
+  private labelInput: HTMLInputElement;
   private emailInput: HTMLInputElement;
   private locationInput: HTMLInputElement;
   private hailThresholdSelect: HTMLSelectElement;
@@ -20,6 +109,7 @@ export class NotificationModalComponent {
   private activeSubsCountEl: HTMLElement;
   private historyCountEl: HTMLElement;
   private btnClearHistory: HTMLElement;
+  private btnAddNewAlert: HTMLElement;
 
   private currentCoords: Coordinates = { lat: 45.438, lng: 10.991 }; // Default: Verona
   private currentLocationName: string = 'Verona, Veneto';
@@ -28,6 +118,8 @@ export class NotificationModalComponent {
   constructor() {
     this.modalBackdrop = document.getElementById('notificationModal') as HTMLElement;
     this.form = document.getElementById('notificationForm') as HTMLFormElement;
+    this.subIdInput = document.getElementById('alertSubId') as HTMLInputElement;
+    this.labelInput = document.getElementById('alertLabelInput') as HTMLInputElement;
     this.emailInput = document.getElementById('alertEmailInput') as HTMLInputElement;
     this.locationInput = document.getElementById('alertLocationInput') as HTMLInputElement;
     this.hailThresholdSelect = document.getElementById('hailThresholdSelect') as HTMLSelectElement;
@@ -44,8 +136,9 @@ export class NotificationModalComponent {
     this.activeSubsCountEl = document.getElementById('activeSubsCount') as HTMLElement;
     this.historyCountEl = document.getElementById('historyCount') as HTMLElement;
     this.btnClearHistory = document.getElementById('btnClearAlertHistory') as HTMLElement;
+    this.btnAddNewAlert = document.getElementById('btnAddNewAlert') as HTMLElement;
 
-    this.loadSavedSubscription();
+    this.loadFirstSubscription();
     this.bindEvents();
     this.refreshTabsData();
   }
@@ -58,7 +151,7 @@ export class NotificationModalComponent {
     if (locationName && coords) {
       this.currentLocationName = locationName;
       this.currentCoords = coords;
-      if (this.locationInput) {
+      if (this.locationInput && !this.subIdInput?.value) {
         this.locationInput.value = locationName;
       }
     }
@@ -78,8 +171,19 @@ export class NotificationModalComponent {
     }
   }
 
+  public resetForm(locationName?: string, coords?: Coordinates): void {
+    if (this.subIdInput) this.subIdInput.value = '';
+    if (this.labelInput) this.labelInput.value = '';
+    if (this.locationInput) this.locationInput.value = locationName || this.currentLocationName;
+    if (this.hailThresholdSelect) this.hailThresholdSelect.value = '2.0';
+    if (this.rainThresholdSelect) this.rainThresholdSelect.value = '10';
+    if (this.leadTimeSelect) this.leadTimeSelect.value = '30';
+    if (this.pushCheckbox) this.pushCheckbox.checked = true;
+    if (coords) this.currentCoords = coords;
+    if (this.emailPreviewContainer) this.emailPreviewContainer.style.display = 'none';
+  }
+
   private switchTab(tabId: string): void {
-    // Aggiorna bottoni
     document.querySelectorAll('.notif-tab-btn').forEach(btn => {
       if (btn.getAttribute('data-tab') === tabId) {
         btn.classList.add('active');
@@ -88,7 +192,6 @@ export class NotificationModalComponent {
       }
     });
 
-    // Aggiorna pannelli
     document.querySelectorAll('.notif-tab-panel').forEach(panel => {
       if (panel.id === tabId) {
         (panel as HTMLElement).style.display = 'block';
@@ -105,9 +208,11 @@ export class NotificationModalComponent {
     this.renderHistory();
   }
 
-  private loadSavedSubscription(): void {
+  private loadFirstSubscription(): void {
     const saved = AlertNotificationService.getSubscription();
     if (saved) {
+      if (this.subIdInput) this.subIdInput.value = saved.id || '';
+      if (this.labelInput) this.labelInput.value = saved.label || '';
       if (this.emailInput) this.emailInput.value = saved.email;
       if (this.locationInput) this.locationInput.value = saved.locationName;
       if (this.hailThresholdSelect) this.hailThresholdSelect.value = saved.hailThresholdCm.toString();
@@ -117,6 +222,30 @@ export class NotificationModalComponent {
       this.currentCoords = saved.coords;
       this.currentLocationName = saved.locationName;
     }
+  }
+
+  private loadSubscriptionIntoForm(sub: AlertSubscription): void {
+    if (this.subIdInput) this.subIdInput.value = sub.id || '';
+    if (this.labelInput) this.labelInput.value = sub.label || '';
+    if (this.emailInput) this.emailInput.value = sub.email;
+    if (this.locationInput) this.locationInput.value = sub.locationName;
+    if (this.hailThresholdSelect) this.hailThresholdSelect.value = sub.hailThresholdCm.toString();
+    if (this.rainThresholdSelect) this.rainThresholdSelect.value = sub.rainThresholdMm.toString();
+    if (this.leadTimeSelect) this.leadTimeSelect.value = sub.leadTimeMinutes.toString();
+    if (this.pushCheckbox) this.pushCheckbox.checked = sub.enableBrowserPush;
+    this.currentCoords = sub.coords;
+    this.currentLocationName = sub.locationName;
+    this.switchTab('tabConfigPanel');
+  }
+
+  private resolveCoordinates(locationName: string): Coordinates {
+    const clean = locationName.toLowerCase().trim();
+    for (const [name, coords] of Object.entries(ITALIAN_TOWNS_GEO)) {
+      if (clean.includes(name)) {
+        return coords;
+      }
+    }
+    return this.currentCoords;
   }
 
   private renderActiveSubscriptions(): void {
@@ -132,7 +261,7 @@ export class NotificationModalComponent {
         <div class="empty-alerts-box">
           <span class="empty-icon">📍</span>
           <p>Nessuna allerta mail attiva al momento.</p>
-          <small>Configura la tua prima città nella scheda "Configura Allerta".</small>
+          <small>Configura la tua prima città nella scheda "Configura Allerta" o clicca su "+ Nuova Allerta".</small>
         </div>
       `;
       return;
@@ -146,7 +275,7 @@ export class NotificationModalComponent {
         <div class="sub-card-header">
           <div class="sub-card-title">
             <span class="sub-pin">📍</span>
-            <strong>${sub.locationName}</strong>
+            <strong>${sub.label ? `<span class="sub-custom-tag">${sub.label}</span> ` : ''}${sub.locationName}</strong>
           </div>
           <div class="sub-status-pill ${sub.enabled ? 'live' : 'off'}">
             ${sub.enabled ? 'MONITORAGGIO ATTIVO 🟢' : 'SOSPESO ⚪'}
@@ -168,6 +297,9 @@ export class NotificationModalComponent {
         </div>
 
         <div class="sub-card-actions">
+          <button class="btn-edit-sub btn btn-secondary btn-xs" data-id="${sub.id}">
+            Modifica ✏️
+          </button>
           <button class="btn-toggle-sub btn btn-secondary btn-xs" data-id="${sub.id}">
             ${sub.enabled ? 'Sospendi ⏸️' : 'Riattiva ▶️'}
           </button>
@@ -176,6 +308,10 @@ export class NotificationModalComponent {
           </button>
         </div>
       `;
+
+      card.querySelector('.btn-edit-sub')?.addEventListener('click', () => {
+        this.loadSubscriptionIntoForm(sub);
+      });
 
       card.querySelector('.btn-toggle-sub')?.addEventListener('click', () => {
         AlertNotificationService.toggleSubscription(sub.id || sub.locationName, !sub.enabled);
@@ -242,6 +378,12 @@ export class NotificationModalComponent {
     this.btnClose?.addEventListener('click', () => this.close());
     this.btnCancel?.addEventListener('click', () => this.close());
 
+    // Click + Nuova Allerta
+    this.btnAddNewAlert?.addEventListener('click', () => {
+      this.resetForm();
+      this.switchTab('tabConfigPanel');
+    });
+
     // Tab buttons click
     document.querySelectorAll('.notif-tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -282,11 +424,14 @@ export class NotificationModalComponent {
       this.btnTestEmail.innerHTML = '<span>⏳ Invio Email in corso verso i server...</span>';
       (this.btnTestEmail as HTMLButtonElement).disabled = true;
 
+      const resolvedCoords = this.resolveCoordinates(location);
+
       const tempSub: AlertSubscription = {
+        label: this.labelInput?.value?.trim() || undefined,
         enabled: true,
         email,
         locationName: location,
-        coords: this.currentCoords,
+        coords: resolvedCoords,
         hailThresholdCm: parseFloat(this.hailThresholdSelect?.value || '0'),
         rainThresholdMm: parseFloat(this.rainThresholdSelect?.value || '10'),
         leadTimeMinutes: parseInt(this.leadTimeSelect?.value || '30', 10),
@@ -337,6 +482,8 @@ export class NotificationModalComponent {
       e.preventDefault();
       const email = this.emailInput.value.trim();
       const location = this.locationInput.value.trim();
+      const label = this.labelInput.value.trim();
+      const existingId = this.subIdInput.value.trim();
 
       if (!email) return;
 
@@ -348,12 +495,15 @@ export class NotificationModalComponent {
         }
       }
 
+      const resolvedCoords = this.resolveCoordinates(location || this.currentLocationName);
+
       const sub: AlertSubscription = {
-        id: `sub-${Date.now()}`,
+        id: existingId || `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        label: label || undefined,
         enabled: true,
         email,
         locationName: location || this.currentLocationName,
-        coords: this.currentCoords,
+        coords: resolvedCoords,
         hailThresholdCm: parseFloat(this.hailThresholdSelect.value),
         rainThresholdMm: parseFloat(this.rainThresholdSelect.value),
         leadTimeMinutes: parseInt(this.leadTimeSelect.value, 10),
@@ -361,6 +511,7 @@ export class NotificationModalComponent {
       };
 
       AlertNotificationService.saveSubscription(sub);
+      this.resetForm();
       this.refreshTabsData();
       this.switchTab('tabActivePanel');
 

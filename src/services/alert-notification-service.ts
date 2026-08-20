@@ -46,13 +46,16 @@ export class AlertNotificationService {
    */
   public static saveSubscription(sub: AlertSubscription): void {
     const list = this.getSubscriptions();
-    const id = sub.id || `sub-${Date.now()}`;
-    sub.id = id;
-    const idx = list.findIndex(s => s.id === id || s.locationName.toLowerCase() === sub.locationName.toLowerCase());
-    if (idx >= 0) {
-      list[idx] = sub;
-    } else {
+    if (!sub.id) {
+      sub.id = `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
       list.unshift(sub);
+    } else {
+      const idx = list.findIndex(s => s.id === sub.id);
+      if (idx >= 0) {
+        list[idx] = sub;
+      } else {
+        list.unshift(sub);
+      }
     }
     localStorage.setItem(this.STORAGE_KEY_SUBS, JSON.stringify(list));
     localStorage.setItem(this.STORAGE_KEY_OLD, JSON.stringify(sub));

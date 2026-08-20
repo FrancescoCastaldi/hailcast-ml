@@ -109,6 +109,7 @@ export interface RainViewerApiResponse {
 
 export interface AlertSubscription {
   id?: string;
+  label?: string;            // es. "🏠 Casa", "🏢 Lavoro", "🚗 Garage"
   enabled: boolean;
   email: string;
   locationName: string;
