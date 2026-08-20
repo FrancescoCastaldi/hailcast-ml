@@ -1,17 +1,9 @@
 {
-  "updatedAt": "2026-08-20T20:00:06.182Z",
-  "generatedTimestamp": 1787255752,
+  "updatedAt": "2026-08-20T20:17:55.820Z",
+  "generatedTimestamp": 1787256928,
   "host": "https://tilecache.rainviewer.com",
   "radar": {
     "past": [
-      {
-        "time": 1787248200,
-        "path": "/v2/radar/82b000db4e29"
-      },
-      {
-        "time": 1787248800,
-        "path": "/v2/radar/ba01da7f651a"
-      },
       {
         "time": 1787250000,
         "path": "/v2/radar/36329053a1ff"
@@ -47,6 +39,14 @@
       {
         "time": 1787255400,
         "path": "/v2/radar/c32514bd068f"
+      },
+      {
+        "time": 1787256000,
+        "path": "/v2/radar/d675ccdb788b"
+      },
+      {
+        "time": 1787256600,
+        "path": "/v2/radar/cdfc3ba99c68"
       }
     ],
     "nowcast": []
@@ -60,16 +60,16 @@
         "lng": 10.991
       },
       "current": {
-        "temperature": 24.2,
-        "humidity": 83,
+        "temperature": 24.1,
+        "humidity": 85,
         "pressure": 1003.2,
         "windSpeedKmh": 1.3,
-        "windGustsKmh": 15.8,
-        "windDirectionDeg": 56,
+        "windGustsKmh": 14.4,
+        "windDirectionDeg": 34,
         "precipitationMm": 0,
         "weatherCode": 61,
-        "cape": 330,
-        "liftedIndex": -1.7
+        "cape": 350,
+        "liftedIndex": -1.3
       }
     },
     {
@@ -81,15 +81,15 @@
       },
       "current": {
         "temperature": 21.7,
-        "humidity": 78,
+        "humidity": 77,
         "pressure": 995.2,
-        "windSpeedKmh": 8.9,
-        "windGustsKmh": 22.7,
-        "windDirectionDeg": 27,
+        "windSpeedKmh": 7.6,
+        "windGustsKmh": 20.5,
+        "windDirectionDeg": 25,
         "precipitationMm": 0,
-        "weatherCode": 61,
-        "cape": 10,
-        "liftedIndex": -1.7
+        "weatherCode": 3,
+        "cape": 0,
+        "liftedIndex": -1.9
       }
     },
     {
@@ -101,15 +101,15 @@
       },
       "current": {
         "temperature": 23.1,
-        "humidity": 85,
-        "pressure": 1003.4,
-        "windSpeedKmh": 5.6,
-        "windGustsKmh": 41.4,
-        "windDirectionDeg": 117,
-        "precipitationMm": 0.3,
-        "weatherCode": 96,
-        "cape": 30,
-        "liftedIndex": -2
+        "humidity": 84,
+        "pressure": 1003.5,
+        "windSpeedKmh": 4.7,
+        "windGustsKmh": 37.8,
+        "windDirectionDeg": 122,
+        "precipitationMm": 0,
+        "weatherCode": 80,
+        "cape": 20,
+        "liftedIndex": -2.1
       }
     },
     {
@@ -120,15 +120,15 @@
         "lng": 11.255
       },
       "current": {
-        "temperature": 27.7,
-        "humidity": 69,
-        "pressure": 1003.9,
-        "windSpeedKmh": 5.2,
-        "windGustsKmh": 8.6,
-        "windDirectionDeg": 106,
+        "temperature": 26.9,
+        "humidity": 73,
+        "pressure": 1004.2,
+        "windSpeedKmh": 3.3,
+        "windGustsKmh": 12.2,
+        "windDirectionDeg": 77,
         "precipitationMm": 0,
         "weatherCode": 3,
-        "cape": 1620,
+        "cape": 1490,
         "liftedIndex": -4.3
       }
     },
@@ -142,27 +142,27 @@
       "current": {
         "temperature": 28.7,
         "humidity": 61,
-        "pressure": 1011.7,
-        "windSpeedKmh": 14.8,
-        "windGustsKmh": 31.7,
-        "windDirectionDeg": 193,
+        "pressure": 1011.8,
+        "windSpeedKmh": 14.2,
+        "windGustsKmh": 31.3,
+        "windDirectionDeg": 196,
         "precipitationMm": 0,
-        "weatherCode": 2,
-        "cape": 70,
-        "liftedIndex": -2.8
+        "weatherCode": 1,
+        "cape": 100,
+        "liftedIndex": -3.1
       }
     }
   ],
   "convectiveIndices": {
-    "temperature": 24.2,
-    "humidity": 83,
+    "temperature": 24.1,
+    "humidity": 85,
     "pressure": 1003.2,
     "windSpeedKmh": 1.3,
-    "windGustsKmh": 15.8,
-    "windDirectionDeg": 56,
+    "windGustsKmh": 14.4,
+    "windDirectionDeg": 34,
     "precipitationMm": 0,
     "weatherCode": 61,
-    "cape": 330,
-    "liftedIndex": -1.7
+    "cape": 350,
+    "liftedIndex": -1.3
   }
 }
