@@ -105,34 +105,43 @@ class HailCastApp {
         `Nuova segnalazione grandine da ${report.locationName}: chicchi di ${report.hailSizeCm} cm!`,
         report.hailSizeCm > 3.0 ? 'danger' : 'warning'
       );
+      this.showToast(`Segnalazione inviata: ${report.locationName} (${report.hailSizeCm} cm)`, 'success');
     });
 
     // Tasti HUD mappa
     document.getElementById('btnToggleRadarLayer')?.addEventListener('click', (e) => {
       const btn = e.currentTarget as HTMLElement;
       btn.classList.toggle('active');
-      this.radarMap.toggleRadar(btn.classList.contains('active'));
+      const active = btn.classList.contains('active');
+      this.radarMap.toggleRadar(active);
+      this.showToast(active ? 'Layer Radar Attivato' : 'Layer Radar Disattivato', 'info');
     });
 
     document.getElementById('btnToggleVectors')?.addEventListener('click', (e) => {
       const btn = e.currentTarget as HTMLElement;
       btn.classList.toggle('active');
-      this.radarMap.toggleVectors(btn.classList.contains('active'));
+      const active = btn.classList.contains('active');
+      this.radarMap.toggleVectors(active);
+      this.showToast(active ? 'Traiettorie e Coni Visibili' : 'Traiettorie Nascoste', 'info');
     });
 
     document.getElementById('btnToggleSpotters')?.addEventListener('click', (e) => {
       const btn = e.currentTarget as HTMLElement;
       btn.classList.toggle('active');
-      this.radarMap.toggleSpotters(btn.classList.contains('active'));
+      const active = btn.classList.contains('active');
+      this.radarMap.toggleSpotters(active);
+      this.showToast(active ? 'Segnalazioni Spotter Visibili' : 'Segnalazioni Nascoste', 'info');
     });
 
     document.getElementById('btnLayerBasemap')?.addEventListener('click', () => {
       const newKey = this.radarMap.cycleBasemap();
       this.alertFeed.addAlert(`Mappa base cambiata: ${newKey.toUpperCase()}`, 'info');
+      this.showToast(`Mappa base: ${newKey.toUpperCase()}`, 'info');
     });
 
     document.getElementById('btnResetView')?.addEventListener('click', () => {
       this.radarMap.resetView();
+      this.showToast('Vista centrata sull\'Italia', 'info');
     });
 
     // Pulsante Simulazione Supercella
@@ -149,15 +158,25 @@ class HailCastApp {
       welcomeModal.style.display = 'flex';
     }
 
-    btnDismissWelcome?.addEventListener('click', () => {
+    const closeWelcomeModal = () => {
       if (welcomeModal) {
         welcomeModal.style.display = 'none';
       }
+    };
+
+    btnDismissWelcome?.addEventListener('click', closeWelcomeModal);
+
+    // Light dismiss per welcome modal (click sullo sfondo scuro)
+    welcomeModal?.addEventListener('click', (e) => {
+      if (e.target === welcomeModal) {
+        closeWelcomeModal();
+      }
     });
 
-    // Gestione Navigazione Mobile
+    // Gestione Navigazione Mobile e Drawer Backdrop
     const leftSidebar = document.getElementById('leftSidebar');
     const btnCloseLeftSidebar = document.getElementById('btnCloseLeftSidebar');
+    const mobileDrawerBackdrop = document.getElementById('mobileDrawerBackdrop');
     const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
 
     const setMobileNavActive = (btnId: string) => {
@@ -166,21 +185,35 @@ class HailCastApp {
       });
     };
 
-    document.getElementById('btnNavMap')?.addEventListener('click', () => {
+    const closeAllMobileDrawers = () => {
       leftSidebar?.classList.remove('mobile-open');
       this.telemetry.close();
+      mobileDrawerBackdrop?.classList.remove('active');
       setMobileNavActive('btnNavMap');
+    };
+
+    mobileDrawerBackdrop?.addEventListener('click', () => {
+      closeAllMobileDrawers();
+    });
+
+    document.getElementById('btnNavMap')?.addEventListener('click', () => {
+      closeAllMobileDrawers();
     });
 
     document.getElementById('btnNavCells')?.addEventListener('click', () => {
-      leftSidebar?.classList.toggle('mobile-open');
+      const isOpen = leftSidebar?.classList.toggle('mobile-open');
       this.telemetry.close();
-      setMobileNavActive('btnNavCells');
+      if (isOpen) {
+        mobileDrawerBackdrop?.classList.add('active');
+        setMobileNavActive('btnNavCells');
+      } else {
+        mobileDrawerBackdrop?.classList.remove('active');
+        setMobileNavActive('btnNavMap');
+      }
     });
 
     document.getElementById('btnNavSearch')?.addEventListener('click', () => {
-      leftSidebar?.classList.remove('mobile-open');
-      this.telemetry.close();
+      closeAllMobileDrawers();
       const input = document.getElementById('locationSearchInput') as HTMLInputElement;
       input?.focus();
       setMobileNavActive('btnNavSearch');
@@ -189,7 +222,14 @@ class HailCastApp {
     document.getElementById('btnNavTelemetry')?.addEventListener('click', () => {
       leftSidebar?.classList.remove('mobile-open');
       this.telemetry.toggle();
-      setMobileNavActive('btnNavTelemetry');
+      const isTelOpen = document.getElementById('rightSidebar')?.classList.contains('open');
+      if (isTelOpen) {
+        mobileDrawerBackdrop?.classList.add('active');
+        setMobileNavActive('btnNavTelemetry');
+      } else {
+        mobileDrawerBackdrop?.classList.remove('active');
+        setMobileNavActive('btnNavMap');
+      }
     });
 
     document.getElementById('btnNavSpotter')?.addEventListener('click', () => {
@@ -198,9 +238,54 @@ class HailCastApp {
     });
 
     btnCloseLeftSidebar?.addEventListener('click', () => {
-      leftSidebar?.classList.remove('mobile-open');
-      setMobileNavActive('btnNavMap');
+      closeAllMobileDrawers();
     });
+
+    // Supporto globale al tasto Escape per chiudere modali e pannelli
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeWelcomeModal();
+        closeAllMobileDrawers();
+        const riskCard = document.getElementById('locationRiskCard');
+        if (riskCard) riskCard.style.display = 'none';
+      }
+    });
+  }
+
+  public showToast(message: string, type: 'info' | 'success' | 'warning' | 'danger' = 'info'): void {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast-item toast-${type}`;
+    
+    const icons = {
+      info: 'ℹ️',
+      success: '✅',
+      warning: '⚠️',
+      danger: '🚨'
+    };
+
+    toast.innerHTML = `
+      <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+      <span class="toast-message">${message}</span>
+      <button class="toast-close" aria-label="Chiudi notifica">&times;</button>
+    `;
+
+    toast.querySelector('.toast-close')?.addEventListener('click', () => {
+      toast.classList.add('toast-hiding');
+      setTimeout(() => toast.remove(), 250);
+    });
+
+    container.appendChild(toast);
+
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.classList.add('toast-hiding');
+        setTimeout(() => toast.remove(), 250);
+      }
+    }, 4000);
   }
 
   private lastRadarScanTimeStr: string = '';

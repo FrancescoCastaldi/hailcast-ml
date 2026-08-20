@@ -43,6 +43,20 @@ export class SpotterModalComponent {
       this.close();
     });
 
+    // Light dismiss: click fuori dal contenuto del modale
+    this.modalEl.addEventListener('click', (e) => {
+      if (e.target === this.modalEl) {
+        this.close();
+      }
+    });
+
+    // Chiusura con tasto Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.modalEl.style.display === 'flex') {
+        this.close();
+      }
+    });
+
     this.formEl.addEventListener('submit', (e) => {
       e.preventDefault();
       this.handleSubmit();
