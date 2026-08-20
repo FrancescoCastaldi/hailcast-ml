@@ -1,28 +1,129 @@
-import { AlertSubscription, StormCell } from '../types/meteorology';
+import { AlertSubscription, AlertHistoryEntry, StormCell } from '../types/meteorology';
 import { StormTracker } from '../ml/storm-tracker';
 
 export class AlertNotificationService {
-  private static STORAGE_KEY = 'hailcast_alert_subscription';
+  private static STORAGE_KEY_SUBS = 'hailcast_alert_subscriptions_v2';
+  private static STORAGE_KEY_OLD = 'hailcast_alert_subscription';
+  private static STORAGE_KEY_HISTORY = 'hailcast_alert_history_v2';
   private static NOTIFICATION_COOLDOWN_MS = 10 * 60 * 1000; // 10 minuti di cooldown tra avvisi per la stessa cella
 
   /**
-   * Recupera la configurazione di sottoscrizione salvata
+   * Recupera tutte le sottoscrizioni salvate (con migrazione automatica da legacy)
    */
-  public static getSubscription(): AlertSubscription | null {
+  public static getSubscriptions(): AlertSubscription[] {
     try {
-      const data = localStorage.getItem(this.STORAGE_KEY);
-      if (!data) return null;
-      return JSON.parse(data) as AlertSubscription;
+      const data = localStorage.getItem(this.STORAGE_KEY_SUBS);
+      if (data) {
+        return JSON.parse(data) as AlertSubscription[];
+      }
+      // Migrazione da vecchia chiave singola
+      const oldData = localStorage.getItem(this.STORAGE_KEY_OLD);
+      if (oldData) {
+        const oldSub = JSON.parse(oldData) as AlertSubscription;
+        if (oldSub && oldSub.locationName) {
+          oldSub.id = oldSub.id || `sub-${Date.now()}`;
+          const list = [oldSub];
+          localStorage.setItem(this.STORAGE_KEY_SUBS, JSON.stringify(list));
+          return list;
+        }
+      }
+      return [];
     } catch {
-      return null;
+      return [];
     }
   }
 
   /**
-   * Salva o aggiorna la sottoscrizione notifiche
+   * Recupera la prima sottoscrizione attiva (per retrocompatibilità)
+   */
+  public static getSubscription(): AlertSubscription | null {
+    const list = this.getSubscriptions();
+    return list.find(s => s.enabled) || list[0] || null;
+  }
+
+  /**
+   * Salva o aggiorna una sottoscrizione
    */
   public static saveSubscription(sub: AlertSubscription): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(sub));
+    const list = this.getSubscriptions();
+    const id = sub.id || `sub-${Date.now()}`;
+    sub.id = id;
+    const idx = list.findIndex(s => s.id === id || s.locationName.toLowerCase() === sub.locationName.toLowerCase());
+    if (idx >= 0) {
+      list[idx] = sub;
+    } else {
+      list.unshift(sub);
+    }
+    localStorage.setItem(this.STORAGE_KEY_SUBS, JSON.stringify(list));
+    localStorage.setItem(this.STORAGE_KEY_OLD, JSON.stringify(sub));
+  }
+
+  /**
+   * Elimina una sottoscrizione
+   */
+  public static removeSubscription(id: string): void {
+    const list = this.getSubscriptions().filter(s => s.id !== id && s.locationName !== id);
+    localStorage.setItem(this.STORAGE_KEY_SUBS, JSON.stringify(list));
+    if (list.length > 0) {
+      localStorage.setItem(this.STORAGE_KEY_OLD, JSON.stringify(list[0]));
+    } else {
+      localStorage.removeItem(this.STORAGE_KEY_OLD);
+    }
+  }
+
+  /**
+   * Abilita o disabilita una sottoscrizione
+   */
+  public static toggleSubscription(id: string, enabled: boolean): void {
+    const list = this.getSubscriptions();
+    const sub = list.find(s => s.id === id || s.locationName === id);
+    if (sub) {
+      sub.enabled = enabled;
+      localStorage.setItem(this.STORAGE_KEY_SUBS, JSON.stringify(list));
+    }
+  }
+
+  /**
+   * Recupera lo storico cronologico di tutte le allerte inviate
+   */
+  public static getHistory(): AlertHistoryEntry[] {
+    try {
+      const data = localStorage.getItem(this.STORAGE_KEY_HISTORY);
+      if (!data) return [];
+      return JSON.parse(data) as AlertHistoryEntry[];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Aggiunge una nuova voce nello storico persistente
+   */
+  public static addHistoryEntry(entry: Omit<AlertHistoryEntry, 'id' | 'timestamp'>): AlertHistoryEntry {
+    const history = this.getHistory();
+    const fullEntry: AlertHistoryEntry = {
+      ...entry,
+      id: `hist-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      timestamp: new Date().toLocaleString('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+    };
+    history.unshift(fullEntry);
+    if (history.length > 100) history.pop();
+    localStorage.setItem(this.STORAGE_KEY_HISTORY, JSON.stringify(history));
+    return fullEntry;
+  }
+
+  /**
+   * Cancella lo storico
+   */
+  public static clearHistory(): void {
+    localStorage.removeItem(this.STORAGE_KEY_HISTORY);
   }
 
   /**
@@ -99,11 +200,11 @@ export class AlertNotificationService {
   }
 
   /**
-   * Invia un'allerta email reale tramite gateway HTTP FormSubmit.co
+   * Invia un'allerta email reale tramite gateway HTTP FormSubmit.co e salva nello storico
    */
   public static async sendEmailAlert(
     subscription: AlertSubscription,
-    alertType: 'hail' | 'rain',
+    alertType: 'hail' | 'rain' | 'test',
     details: {
       cellName?: string;
       hailSizeCm?: number;
@@ -121,10 +222,14 @@ export class AlertNotificationService {
       subject = `⚠️ ALLERTA GRANDINE per ${subscription.locationName}: Chicchi stimati ${details.hailSizeCm || 2.5} cm in arrivo in ~${details.etaMinutes || 20} min!`;
       bodyText = `È stata rilevata una cella convettiva severa (${details.cellName || 'Supercella'}, intensità radar ${details.maxDbz || 60} dBZ) in rotta verso ${subscription.locationName}.`;
       advice = `Metti subito al riparo autovetture e veicoli, chiudi tapparelle ed evita di sostare all'aperto nelle prossime ore.`;
-    } else {
+    } else if (alertType === 'rain') {
       subject = `🌧️ ALLERTA PIOGGIA INTENSA / NUBIFRAGIO per ${subscription.locationName}`;
       bodyText = `Nucleo temporalesco ad elevata riflettività (${details.maxDbz || 55} dBZ) in avvicinamento su ${subscription.locationName} (ETA ~${details.etaMinutes || 20} min).`;
       advice = `Prestare massima attenzione a possibili allagamenti, sottopassi e raffiche di vento improvvise.`;
+    } else {
+      subject = `🔔 TEST ALLERTA HAILCAST per ${subscription.locationName}`;
+      bodyText = `Invio di verifica per le allerte meteo e grandine collegate a ${subscription.locationName}.`;
+      advice = `Il sistema di notifica è attivo e pronto a inviarti allerte tempestive.`;
     }
 
     const previewHtml = `
@@ -164,11 +269,11 @@ export class AlertNotificationService {
         },
         signal: controller.signal,
         body: JSON.stringify({
-          _subject: `⚡ [HailCast Alert] ${alertType === 'hail' ? 'Grandine' : 'Pioggia'} per ${subscription.locationName}`,
+          _subject: `⚡ [HailCast Alert] ${alertType === 'hail' ? 'Grandine' : alertType === 'rain' ? 'Pioggia' : 'Test'} per ${subscription.locationName}`,
           _template: 'box',
           _captcha: 'false',
           _replyto: 'no-reply@hailcast.ml',
-          Allerta: alertType === 'hail' ? 'RISCHIO GRANDINE' : 'PIOGGIA INTENSA',
+          Allerta: alertType === 'hail' ? 'RISCHIO GRANDINE' : alertType === 'rain' ? 'PIOGGIA INTENSA' : 'TEST VERIFICA',
           Località: subscription.locationName,
           Coordinate: `${subscription.coords.lat.toFixed(4)}°N, ${subscription.coords.lng.toFixed(4)}°E`,
           Cella_Temporalesca: details.cellName || 'Supercella Convettiva',
@@ -192,10 +297,21 @@ export class AlertNotificationService {
       }
     } catch (err) {
       console.warn('Invio tramite gateway FormSubmit terminato (o bloccato da adblocker/CORS):', err);
-      // Fallback: consideriamo l'evento processato localmente
       gatewaySuccess = true;
       gatewayMessage = `Allerta registrata per ${subscription.email}.`;
     }
+
+    // Salva sempre nello storico delle allerte
+    this.addHistoryEntry({
+      locationName: subscription.locationName,
+      email: subscription.email,
+      alertType,
+      cellName: details.cellName,
+      hailSizeCm: details.hailSizeCm,
+      maxDbz: details.maxDbz,
+      etaMinutes: details.etaMinutes,
+      message: subject
+    });
 
     return {
       success: gatewaySuccess,
@@ -205,7 +321,7 @@ export class AlertNotificationService {
   }
 
   /**
-   * Controlla se le celle temporalesche attive soddisfano le condizioni di allerta per la località dell'utente
+   * Controlla se le celle temporalesche attive soddisfano le condizioni di allerta per tutte le località iscritte
    */
   public static checkStormCellAlerts(cells: StormCell[]): {
     triggered: boolean;
@@ -218,75 +334,81 @@ export class AlertNotificationService {
       previewHtml?: string;
     };
   } {
-    const sub = this.getSubscription();
-    if (!sub || !sub.enabled || !sub.email || !sub.coords) {
+    const subscriptions = this.getSubscriptions().filter(s => s.enabled && s.email && s.coords);
+    if (subscriptions.length === 0) {
       return { triggered: false };
     }
 
     const now = Date.now();
-    // Valuta il rischio per le coordinate salvate
-    const assessment = StormTracker.assessLocationRisk(sub.locationName, sub.coords, cells);
+    let lastTriggeredAlert: any = null;
 
-    if (
-      assessment.estimatedArrivalMinutes !== null &&
-      assessment.estimatedArrivalMinutes <= sub.leadTimeMinutes
-    ) {
-      // Trova la cella più vicina in avvicinamento
-      const nearestCell = cells.find(c => {
-        const dLat = (c.centroid.lat - sub.coords.lat) * 111.32;
-        const dLng = (c.centroid.lng - sub.coords.lng) * (111.32 * Math.cos((sub.coords.lat * Math.PI) / 180));
-        return Math.sqrt(dLat * dLat + dLng * dLng) <= assessment.nearestStormDistanceKm + 5;
-      }) || cells[0];
+    for (const sub of subscriptions) {
+      const assessment = StormTracker.assessLocationRisk(sub.locationName, sub.coords, cells);
 
-      if (!nearestCell) return { triggered: false };
+      if (
+        assessment.estimatedArrivalMinutes !== null &&
+        assessment.estimatedArrivalMinutes <= sub.leadTimeMinutes
+      ) {
+        const nearestCell = cells.find(c => {
+          const dLat = (c.centroid.lat - sub.coords.lat) * 111.32;
+          const dLng = (c.centroid.lng - sub.coords.lng) * (111.32 * Math.cos((sub.coords.lat * Math.PI) / 180));
+          return Math.sqrt(dLat * dLat + dLng * dLng) <= assessment.nearestStormDistanceKm + 5;
+        }) || cells[0];
 
-      const isHailThreat = nearestCell.meshDiameterCm >= sub.hailThresholdCm;
-      const isRainThreat = nearestCell.maxDbz >= (sub.rainThresholdMm >= 25 ? 52 : 44);
+        if (!nearestCell) continue;
 
-      if (isHailThreat || isRainThreat) {
-        // Verifica cooldown per non spammare la stessa cella
-        if (
-          sub.lastNotifiedCellId === nearestCell.id &&
-          sub.lastNotifiedAt &&
-          now - sub.lastNotifiedAt < this.NOTIFICATION_COOLDOWN_MS
-        ) {
-          return { triggered: false };
-        }
+        const isHailThreat = nearestCell.meshDiameterCm >= sub.hailThresholdCm;
+        const isRainThreat = nearestCell.maxDbz >= (sub.rainThresholdMm >= 25 ? 52 : 44);
 
-        // Aggiorna stato notifica
-        sub.lastNotifiedAt = now;
-        sub.lastNotifiedCellId = nearestCell.id;
-        this.saveSubscription(sub);
-
-        const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
-        const title = isHailThreat
-          ? `⚠️ ALLERTA GRANDINE su ${sub.locationName}!`
-          : `🌧️ ALLERTA PIOGGIA FORTE su ${sub.locationName}!`;
-        const message = isHailThreat
-          ? `Cella ${nearestCell.name} (${nearestCell.meshDiameterCm} cm MESH) in arrivo in ~${assessment.estimatedArrivalMinutes} min.`
-          : `Temporale ad alta intensità (${nearestCell.maxDbz} dBZ) in arrivo in ~${assessment.estimatedArrivalMinutes} min.`;
-
-        // Suona il segnale acustico d'allerta
-        this.playAlertChime();
-
-        // Invia notifica browser se abilitata
-        if (sub.enableBrowserPush) {
-          this.sendBrowserNotification(title, message);
-        }
-
-        return {
-          triggered: true,
-          alert: {
-            type,
-            title,
-            message,
-            cell: nearestCell,
-            eta: assessment.estimatedArrivalMinutes
+        if (isHailThreat || isRainThreat) {
+          if (
+            sub.lastNotifiedCellId === nearestCell.id &&
+            sub.lastNotifiedAt &&
+            now - sub.lastNotifiedAt < this.NOTIFICATION_COOLDOWN_MS
+          ) {
+            continue;
           }
-        };
+
+          sub.lastNotifiedAt = now;
+          sub.lastNotifiedCellId = nearestCell.id;
+          this.saveSubscription(sub);
+
+          const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
+          const title = isHailThreat
+            ? `⚠️ ALLERTA GRANDINE su ${sub.locationName}!`
+            : `🌧️ ALLERTA PIOGGIA FORTE su ${sub.locationName}!`;
+          const message = isHailThreat
+            ? `Cella ${nearestCell.name} (${nearestCell.meshDiameterCm} cm MESH) in arrivo in ~${assessment.estimatedArrivalMinutes} min.`
+            : `Temporale ad alta intensità (${nearestCell.maxDbz} dBZ) in arrivo in ~${assessment.estimatedArrivalMinutes} min.`;
+
+          this.playAlertChime();
+
+          if (sub.enableBrowserPush) {
+            this.sendBrowserNotification(title, message);
+          }
+
+          // Invia email automatica
+          this.sendEmailAlert(sub, type, {
+            cellName: nearestCell.name,
+            hailSizeCm: nearestCell.meshDiameterCm,
+            maxDbz: nearestCell.maxDbz,
+            etaMinutes: assessment.estimatedArrivalMinutes
+          });
+
+          lastTriggeredAlert = {
+            triggered: true,
+            alert: {
+              type,
+              title,
+              message,
+              cell: nearestCell,
+              eta: assessment.estimatedArrivalMinutes
+            }
+          };
+        }
       }
     }
 
-    return { triggered: false };
+    return lastTriggeredAlert || { triggered: false };
   }
 }

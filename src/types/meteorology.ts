@@ -108,6 +108,7 @@ export interface RainViewerApiResponse {
 }
 
 export interface AlertSubscription {
+  id?: string;
   enabled: boolean;
   email: string;
   locationName: string;
@@ -118,4 +119,17 @@ export interface AlertSubscription {
   enableBrowserPush: boolean;
   lastNotifiedAt?: number;
   lastNotifiedCellId?: string;
+}
+
+export interface AlertHistoryEntry {
+  id: string;
+  timestamp: string;
+  locationName: string;
+  email: string;
+  alertType: 'hail' | 'rain' | 'test';
+  cellName?: string;
+  hailSizeCm?: number;
+  maxDbz?: number;
+  etaMinutes?: number;
+  message: string;
 }

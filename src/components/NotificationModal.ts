@@ -15,6 +15,12 @@ export class NotificationModalComponent {
   private btnTestEmail: HTMLElement;
   private emailPreviewContainer: HTMLElement;
 
+  private activeListContainer: HTMLElement;
+  private historyListContainer: HTMLElement;
+  private activeSubsCountEl: HTMLElement;
+  private historyCountEl: HTMLElement;
+  private btnClearHistory: HTMLElement;
+
   private currentCoords: Coordinates = { lat: 45.438, lng: 10.991 }; // Default: Verona
   private currentLocationName: string = 'Verona, Veneto';
   private onSubscriptionUpdatedCallback?: (sub: AlertSubscription) => void;
@@ -33,15 +39,22 @@ export class NotificationModalComponent {
     this.btnTestEmail = document.getElementById('btnTestEmailAlert') as HTMLElement;
     this.emailPreviewContainer = document.getElementById('emailPreviewContainer') as HTMLElement;
 
+    this.activeListContainer = document.getElementById('activeAlertsListContainer') as HTMLElement;
+    this.historyListContainer = document.getElementById('alertHistoryListContainer') as HTMLElement;
+    this.activeSubsCountEl = document.getElementById('activeSubsCount') as HTMLElement;
+    this.historyCountEl = document.getElementById('historyCount') as HTMLElement;
+    this.btnClearHistory = document.getElementById('btnClearAlertHistory') as HTMLElement;
+
     this.loadSavedSubscription();
     this.bindEvents();
+    this.refreshTabsData();
   }
 
   public setOnSubscriptionUpdated(callback: (sub: AlertSubscription) => void): void {
     this.onSubscriptionUpdatedCallback = callback;
   }
 
-  public open(locationName?: string, coords?: Coordinates): void {
+  public open(locationName?: string, coords?: Coordinates, tabId: string = 'tabConfigPanel'): void {
     if (locationName && coords) {
       this.currentLocationName = locationName;
       this.currentCoords = coords;
@@ -49,6 +62,8 @@ export class NotificationModalComponent {
         this.locationInput.value = locationName;
       }
     }
+    this.refreshTabsData();
+    this.switchTab(tabId);
     if (this.modalBackdrop) {
       this.modalBackdrop.style.display = 'flex';
     }
@@ -61,6 +76,33 @@ export class NotificationModalComponent {
     if (this.emailPreviewContainer) {
       this.emailPreviewContainer.style.display = 'none';
     }
+  }
+
+  private switchTab(tabId: string): void {
+    // Aggiorna bottoni
+    document.querySelectorAll('.notif-tab-btn').forEach(btn => {
+      if (btn.getAttribute('data-tab') === tabId) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Aggiorna pannelli
+    document.querySelectorAll('.notif-tab-panel').forEach(panel => {
+      if (panel.id === tabId) {
+        (panel as HTMLElement).style.display = 'block';
+      } else {
+        (panel as HTMLElement).style.display = 'none';
+      }
+    });
+
+    this.refreshTabsData();
+  }
+
+  private refreshTabsData(): void {
+    this.renderActiveSubscriptions();
+    this.renderHistory();
   }
 
   private loadSavedSubscription(): void {
@@ -77,9 +119,147 @@ export class NotificationModalComponent {
     }
   }
 
+  private renderActiveSubscriptions(): void {
+    const list = AlertNotificationService.getSubscriptions();
+    if (this.activeSubsCountEl) {
+      this.activeSubsCountEl.textContent = list.filter(s => s.enabled).length.toString();
+    }
+
+    if (!this.activeListContainer) return;
+
+    if (list.length === 0) {
+      this.activeListContainer.innerHTML = `
+        <div class="empty-alerts-box">
+          <span class="empty-icon">📍</span>
+          <p>Nessuna allerta mail attiva al momento.</p>
+          <small>Configura la tua prima città nella scheda "Configura Allerta".</small>
+        </div>
+      `;
+      return;
+    }
+
+    this.activeListContainer.innerHTML = '';
+    for (const sub of list) {
+      const card = document.createElement('div');
+      card.className = `alert-sub-card ${sub.enabled ? 'active' : 'disabled'}`;
+      card.innerHTML = `
+        <div class="sub-card-header">
+          <div class="sub-card-title">
+            <span class="sub-pin">📍</span>
+            <strong>${sub.locationName}</strong>
+          </div>
+          <div class="sub-status-pill ${sub.enabled ? 'live' : 'off'}">
+            ${sub.enabled ? 'MONITORAGGIO ATTIVO 🟢' : 'SOSPESO ⚪'}
+          </div>
+        </div>
+
+        <div class="sub-card-body">
+          <div class="sub-info-row">
+            <span>Email:</span> <b>${sub.email}</b>
+          </div>
+          <div class="sub-info-row">
+            <span>Soglie:</span> 
+            <b>Grandine &gt; ${sub.hailThresholdCm} cm | Pioggia &gt; ${sub.rainThresholdMm} mm/h | Preavviso ${sub.leadTimeMinutes} min</b>
+          </div>
+          <div class="sub-info-row">
+            <span>Notifiche Browser:</span> 
+            <b>${sub.enableBrowserPush ? 'Abilitate ✅' : 'Disattivate'}</b>
+          </div>
+        </div>
+
+        <div class="sub-card-actions">
+          <button class="btn-toggle-sub btn btn-secondary btn-xs" data-id="${sub.id}">
+            ${sub.enabled ? 'Sospendi ⏸️' : 'Riattiva ▶️'}
+          </button>
+          <button class="btn-remove-sub btn btn-secondary btn-xs danger-hover" data-id="${sub.id}">
+            Rimuovi 🗑️
+          </button>
+        </div>
+      `;
+
+      card.querySelector('.btn-toggle-sub')?.addEventListener('click', () => {
+        AlertNotificationService.toggleSubscription(sub.id || sub.locationName, !sub.enabled);
+        this.renderActiveSubscriptions();
+      });
+
+      card.querySelector('.btn-remove-sub')?.addEventListener('click', () => {
+        if (confirm(`Rimuovere il monitoraggio allerte per ${sub.locationName}?`)) {
+          AlertNotificationService.removeSubscription(sub.id || sub.locationName);
+          this.renderActiveSubscriptions();
+        }
+      });
+
+      this.activeListContainer.appendChild(card);
+    }
+  }
+
+  private renderHistory(): void {
+    const history = AlertNotificationService.getHistory();
+    if (this.historyCountEl) {
+      this.historyCountEl.textContent = history.length.toString();
+    }
+
+    if (!this.historyListContainer) return;
+
+    if (history.length === 0) {
+      this.historyListContainer.innerHTML = `
+        <div class="empty-alerts-box">
+          <span class="empty-icon">📜</span>
+          <p>Nessuna allerta registrata nello storico.</p>
+          <small>Le email e gli avvisi inviati compariranno automaticamente qui in ordine cronologico.</small>
+        </div>
+      `;
+      return;
+    }
+
+    this.historyListContainer.innerHTML = '';
+    for (const item of history) {
+      const row = document.createElement('div');
+      const isHail = item.alertType === 'hail';
+      const isRain = item.alertType === 'rain';
+      row.className = `history-item-row alert-${isHail ? 'danger' : isRain ? 'warning' : 'info'}`;
+      row.innerHTML = `
+        <div class="history-item-top">
+          <div class="history-type">
+            <span class="history-emoji">${isHail ? '❄️ ALLERTA GRANDINE' : isRain ? '🌧️ ALLERTA PIOGGIA' : '🔔 TEST DI VERIFICA'}</span>
+            <strong>${item.locationName}</strong>
+          </div>
+          <span class="history-time">${item.timestamp}</span>
+        </div>
+        <div class="history-item-msg">${item.message}</div>
+        <div class="history-item-footer">
+          <span>Destinatario: <b>${item.email}</b></span>
+          ${item.hailSizeCm ? `<span class="hail-pill">Chicchi: ${item.hailSizeCm} cm</span>` : ''}
+          ${item.etaMinutes ? `<span class="eta-pill">ETA: ~${item.etaMinutes} min</span>` : ''}
+          <span class="badge-dispatched">INVIATA CON SUCCESSO ✅</span>
+        </div>
+      `;
+      this.historyListContainer.appendChild(row);
+    }
+  }
+
   private bindEvents(): void {
     this.btnClose?.addEventListener('click', () => this.close());
     this.btnCancel?.addEventListener('click', () => this.close());
+
+    // Tab buttons click
+    document.querySelectorAll('.notif-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const tabId = target.getAttribute('data-tab');
+        if (tabId) {
+          this.switchTab(tabId);
+        }
+      });
+    });
+
+    // Svuota Storico
+    this.btnClearHistory?.addEventListener('click', () => {
+      if (confirm('Sei sicuro di voler cancellare tutto lo storico delle allerte inviate?')) {
+        AlertNotificationService.clearHistory();
+        this.renderHistory();
+      }
+    });
 
     this.modalBackdrop?.addEventListener('click', (e) => {
       if (e.target === this.modalBackdrop) {
@@ -113,7 +293,6 @@ export class NotificationModalComponent {
         enableBrowserPush: this.pushCheckbox?.checked || false
       };
 
-      // Suona segnale acustico d'allerta
       AlertNotificationService.playAlertChime();
 
       const res = await AlertNotificationService.sendEmailAlert(tempSub, 'hail', {
@@ -149,6 +328,8 @@ export class NotificationModalComponent {
           );
         }
       }
+
+      this.refreshTabsData();
     });
 
     // Salva sottoscrizione
@@ -168,6 +349,7 @@ export class NotificationModalComponent {
       }
 
       const sub: AlertSubscription = {
+        id: `sub-${Date.now()}`,
         enabled: true,
         email,
         locationName: location || this.currentLocationName,
@@ -179,7 +361,8 @@ export class NotificationModalComponent {
       };
 
       AlertNotificationService.saveSubscription(sub);
-      this.close();
+      this.refreshTabsData();
+      this.switchTab('tabActivePanel');
 
       if (this.onSubscriptionUpdatedCallback) {
         this.onSubscriptionUpdatedCallback(sub);
