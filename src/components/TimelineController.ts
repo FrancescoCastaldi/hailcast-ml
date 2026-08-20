@@ -99,6 +99,10 @@ export class TimelineControllerComponent {
       this.togglePlay();
     });
 
+    document.getElementById('btnGoLive')?.addEventListener('click', () => {
+      this.jumpToLive();
+    });
+
     // Speed buttons
     document.querySelectorAll('.speed-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -112,6 +116,11 @@ export class TimelineControllerComponent {
         }
       });
     });
+  }
+
+  public jumpToLive(): void {
+    const liveIndex = Math.max(0, this.pastFramesCount - 1);
+    this.goToFrame(liveIndex);
   }
 
   public setFrames(past: RainViewerFrame[], nowcast: RainViewerFrame[]): void {

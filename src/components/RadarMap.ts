@@ -65,6 +65,12 @@ export class RadarMapComponent {
     // Imposta layer dark predefinito
     this.baseLayers.dark.addTo(this.map);
 
+    // Crea pane dedicato per il radar con z-index e proprietà CSS per traslazione fluida
+    const radarPane = this.map.createPane('radarPane');
+    radarPane.style.zIndex = '250';
+    radarPane.style.pointerEvents = 'none';
+    radarPane.style.transition = 'transform 0.15s ease-out';
+
     // Aggiungi layer groups
     this.stormCellsLayerGroup.addTo(this.map);
     this.trajectoriesLayerGroup.addTo(this.map);
@@ -111,16 +117,15 @@ export class RadarMapComponent {
     }
 
     this.radarLayer = L.tileLayer(tileUrl, {
-      opacity: 0.78,
+      pane: 'radarPane',
+      opacity: 0.82,
       minZoom: 1,
       maxNativeZoom: 6,
       maxZoom: 19,
-      zIndex: 200,
       tileSize: 256
     });
 
     this.radarLayer.addTo(this.map);
-    this.radarLayer.on('load', () => this.applyRadarDisplacement());
     this.applyRadarDisplacement();
   }
 
@@ -128,16 +133,15 @@ export class RadarMapComponent {
    * Applica lo spostamento dinamico del radar coerentemente con il vento convettivo
    */
   private applyRadarDisplacement(): void {
-    if (!this.radarLayer) return;
-    const container = this.radarLayer.getContainer();
-    if (!container) return;
+    const pane = this.map.getPane('radarPane');
+    if (!pane) return;
 
     if (this.currentOffsetMinutes === 0) {
-      container.style.transform = '';
+      pane.style.transform = '';
       return;
     }
 
-    const speedKmh = this.currentVelocity?.speedKmh || 46;
+    const speedKmh = this.currentVelocity?.speedKmh || 48;
     const dirDeg = this.currentVelocity?.directionDeg || 76;
     const dirRad = (dirDeg * Math.PI) / 180;
     
@@ -152,7 +156,7 @@ export class RadarMapComponent {
     const dx = Math.round(p2.x - p1.x);
     const dy = Math.round(p2.y - p1.y);
 
-    container.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+    pane.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
   }
 
   /**
