@@ -1960,6 +1960,75 @@ body.dark-theme {
 }
 
 /* ==========================================================================
+   Location-Based Alert & Email Notification Modal
+   ========================================================================== */
+.notification-modal-card {
+  max-width: min(540px, 94vw);
+  max-height: min(90vh, 90dvh);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 16px;
+  padding: clamp(16px, 4vw, 24px);
+}
+
+.notification-desc-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.notification-desc-box .desc-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.notification-test-bar {
+  margin: 12px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.email-preview-box {
+  margin: 14px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  animation: slide-down 0.25s ease;
+}
+
+.test-email-success-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--accent-green);
+  color: var(--accent-green);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.btn-risk-alert {
+  background: linear-gradient(135deg, #00f0ff, #3b82f6);
+  color: #060b14;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 240, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-risk-alert:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5);
+}
+
+/* ==========================================================================
    Welcome Creator Modal (Made by Francesco Castaldi - Fully Responsive)
    ========================================================================== */
 .welcome-modal-card {

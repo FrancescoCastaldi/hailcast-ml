@@ -101,3 +101,16 @@ export interface RainViewerApiResponse {
     infrared: RainViewerFrame[];
   };
 }
+
+export interface AlertSubscription {
+  enabled: boolean;
+  email: string;
+  locationName: string;
+  coords: Coordinates;
+  hailThresholdCm: number;   // 0 = qualsiasi grandine, 2.0 = > 2cm, 4.0 = > 4cm
+  rainThresholdMm: number;   // 10 = pioggia forte, 25 = nubifragio
+  leadTimeMinutes: number;   // 15, 30, 45, 60
+  enableBrowserPush: boolean;
+  lastNotifiedAt?: number;
+  lastNotifiedCellId?: string;
+}

@@ -2,6 +2,7 @@ import { RainViewerService } from './services/rainviewer';
 import { OpenMeteoService } from './services/openmeteo';
 import { SpotterFeedService } from './services/spotter-feed';
 import { MultiSourceStormDetector } from './services/multi-source-tracker';
+import { AlertNotificationService } from './services/alert-notification-service';
 import { StormTracker } from './ml/storm-tracker';
 import { HailPredictorML } from './ml/hail-ml-model';
 import { Coordinates, StormCell, RainViewerFrame, SpotterReport } from './types/meteorology';
@@ -12,6 +13,7 @@ import { AlertFeedComponent } from './components/AlertFeed';
 import { ConvectiveTelemetryComponent } from './components/ConvectiveTelemetry';
 import { LocationSearchComponent } from './components/LocationSearch';
 import { SpotterModalComponent } from './components/SpotterModal';
+import { NotificationModalComponent } from './components/NotificationModal';
 
 class HailCastApp {
   private radarMap!: RadarMapComponent;
@@ -20,6 +22,7 @@ class HailCastApp {
   private telemetry!: ConvectiveTelemetryComponent;
   private locationSearch!: LocationSearchComponent;
   private spotterModal!: SpotterModalComponent;
+  private notificationModal!: NotificationModalComponent;
 
   private baseStormCells: StormCell[] = [];
   private currentStormCells: StormCell[] = [];
@@ -41,6 +44,7 @@ class HailCastApp {
     this.telemetry = new ConvectiveTelemetryComponent();
     this.locationSearch = new LocationSearchComponent();
     this.spotterModal = new SpotterModalComponent();
+    this.notificationModal = new NotificationModalComponent();
 
     // 2. Registra gli eventi
     this.bindEvents();
@@ -254,6 +258,26 @@ class HailCastApp {
       setMobileNavActive('btnNavSpotter');
     });
 
+    document.getElementById('btnNavAlerts')?.addEventListener('click', () => {
+      this.notificationModal.open();
+      setMobileNavActive('btnNavAlerts');
+    });
+
+    // Pulsante Apertura Modale Notifiche & Allerte Email
+    document.getElementById('btnOpenNotificationModal')?.addEventListener('click', () => {
+      this.notificationModal.open(this.inspectedLocation?.name, this.inspectedLocation?.coords);
+    });
+
+    // Pulsante Allerta Rapida dalla Card Località
+    document.getElementById('btnSetAlertForLocation')?.addEventListener('click', () => {
+      this.notificationModal.open(this.inspectedLocation?.name, this.inspectedLocation?.coords);
+    });
+
+    this.notificationModal.setOnSubscriptionUpdated((sub) => {
+      this.showToast(`Monitoraggio attivo per ${sub.locationName} (${sub.email})`, 'success');
+      this.alertFeed.addAlert(`Configurato monitoraggio allerta grandine/pioggia per ${sub.locationName} (${sub.email}).`, 'info');
+    });
+
     btnCloseLeftSidebar?.addEventListener('click', () => {
       closeAllMobileDrawers();
     });
@@ -407,6 +431,22 @@ class HailCastApp {
             this.currentStormCells
           );
           this.locationSearch.showRiskCard(assessment);
+        }
+
+        // Verifica le allerte per l'eventuale sottoscrizione email/push configurata dall'utente
+        const alertCheck = AlertNotificationService.checkStormCellAlerts(this.currentStormCells);
+        if (alertCheck.triggered && alertCheck.alert) {
+          const sub = AlertNotificationService.getSubscription();
+          if (sub) {
+            await AlertNotificationService.sendEmailAlert(sub, alertCheck.alert.type, {
+              cellName: alertCheck.alert.cell.name,
+              hailSizeCm: alertCheck.alert.cell.meshDiameterCm,
+              etaMinutes: alertCheck.alert.eta,
+              maxDbz: alertCheck.alert.cell.maxDbz
+            });
+            this.showToast(`📧 Allerta Inviata a ${sub.email}: ${alertCheck.alert.title}`, 'danger');
+            this.alertFeed.addAlert(`[EMAIL & PUSH INVIATA] ${alertCheck.alert.title}: ${alertCheck.alert.message}`, 'danger');
+          }
         }
       }
     } catch (err) {
