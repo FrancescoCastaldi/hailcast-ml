@@ -216,12 +216,14 @@ export class RadarMapComponent {
       this.stormCellsLayerGroup.addLayer(polygon);
 
       // 2. Marker centrale con indicatore chiaro di GRANDINE (Icona + Diametro + Oggetto)
+      const isNew = !!cell.isNew;
       const centerIcon = L.divIcon({
-        className: 'storm-center-icon',
+        className: `storm-center-icon ${isNew ? 'new-trajectory-marker' : ''}`,
         html: `
-          <div class="hail-map-badge severity-${cell.severity}" title="Grandine: ${cell.meshDiameterCm} cm (${sizeNickname})">
+          <div class="hail-map-badge severity-${cell.severity} ${isNew ? 'pulse-new-genesis' : ''}" title="Grandine: ${cell.meshDiameterCm} cm (${sizeNickname})">
+            ${isNew ? '<div class="new-genesis-tag">⚡ NUOVO SVILUPPO</div>' : ''}
             <div class="badge-top-row">
-              <span class="badge-hail-icon">❄️</span>
+              <span class="badge-hail-icon">${isNew ? '⚡' : '❄️'}</span>
               <span class="badge-hail-size">${cell.meshDiameterCm > 0 ? cell.meshDiameterCm + ' cm' : 'Pioggia'}</span>
             </div>
             <div class="badge-bottom-row">
@@ -230,8 +232,8 @@ export class RadarMapComponent {
             </div>
           </div>
         `,
-        iconSize: [110, 44],
-        iconAnchor: [55, 22]
+        iconSize: [isNew ? 124 : 110, isNew ? 56 : 44],
+        iconAnchor: [isNew ? 62 : 55, isNew ? 28 : 22]
       });
 
       const centerMarker = L.marker([cell.centroid.lat, cell.centroid.lng], { icon: centerIcon });
@@ -331,11 +333,12 @@ export class RadarMapComponent {
     // Linea principale del vettore di avanzamento (60 min) con animazione tratteggiata
     const end60 = cell.nowcastCones[cell.nowcastCones.length - 1]?.projectedCentroid;
     if (end60) {
+      const isNew = !!cell.isNew;
       const vectorLine = L.polyline([startPoint, [end60.lat, end60.lng]], {
-        color: '#ffaa00',
-        weight: 3,
-        dashArray: '8, 8',
-        className: 'animated-trajectory-line'
+        color: isNew ? '#00f0ff' : '#ffaa00',
+        weight: isNew ? 4 : 3,
+        dashArray: isNew ? '6, 6' : '8, 8',
+        className: isNew ? 'animated-new-trajectory-line' : 'animated-trajectory-line'
       });
       this.trajectoriesLayerGroup.addLayer(vectorLine);
     }

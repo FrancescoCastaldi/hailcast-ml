@@ -32,12 +32,14 @@ export class AlertFeedComponent {
 
     for (const cell of cells) {
       const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
+      const isNew = !!cell.isNew;
       const card = document.createElement('div');
-      card.className = `storm-cell-card severity-${cell.severity}`;
+      card.className = `storm-cell-card severity-${cell.severity} ${isNew ? 'is-new-trajectory' : ''}`;
       card.innerHTML = `
         <div class="cell-card-header">
           <div class="cell-name-group">
             <span class="cell-name">${cell.name}</span>
+            ${isNew ? '<span class="new-trajectory-chip">⚡ NUOVA TRAIETTORIA</span>' : ''}
             <span class="cell-trend ${cell.trend}">${cell.trend === 'intensifying' ? '▲ In Intensificazione' : '■ Stazionaria'}</span>
           </div>
           <div class="cell-dbz-pill">${cell.maxDbz} dBZ</div>

@@ -44,6 +44,8 @@ export interface StormCell {
   trend: 'intensifying' | 'steady' | 'weakening';
   nowcastCones: NowcastCone[];
   impactedTowns?: string[];
+  isNew?: boolean;
+  formationStage?: 'new_initiation' | 'rapid_intensification' | 'established' | 'dissipating';
 }
 
 export interface NowcastCone {

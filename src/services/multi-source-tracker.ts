@@ -117,6 +117,9 @@ export class MultiSourceStormDetector {
       const driftedLat = spot.coords.lat + (driftKm * Math.cos(rad)) / 111.32;
       const driftedLng = spot.coords.lng + (driftKm * Math.sin(rad)) / (111.32 * Math.cos((spot.coords.lat * Math.PI) / 180));
 
+      // Rilevamento celle in fase di genesi/innesco rapido
+      const isGenesis = i === 1 || sounding.cape > 2200;
+
       const cell = StormTracker.createStormCell(
         `${spot.id}-${i}`,
         spot.name,
@@ -125,7 +128,9 @@ export class MultiSourceStormDetector {
         speedKmh,
         directionDeg,
         sounding,
-        spot.areaRadiusKm
+        spot.areaRadiusKm,
+        isGenesis,
+        isGenesis ? 'new_initiation' : 'established'
       );
 
       detectedCells.push(cell);

@@ -211,7 +211,9 @@ export class StormTracker {
     speedKmh: number,
     directionDeg: number,
     sounding: ConvectiveSounding,
-    radiusKm: number = 12
+    radiusKm: number = 12,
+    isNew: boolean = false,
+    formationStage: 'new_initiation' | 'rapid_intensification' | 'established' | 'dissipating' = 'established'
   ): StormCell {
     // Calcola componenti vettoriali
     const rad = directionDeg * (Math.PI / 180);
@@ -251,9 +253,11 @@ export class StormTracker {
       pohPercentage: prediction.probability,
       poshPercentage: prediction.posh,
       severity: prediction.severityClass,
-      trend: maxDbz > 58 ? 'intensifying' : 'steady',
+      trend: isNew ? 'intensifying' : maxDbz > 58 ? 'intensifying' : 'steady',
       nowcastCones,
-      impactedTowns
+      impactedTowns,
+      isNew,
+      formationStage
     };
   }
 

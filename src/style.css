@@ -3026,3 +3026,79 @@ textarea:focus-visible,
   margin-left: auto;
 }
 
+/* ==========================================================================
+   Newly Detected Storm Trajectories & Early Genesis Highlights
+   ========================================================================== */
+.pulse-new-genesis {
+  animation: pulse-new-halo 1.6s infinite alternate ease-in-out !important;
+  border: 2px solid #00f0ff !important;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.6) !important;
+}
+
+.new-genesis-tag {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #00f0ff, #ffaa00);
+  color: #0b1322;
+  font-size: 0.62rem;
+  font-weight: 900;
+  padding: 1px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  animation: bounce-chip 2s infinite ease-in-out;
+}
+
+@keyframes pulse-new-halo {
+  0% {
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4), 0 0 20px rgba(255, 170, 0, 0.2);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.8), 0 0 35px rgba(255, 170, 0, 0.4);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes bounce-chip {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-3px);
+  }
+}
+
+.animated-new-trajectory-line {
+  stroke-dasharray: 8, 8;
+  animation: dash-flow-fast 1s linear infinite;
+  filter: drop-shadow(0 0 6px #00f0ff);
+}
+
+@keyframes dash-flow-fast {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+.storm-cell-card.is-new-trajectory {
+  border-color: rgba(0, 240, 255, 0.6) !important;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.08) 0%, rgba(14, 20, 32, 0.9) 100%) !important;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.2) !important;
+}
+
+.new-trajectory-chip {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.5);
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.2px;
+}
+
+
