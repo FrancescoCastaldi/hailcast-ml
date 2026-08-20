@@ -93,6 +93,36 @@ body.dark-theme {
   gap: 12px;
 }
 
+.brand-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+  border: 1px solid rgba(0, 240, 255, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.brand-logo-img:hover {
+  transform: scale(1.08) rotate(5deg);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+}
+
+.welcome-hero-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 24px rgba(0, 240, 255, 0.6), 0 0 48px rgba(168, 85, 247, 0.3);
+  border: 2px solid rgba(0, 240, 255, 0.6);
+  animation: logo-float 4s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.03); }
+}
+
 .radar-pulse-icon {
   position: relative;
   width: 28px;
