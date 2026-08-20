@@ -48,3 +48,5 @@ EXAM_INFO.md
 report/Lecture/
 private/
 *.pdf
+
+# Playwright MCP test artifacts.playwright-mcp/

@@ -470,8 +470,16 @@ export class AlertNotificationService {
       const threatActive = isHailThreat || isRainThreat;
 
       if (threatActive) {
-        // Isteresi: se l'allerta è già scattata, non ri-inviare finché la minaccia non rientra sotto la banda
-        if (sub.alertActive) {
+        const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
+
+        // Isteresi: NON ri-inviare finché la STESSA minaccia (stessa cella e stesso tipo) è ancora attiva.
+        // Una cella diversa o un tipo diverso (es. grandine -> pioggia intensa) è un nuovo evento e può scattare
+        // di nuovo, sempre rispettando i cooldown anti-spam sottostanti.
+        const sameOngoingThreat =
+          sub.alertActive &&
+          sub.lastAlertType === type &&
+          nearestCell.id === sub.lastNotifiedCellId;
+        if (sameOngoingThreat) {
           continue;
         }
 
@@ -493,11 +501,11 @@ export class AlertNotificationService {
         }
 
         sub.alertActive = true;
+        sub.lastAlertType = type;
         sub.lastNotifiedAt = now;
         sub.lastNotifiedCellId = nearestCell.id;
         this.saveSubscription(sub);
 
-        const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
         const title = isHailThreat
           ? `⚠️ ALLERTA GRANDINE su ${sub.locationName}!`
           : `🌧️ ALLERTA PIOGGIA INTENSA su ${sub.locationName}!`;
@@ -530,10 +538,24 @@ export class AlertNotificationService {
           }
         };
       } else {
-        // Banda di isteresi: riarma solo quando la minaccia scende sotto la soglia di riarmo
-        const rearmHail = nearestCell.meshDiameterCm < (sub.hailThresholdCm || 0) * this.HYSTERESIS_FACTOR;
-        const rearmRain = nearestCell.maxDbz < Math.max(38, Math.min(58, rainDbzThreshold)) - this.RAIN_HYSTERESIS_DBZ;
-        if (sub.alertActive && rearmHail && rearmRain) {
+        // Banda di isteresi: riarma in base al tipo di minaccia che aveva fatto scattare l'allerta.
+        // (Es. un'allerta di pioggia si riarma quando i dBZ scendono sotto la banda, senza essere
+        // bloccata dalla MESH, e viceversa.)
+        const hailRearmBand = (sub.hailThresholdCm || 0) * this.HYSTERESIS_FACTOR;
+        const rainRearmDbz = Math.max(38, Math.min(58, rainDbzThreshold)) - this.RAIN_HYSTERESIS_DBZ;
+
+        let rearmed = false;
+        if (sub.lastAlertType === 'hail') {
+          rearmed = (sub.hailThresholdCm || 0) <= 0 || nearestCell.meshDiameterCm < hailRearmBand;
+        } else if (sub.lastAlertType === 'rain') {
+          rearmed = nearestCell.maxDbz < rainRearmDbz;
+        } else {
+          // Sottoscrizioni legacy senza tipo registrato: riarma solo se entrambe le minacce sono rientrate
+          rearmed = ((sub.hailThresholdCm || 0) <= 0 || nearestCell.meshDiameterCm < hailRearmBand) &&
+                    nearestCell.maxDbz < rainRearmDbz;
+        }
+
+        if (sub.alertActive && rearmed) {
           sub.alertActive = false;
           this.saveSubscription(sub);
         }

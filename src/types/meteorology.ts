@@ -123,6 +123,7 @@ export interface AlertSubscription {
   lastNotifiedAt?: number;
   lastNotifiedCellId?: string;
   alertActive?: boolean;   // Isteresi: true = allerta già scattata, in attesa che la minaccia rientri sotto la banda
+  lastAlertType?: 'hail' | 'rain'; // Tipo dell'ultima allerta scattata (per riarmo selettivo)
 }
 
 export interface AlertHistoryEntry {
