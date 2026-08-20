@@ -202,7 +202,7 @@ class HailCastApp {
       }
     });
 
-    // Gestione Navigazione Mobile e Drawer Backdrop
+    // Gestione Navigazione Mobile con 4 Tasti Contestuali
     const leftSidebar = document.getElementById('leftSidebar');
     const btnCloseLeftSidebar = document.getElementById('btnCloseLeftSidebar');
     const mobileDrawerBackdrop = document.getElementById('mobileDrawerBackdrop');
@@ -218,17 +218,46 @@ class HailCastApp {
       leftSidebar?.classList.remove('mobile-open');
       this.telemetry.close();
       mobileDrawerBackdrop?.classList.remove('active');
-      setMobileNavActive('btnNavMap');
+      setMobileNavActive('btnNavGpsLocation');
     };
 
     mobileDrawerBackdrop?.addEventListener('click', () => {
       closeAllMobileDrawers();
     });
 
-    document.getElementById('btnNavMap')?.addEventListener('click', () => {
+    btnCloseLeftSidebar?.addEventListener('click', () => {
       closeAllMobileDrawers();
     });
 
+    // 1. Tasto Contestuale: 📍 Rileva Posizione GPS del Telefono & Calcola Rischio
+    document.getElementById('btnNavGpsLocation')?.addEventListener('click', () => {
+      closeAllMobileDrawers();
+      setMobileNavActive('btnNavGpsLocation');
+
+      if ('geolocation' in navigator) {
+        this.showToast('📍 Rilevamento posizione GPS del telefono...', 'info');
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            const locName = 'La tua posizione (GPS)';
+            this.handleLocationInspection(coords, locName);
+            this.showToast(`📍 Posizione rilevata: ${coords.lat.toFixed(3)}°N, ${coords.lng.toFixed(3)}°E`, 'success');
+          },
+          (err) => {
+            console.warn('GPS negato o non disponibile:', err);
+            // Centra sulla vista Italia o posizione salvata
+            this.radarMap.resetView();
+            this.showToast('Impossibile ottenere il GPS. Mappa centrata sull\'Italia.', 'warning');
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      } else {
+        this.radarMap.resetView();
+        this.showToast('Geolocalizzazione non supportata dal browser.', 'warning');
+      }
+    });
+
+    // 2. Tasto Contestuale: ⚡ Temporali & Nowcast
     document.getElementById('btnNavCells')?.addEventListener('click', () => {
       const isOpen = leftSidebar?.classList.toggle('mobile-open');
       this.telemetry.close();
@@ -237,41 +266,25 @@ class HailCastApp {
         setMobileNavActive('btnNavCells');
       } else {
         mobileDrawerBackdrop?.classList.remove('active');
-        setMobileNavActive('btnNavMap');
+        setMobileNavActive('btnNavGpsLocation');
       }
     });
 
-    document.getElementById('btnNavSearch')?.addEventListener('click', () => {
-      closeAllMobileDrawers();
-      const input = document.getElementById('locationSearchInput') as HTMLInputElement;
-      input?.focus();
-      setMobileNavActive('btnNavSearch');
-    });
-
-    document.getElementById('btnNavTelemetry')?.addEventListener('click', () => {
-      leftSidebar?.classList.remove('mobile-open');
-      this.telemetry.toggle();
-      const isTelOpen = document.getElementById('rightSidebar')?.classList.contains('open');
-      if (isTelOpen) {
-        mobileDrawerBackdrop?.classList.add('active');
-        setMobileNavActive('btnNavTelemetry');
-      } else {
-        mobileDrawerBackdrop?.classList.remove('active');
-        setMobileNavActive('btnNavMap');
-      }
-    });
-
+    // 3. Tasto Contestuale: ❄️ Segnala Grandine/Temporale
     document.getElementById('btnNavSpotter')?.addEventListener('click', () => {
-      this.spotterModal.open();
+      closeAllMobileDrawers();
       setMobileNavActive('btnNavSpotter');
+      this.spotterModal.open(this.inspectedLocation?.name, this.inspectedLocation?.coords);
     });
 
+    // 4. Tasto Contestuale: 🔔 Gestione Allerte & Email
     document.getElementById('btnNavAlerts')?.addEventListener('click', () => {
-      this.notificationModal.open();
+      closeAllMobileDrawers();
       setMobileNavActive('btnNavAlerts');
+      this.notificationModal.open(this.inspectedLocation?.name, this.inspectedLocation?.coords);
     });
 
-    // Pulsante Apertura Modale Notifiche & Allerte Email
+    // Pulsante Apertura Modale Notifiche & Allerte Email da Header
     document.getElementById('btnOpenNotificationModal')?.addEventListener('click', () => {
       this.notificationModal.open(this.inspectedLocation?.name, this.inspectedLocation?.coords);
     });
