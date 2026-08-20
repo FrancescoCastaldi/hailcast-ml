@@ -123,26 +123,50 @@
           
           <!-- Radar HUD Overlay -->
           <div class="map-hud-overlay">
-            <!-- Top Map Legend (dBZ Scale & Grandine Guide) -->
-            <div class="radar-legend-bar glass-panel">
+            <!-- Top Map Legend (dBZ Scale & Grandine / Pioggia Guide) -->
+            <div class="radar-legend-bar glass-panel" id="radarLegendBar">
               <div class="legend-header-line">
-                <span class="legend-label">Scala Riflettività Radar:</span>
-                <div class="legend-gradient">
-                  <span class="legend-mark mark-10">10</span>
-                  <span class="legend-mark mark-25">25</span>
-                  <span class="legend-mark mark-40">40</span>
-                  <span class="legend-mark mark-50">50</span>
-                  <span class="legend-mark mark-60">60</span>
-                  <span class="legend-mark mark-70">70+</span>
+                <div class="legend-title-group">
+                  <span class="legend-icon">📡</span>
+                  <span class="legend-label">Riflettività & Pioggia:</span>
+                </div>
+                <div class="legend-gradient-wrapper">
+                  <div class="legend-gradient">
+                    <span class="legend-mark mark-10">10</span>
+                    <span class="legend-mark mark-25">25</span>
+                    <span class="legend-mark mark-40">40</span>
+                    <span class="legend-mark mark-50">50</span>
+                    <span class="legend-mark mark-60">60</span>
+                    <span class="legend-mark mark-70">70+</span>
+                  </div>
+                  <div class="legend-intensity-labels">
+                    <span class="int-label">Debole</span>
+                    <span class="int-label">Moderata</span>
+                    <span class="int-label">Forte</span>
+                    <span class="int-label">Nubifragio</span>
+                    <span class="int-label">Grandine</span>
+                  </div>
                 </div>
               </div>
-              <div class="hail-risk-indicator">
-                <span class="hail-tag tag-low">🌧️ Pioggia</span>
-                <span class="hail-tag tag-coin">🪙 Moneta (1.5cm)</span>
-                <span class="hail-tag tag-nut">🌰 Noce (3cm)</span>
-                <span class="hail-tag tag-golf">⛳ Golf (4.5cm)</span>
-                <span class="hail-tag tag-egg">🥚 Uovo (6cm)</span>
-                <span class="hail-tag tag-tennis">🎾 Tennis (&gt;7cm)</span>
+              <div class="legend-indicators-container">
+                <div class="legend-sub-row rain-sub-row">
+                  <span class="sub-row-label">🌧️ Pioggia:</span>
+                  <div class="sub-row-tags">
+                    <span class="rain-tag tag-drizzle" title="10-20 dBZ">&lt;1 mm/h (Pioviggine)</span>
+                    <span class="rain-tag tag-mod" title="20-35 dBZ">1-5 mm/h (Moderata)</span>
+                    <span class="rain-tag tag-heavy" title="35-45 dBZ">5-20 mm/h (Forte)</span>
+                    <span class="rain-tag tag-torrential" title="45-55 dBZ">&gt;20 mm/h (Nubifragio)</span>
+                  </div>
+                </div>
+                <div class="legend-sub-row hail-sub-row">
+                  <span class="sub-row-label">❄️ Grandine:</span>
+                  <div class="sub-row-tags">
+                    <span class="hail-tag tag-coin" title="50-55 dBZ">🪙 1-2 cm</span>
+                    <span class="hail-tag tag-nut" title="55-60 dBZ">🌰 3 cm</span>
+                    <span class="hail-tag tag-golf" title="60-65 dBZ">⛳ 4.5 cm</span>
+                    <span class="hail-tag tag-egg" title=">65 dBZ">🥚 &gt;6 cm</span>
+                  </div>
+                </div>
               </div>
             </div>
 
