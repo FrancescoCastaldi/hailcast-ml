@@ -62,12 +62,23 @@ export class TimelineControllerComponent {
     });
   }
 
+  private pastFramesCount: number = 0;
+
   public setFrames(past: RainViewerFrame[], nowcast: RainViewerFrame[]): void {
+    this.pastFramesCount = past.length;
     this.frames = [...past, ...nowcast];
     this.scrubberInput.max = (this.frames.length - 1).toString();
-    // Default: ultimo frame passato (LIVE / NOW)
-    this.currentIndex = Math.max(0, past.length - 1);
-    this.scrubberInput.value = this.currentIndex.toString();
+    
+    // Se non stava già riproducendo, posizionati sull'ultimo frame passato (LIVE)
+    if (!this.isPlaying) {
+      this.currentIndex = Math.max(0, past.length - 1);
+      this.scrubberInput.value = this.currentIndex.toString();
+    } else {
+      if (this.currentIndex >= this.frames.length) {
+        this.currentIndex = 0;
+      }
+      this.scrubberInput.value = this.currentIndex.toString();
+    }
     this.updateUI();
   }
 
@@ -82,7 +93,7 @@ export class TimelineControllerComponent {
     this.updateUI();
 
     if (this.onFrameChangeCallback && this.frames[index]) {
-      const isNowcast = index >= (this.frames.length / 2); // stima per nowcast
+      const isNowcast = index >= this.pastFramesCount;
       this.onFrameChangeCallback(this.frames[index], index, isNowcast);
     }
   }
@@ -143,21 +154,35 @@ export class TimelineControllerComponent {
     const frame = this.frames[this.currentIndex];
     if (!frame) return;
 
-    const date = new Date(frame.time * 1000);
-    const timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const isNowcast = frame.path.includes('nowcast');
+    const frameDate = new Date(frame.time * 1000);
+    const timeStr = frameDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const isNowcast = this.currentIndex >= this.pastFramesCount;
+    const isLatestPast = this.currentIndex === (this.pastFramesCount - 1);
 
-    this.currentTimestampEl.textContent = `${timeStr} (UTC+2)`;
-    
+    const now = new Date();
+    const diffMinutes = Math.round((now.getTime() - frameDate.getTime()) / 60000);
+
+    let relativeStr = '';
     if (isNowcast) {
+      const futureMins = Math.round((frameDate.getTime() - (this.frames[this.pastFramesCount - 1]?.time * 1000 || now.getTime())) / 60000);
+      relativeStr = ` (+${futureMins}m)`;
       this.frameModeBadge.className = 'frame-mode-badge nowcast';
-      this.frameModeBadge.textContent = 'NOWCAST +PREVISIONE';
-    } else {
+      this.frameModeBadge.textContent = `NOWCAST +${futureMins}m`;
+    } else if (isLatestPast) {
+      relativeStr = diffMinutes > 0 ? ` (Ultimo Scatto: -${diffMinutes}m)` : ` (Ultimo Scatto)`;
       this.frameModeBadge.className = 'frame-mode-badge live';
-      this.frameModeBadge.textContent = 'RADAR REALE';
+      this.frameModeBadge.textContent = 'RADAR REALE (LIVE)';
+    } else {
+      relativeStr = diffMinutes > 0 ? ` (-${diffMinutes}m)` : '';
+      this.frameModeBadge.className = 'frame-mode-badge live';
+      this.frameModeBadge.textContent = 'ARCHIVIO PASSATO';
     }
 
-    const percentage = (this.currentIndex / (this.frames.length - 1)) * 100;
+    this.currentTimestampEl.textContent = `${timeStr}${relativeStr}`;
+
+    const percentage = this.frames.length > 1 
+      ? (this.currentIndex / (this.frames.length - 1)) * 100 
+      : 100;
     this.progressBar.style.width = `${percentage}%`;
   }
 }

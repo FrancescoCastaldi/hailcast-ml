@@ -55,11 +55,13 @@ class HailCastApp {
     // Avvio automatico della timeline (il tempo avanza da solo)
     this.timelineController.play();
     
-    // Refresh automatico dei dati radar ogni 5 minuti (300000 ms)
+    // Avvia orologio live in tempo reale (aggiornato ogni secondo)
+    this.startLiveClockTicker();
+
+    // Refresh automatico dei dati radar ogni 60 secondi (1 minuto)
     setInterval(() => {
-      console.log('🔄 Aggiornamento automatico dei dati radar...');
-      this.fetchLiveRadar();
-    }, 300000);
+      this.fetchLiveRadar(true);
+    }, 60000);
 
     // 6. Esegui la prima valutazione di telemetria sulla prima cella attiva
     if (this.currentStormCells.length > 0) {
@@ -201,11 +203,32 @@ class HailCastApp {
     });
   }
 
-  private async fetchLiveRadar(): Promise<void> {
+  private lastRadarScanTimeStr: string = '';
+
+  private startLiveClockTicker(): void {
+    const updateClock = () => {
+      const now = new Date();
+      const liveTimeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const statusTextEl = document.getElementById('radarStatusText') as HTMLElement;
+      if (statusTextEl) {
+        if (this.lastRadarScanTimeStr) {
+          statusTextEl.textContent = `LIVE • RADAR: ${this.lastRadarScanTimeStr} | ORA: ${liveTimeStr}`;
+        } else {
+          statusTextEl.textContent = `LIVE | ORA: ${liveTimeStr}`;
+        }
+      }
+    };
+    updateClock();
+    setInterval(updateClock, 1000);
+  }
+
+  private async fetchLiveRadar(isBackgroundRefresh: boolean = false): Promise<void> {
     const statusTextEl = document.getElementById('radarStatusText') as HTMLElement;
     
     try {
-      statusTextEl.textContent = 'CONNESSIONE RAINVIEWER...';
+      if (!isBackgroundRefresh && statusTextEl) {
+        statusTextEl.textContent = 'CONNESSIONE RADAR...';
+      }
       const radarData = await RainViewerService.fetchRadarData();
       this.rainViewerHost = radarData.host;
 
@@ -214,14 +237,21 @@ class HailCastApp {
       if (radarData.radar.past.length > 0) {
         const lastPast = radarData.radar.past[radarData.radar.past.length - 1];
         this.radarMap.updateRadarFrame(lastPast, radarData.host);
+        const scanDate = new Date(lastPast.time * 1000);
+        this.lastRadarScanTimeStr = scanDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
       }
 
-      statusTextEl.textContent = 'RADAR FEED: LIVE / CONNESSO';
-      this.alertFeed.addAlert('Feed radar meteorologico sincronizzato con successo.', 'info');
+      if (!isBackgroundRefresh) {
+        this.alertFeed.addAlert(`Feed radar sincronizzato (Ultima scansione: ${this.lastRadarScanTimeStr || 'in corso'}).`, 'info');
+      }
     } catch (err) {
       console.error('Errore radar live:', err);
-      statusTextEl.textContent = 'RADAR FEED: OFFLINE (SIMULATO)';
-      this.alertFeed.addAlert('Feed radar in modalità simulata.', 'warning');
+      if (statusTextEl) {
+        statusTextEl.textContent = 'RADAR: MODALITÀ SIMULATA';
+      }
+      if (!isBackgroundRefresh) {
+        this.alertFeed.addAlert('Feed radar in modalità simulata.', 'warning');
+      }
     }
   }
 

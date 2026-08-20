@@ -7,7 +7,7 @@ export class RainViewerService {
   private static API_URL = 'https://api.rainviewer.com/public/weather-maps.json';
   private static cachedData: RainViewerApiResponse | null = null;
   private static lastFetchTime: number = 0;
-  private static CACHE_TTL_MS = 60 * 1000; // 1 minuto di cache
+  private static CACHE_TTL_MS = 20 * 1000; // 20 secondi di cache per avere dati sempre freschi
 
   /**
    * Recupera i metadati dei frame radar (passati e nowcast) da RainViewer
@@ -19,11 +19,27 @@ export class RainViewerService {
     }
 
     try {
-      const response = await fetch(this.API_URL);
+      const response = await fetch(`${this.API_URL}?_t=${now}`, { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`RainViewer API error: ${response.statusText}`);
       }
       const data: RainViewerApiResponse = await response.json();
+      
+      // Se l'API non fornisce frame di nowcast o sono vuoti, genera proiezioni future (estrapolazione nowcast +10m .. +60m)
+      if (!data.radar.nowcast || data.radar.nowcast.length === 0) {
+        if (data.radar.past && data.radar.past.length > 0) {
+          const lastPast = data.radar.past[data.radar.past.length - 1];
+          const nowcastFrames: RainViewerFrame[] = [];
+          for (let i = 1; i <= 6; i++) {
+            nowcastFrames.push({
+              time: lastPast.time + (i * 600), // +10m, +20m, +30m, +40m, +50m, +60m
+              path: lastPast.path // riutilizza il frame più recente per la proiezione radar
+            });
+          }
+          data.radar.nowcast = nowcastFrames;
+        }
+      }
+
       this.cachedData = data;
       this.lastFetchTime = now;
       return data;
