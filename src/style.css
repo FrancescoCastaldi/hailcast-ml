@@ -3,37 +3,60 @@
    ========================================================================== */
 
 :root {
-  --bg-dark: #080c14;
-  --bg-card: rgba(14, 20, 32, 0.78);
-  --bg-card-hover: rgba(22, 31, 48, 0.88);
-  --border-glass: rgba(255, 255, 255, 0.09);
-  --border-active: rgba(0, 229, 255, 0.4);
+  --bg-dark: #070b12;
+  --bg-surface: #0b1322;
+  --bg-card: rgba(12, 20, 36, 0.82);
+  --bg-card-hover: rgba(18, 30, 52, 0.92);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-active: rgba(0, 240, 255, 0.45);
 
-  --text-primary: #f0f4fc;
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
+  /* Curated Meteorological Palette */
   --accent-cyan: #00f0ff;
-  --accent-blue: #0088ff;
-  --accent-purple: #9933ff;
-  --accent-pink: #ff007f;
-  --accent-red: #ff2a4b;
-  --accent-orange: #ff8800;
-  --accent-yellow: #ffd000;
-  --accent-green: #00e676;
+  --accent-blue: #3b82f6;
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+  --accent-pink: #ec4899;
+  --accent-red: #f43f5e;
+  --accent-orange: #f97316;
+  --accent-yellow: #eab308;
+  --accent-green: #10b981;
 
   --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --header-height: 64px;
-  --timeline-height: 76px;
-  --sidebar-width: 380px;
+  --header-height: 60px;
+  --timeline-height: 72px;
+  --sidebar-width: 360px;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Custom modern scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
 }
 
 body.dark-theme {
@@ -44,16 +67,17 @@ body.dark-theme {
   width: 100vw;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Glassmorphism Panel */
 .glass-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-glass);
   border-radius: 12px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.42);
 }
 
 /* Layout */
@@ -427,22 +451,26 @@ body.dark-theme {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
 }
 
 /* Storm Cell Card */
 .storm-cell-card {
-  background: rgba(10, 16, 26, 0.8);
+  background: rgba(11, 18, 32, 0.75);
   border: 1px solid var(--border-glass);
   border-radius: 10px;
   padding: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .storm-cell-card:hover {
   border-color: var(--accent-cyan);
-  background: rgba(16, 26, 42, 0.9);
+  background: rgba(16, 26, 46, 0.88);
   transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12);
 }
 
 .storm-cell-card.severity-destructive {
@@ -455,6 +483,10 @@ body.dark-theme {
 
 .storm-cell-card.severity-moderate {
   border-left: 4px solid var(--accent-orange);
+}
+
+.storm-cell-card.severity-minor {
+  border-left: 4px solid var(--accent-green);
 }
 
 .cell-card-header {
@@ -676,30 +708,41 @@ body.dark-theme {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 150px;
 }
 
 .alert-item {
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.75rem;
   display: flex;
   gap: 8px;
-  line-height: 1.35;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.alert-item:hover {
+  transform: translateX(2px);
 }
 
 .alert-info {
-  background: rgba(0, 136, 255, 0.1);
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.25);
   border-left: 3px solid var(--accent-blue);
 }
 
 .alert-warning {
-  background: rgba(255, 136, 0, 0.15);
-  border-left: 3px solid var(--accent-orange);
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+  border-left: 3px solid var(--accent-yellow);
 }
 
 .alert-danger {
-  background: rgba(255, 0, 85, 0.2);
-  border-left: 3px solid var(--accent-pink);
+  background: rgba(244, 63, 94, 0.14);
+  border-color: rgba(244, 63, 94, 0.28);
+  border-left: 3px solid var(--accent-red);
 }
 
 .alert-time {
