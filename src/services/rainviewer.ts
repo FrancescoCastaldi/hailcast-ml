@@ -61,7 +61,8 @@ export class RainViewerService {
     colorScheme: number = 6,
     smooth: number = 1
   ): string {
-    return `${host}/v2/radar/${frame.time}/256/{z}/{x}/{y}/${colorScheme}/${smooth}_1.png`;
+    const path = frame.path || `/v2/radar/${frame.time}`;
+    return `${host}${path}/256/{z}/{x}/{y}/${colorScheme}/${smooth}_1.png`;
   }
 
   /**
