@@ -1,6 +1,7 @@
 import { RainViewerService } from './services/rainviewer';
 import { OpenMeteoService } from './services/openmeteo';
 import { SpotterFeedService } from './services/spotter-feed';
+import { MultiSourceStormDetector } from './services/multi-source-tracker';
 import { StormTracker } from './ml/storm-tracker';
 import { HailPredictorML } from './ml/hail-ml-model';
 import { Coordinates, StormCell, RainViewerFrame, SpotterReport } from './types/meteorology';
@@ -31,7 +32,7 @@ class HailCastApp {
   }
 
   private async init(): Promise<void> {
-    console.log('⚡ Inizializzazione HailCast-ML...');
+    console.log('⚡ Inizializzazione HailCast-ML Multi-Source...');
 
     // 1. Inizializza i componenti grafici
     this.radarMap = new RadarMapComponent('radarMap');
@@ -48,8 +49,8 @@ class HailCastApp {
     this.currentSpotterReports = SpotterFeedService.getReports();
     this.radarMap.renderSpotterReports(this.currentSpotterReports);
 
-    // 4. Carica le celle temporalesche simulate/reali
-    this.loadConvectiveStorms();
+    // 4. Carica e rileva le celle temporalesche da fonti multiple (Radar + Open-Meteo CAPE + Spotter)
+    await this.loadConvectiveStorms();
 
     // 5. Connettiti a RainViewer API per i frame radar in tempo reale
     await this.fetchLiveRadar();
@@ -60,9 +61,10 @@ class HailCastApp {
     // Avvia orologio live in tempo reale (aggiornato ogni secondo)
     this.startLiveClockTicker();
 
-    // Refresh automatico dei dati radar ogni 60 secondi (1 minuto)
-    setInterval(() => {
-      this.fetchLiveRadar(true);
+    // Refresh automatico continuo multi-sorgente ogni 60 secondi (1 minuto)
+    setInterval(async () => {
+      await this.fetchLiveRadar(true);
+      await this.refreshMultiSourceStorms();
     }, 60000);
 
     // 6. Esegui la prima valutazione di telemetria sulla prima cella attiva
@@ -355,8 +357,15 @@ class HailCastApp {
     }
   }
 
-  private loadConvectiveStorms(): void {
-    this.baseStormCells = SpotterFeedService.getSimulatedSupercells();
+  private async loadConvectiveStorms(): Promise<void> {
+    try {
+      const detected = await MultiSourceStormDetector.scanAndDetectCells();
+      this.baseStormCells = detected.length > 0 ? detected : SpotterFeedService.getSimulatedSupercells();
+    } catch (err) {
+      console.warn('Fallback a celle convettive simulate:', err);
+      this.baseStormCells = SpotterFeedService.getSimulatedSupercells();
+    }
+
     this.currentStormCells = this.baseStormCells;
     this.radarMap.renderStormCells(this.currentStormCells);
     this.alertFeed.renderStormCells(this.currentStormCells);
@@ -368,6 +377,40 @@ class HailCastApp {
           'danger'
         );
       }
+    }
+  }
+
+  private async refreshMultiSourceStorms(): Promise<void> {
+    try {
+      const previousIds = new Set(this.baseStormCells.map(c => c.id));
+      const freshCells = await MultiSourceStormDetector.scanAndDetectCells();
+      
+      if (freshCells.length > 0) {
+        this.baseStormCells = freshCells;
+        this.currentStormCells = freshCells;
+        this.radarMap.renderStormCells(this.currentStormCells);
+        this.alertFeed.renderStormCells(this.currentStormCells);
+
+        // Notifica eventuali nuove celle convettive rilevate
+        for (const cell of freshCells) {
+          if (!previousIds.has(cell.id) && (cell.severity === 'destructive' || cell.severity === 'severe')) {
+            this.showToast(`Nuova cella rilevata da multi-feed: ${cell.name} (${cell.meshDiameterCm} cm)`, 'warning');
+            this.alertFeed.addAlert(`Nuovo nucleo convettivo rilevato da Radar & Open-Meteo: ${cell.name} (${cell.maxDbz} dBZ)`, 'danger');
+          }
+        }
+
+        // Se l'utente sta monitorando una località, aggiorna i dati in tempo reale
+        if (this.inspectedLocation) {
+          const assessment = StormTracker.assessLocationRisk(
+            this.inspectedLocation.name,
+            this.inspectedLocation.coords,
+            this.currentStormCells
+          );
+          this.locationSearch.showRiskCard(assessment);
+        }
+      }
+    } catch (err) {
+      console.warn('Errore refresh celle multi-fonte:', err);
     }
   }
 
@@ -402,9 +445,9 @@ class HailCastApp {
     }
   }
 
-  private runSupercellSimulation(): void {
+  private async runSupercellSimulation(): Promise<void> {
     this.alertFeed.addAlert('▶ Avviata simulazione supercella convettiva padana (Evento Estremo 65 dBZ).', 'danger');
-    this.loadConvectiveStorms();
+    await this.loadConvectiveStorms();
     this.radarMap.flyTo({ lat: 45.4, lng: 10.8 }, 9);
     this.timelineController.play();
   }
