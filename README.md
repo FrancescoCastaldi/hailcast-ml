@@ -13,78 +13,81 @@
   🌐 <strong>Live Web App:</strong> <a href="https://francescocastaldi.github.io/hailcast-ml/">https://francescocastaldi.github.io/hailcast-ml/</a>
 </p>
 
-> **HailCast-ML** è una piattaforma avanzata per il monitoraggio, tracciamento e la previsione *nowcasting* in tempo reale della grandine e delle supercelle temporalesche violente. Combina i dati radar meteorologici open-source mondiali (**RainViewer API**), i radiosondaggi termodinamici (**Open-Meteo API**), i modelli fisici di riflettività (**Witt MESH, Waldvogel POH**) e algoritmi di **Machine Learning** basati su ensemble di alberi decisionali.
+> **HailCast-ML** is an advanced platform for real-time monitoring, tracking and *nowcasting* of hail and severe convective supercells. It combines global open-source weather radar data (**RainViewer API**), thermodynamic soundings (**Open-Meteo API**), physical reflectivity models (**Witt MESH, Waldvogel POH**) and **Machine Learning** algorithms based on decision tree ensembles.
 
 ---
 
-## 🌟 Caratteristiche Principali
+## 🌟 Key Features
 
-- 🛰️ **Mappa Radar Open-Source Interattiva**:
-  - Mappe base ad alto contrasto (CartoDB Dark Matter, Satellite, Topografica, OpenStreetMap).
-  - Overlay radar Doppler real-time con scala di riflettività a colori standard (dBZ 10–75+).
-  - Animazione fluida dei frame radar passati e delle proiezioni future nowcasting.
-- ⚡ **Algoritmi Fisici & Machine Learning Ibrido (Physics-Informed ML)**:
-  - Calcolo del **Severe Hail Index ($SHI$)** e **Maximum Estimated Size of Hail ($MESH$)** secondo Witt et al. (1998).
-  - Stima della **Probability of Hail ($POH$)** secondo Waldvogel et al. (1979).
-  - Classificatore ed estimatore del diametro del chicco (cm) basato su Gradient Boosted Trees nel browser.
-- 🎯 **Storm Cell Tracking & Calcolo ETA**:
-  - Rilevamento automatico dei centroidi convettivi e calcolo del vettore di spostamento $(\text{km/h}, \text{azimuth})$.
-  - Proiezione a ventaglio dei **coni d'incertezza** a 15, 30, 45 e 60 minuti.
-  - Calcolo automatico dell'ETA (tempo stimato di arrivo) e della distanza per qualsiasi comune o punto cliccato sulla mappa.
-- 🔍 **Ricerca Comune & Valutazione Rischio Immediato**:
-  - Ricerca istantanea con geocoding Nominatim e autocompletamento.
-  - Scheda di rischio con probabilità grandine, diametro atteso e raccomandazioni di protezione (auto, finestre, colture).
-- 📱 **Rete di Segnalazione Spotter (Crowdsourcing)**:
-  - Modale interattivo per inviare segnalazioni di grandine al suolo con comparatori visivi (Moneta 2cm, Noce 3cm, Golf 4.5cm, Uovo 6cm, Tennis 7.5cm).
-- 📊 **Telemetria Convettiva & Profilo Verticale**:
-  - Indicatori di instabilità: $CAPE$, Lifted Index, 0-6km Bulk Wind Shear, Quota Zero Termico ($H_0$), Isoterma $-20^\circ\text{C}$, $VIL$.
-  - Grafico dinamico del profilo verticale di riflettività radar (dBZ vs Quota).
-- 🌪️ **Modalità Simulazione Supercella Estrema**:
-  - Possibilità di avviare con un click una simulazione dinamica di supercella padana (65 dBZ, grandine gigante >5 cm) per test e dimostrazioni.
+- 🛰️ **Interactive Open-Source Radar Map**:
+  - High-contrast basemaps (CartoDB Dark Matter, Satellite, Topographic, OpenStreetMap).
+  - Real-time Doppler radar overlay with standard color reflectivity scale (dBZ 10–75+).
+  - Smooth animation of past radar frames and future nowcasting projections.
+- ⚡ **Hybrid Physics & Machine Learning (Physics-Informed ML)**:
+  - **Severe Hail Index ($SHI$)** and **Maximum Estimated Size of Hail ($MESH$)** computed per Witt et al. (1998).
+  - **Probability of Hail ($POH$)** estimation per Waldvogel et al. (1979).
+  - In-browser classifier and hailstone diameter estimator (cm) based on Gradient Boosted Trees.
+- 🎯 **Storm Cell Tracking & ETA Calculation**:
+  - Automatic convective centroid detection and motion vector computation $(\text{km/h}, \text{azimuth})$.
+  - Fan-shaped **uncertainty cones** projected at 15, 30, 45 and 60 minutes.
+  - Automatic ETA (estimated time of arrival) and distance calculation for any town or map-clicked point.
+- 🔍 **Town Search & Instant Risk Assessment**:
+  - Instant search with Nominatim geocoding and autocomplete.
+  - Risk card with hail probability, expected diameter and protection recommendations (cars, windows, crops).
+- 📱 **Spotter Reporting Network (Crowdsourcing)**:
+  - Interactive modal to submit ground hail reports with visual comparators (Coin 2cm, Walnut 3cm, Golf 4.5cm, Egg 6cm, Tennis 7.5cm).
+- 🎬 **Immersive Weather FX Animations**:
+  - Canvas particle animations (bouncing hail, torrential rain, wind downburst, lightning) triggered by cell, trajectory and spotter clicks.
+  - Hail animation runs in a **continuous loop** until dismissed.
+- 📊 **Convective Telemetry & Vertical Profile**:
+  - Instability indicators: $CAPE$, Lifted Index, 0-6km Bulk Wind Shear, Freezing Level ($H_0$), $-20^\circ\text{C}$ isotherm, $VIL$.
+  - Dynamic chart of the vertical radar reflectivity profile (dBZ vs height).
+- 🌪️ **Extreme Supercell Simulation Mode**:
+  - One-click dynamic simulation of a Po Valley supercell (65 dBZ, giant hail >5 cm) for testing and demonstrations.
 
 ---
 
-## 📐 Fondamenti Fisici
+## 📐 Physical Foundations
 
-| Indice / Metrica | Formula / Relazione | Riferimento Scientifico |
+| Index / Metric | Formula / Relation | Scientific Reference |
 |---|---|---|
 | **Hail Kinetic Energy ($\dot{E}$)** | $\dot{E} = 5.0 \times 10^{-6} \times 10^{0.084 \cdot Z} \cdot W(Z)$ | Witt et al., 1998 |
 | **Severe Hail Index ($SHI$)** | $SHI = 0.1 \times \int_{H_0}^{H_{top}} \dot{E}(Z) \cdot W(H) \, dH$ | Witt et al., 1998 |
-| **MESH (Diametro Max Grandine)** | $MESH_{\text{cm}} = 0.254 \times \sqrt{SHI}$ | Witt et al., 1998 |
-| **POH (Probabilità Grandine)** | $POH = 22.22 \times (H_{45} - H_0)$ | Waldvogel et al., 1979 |
-| **Distanza Geodesica** | Formula del cerchio massimo di Haversine | Haversine Formula |
+| **MESH (Max Hail Diameter)** | $MESH_{\text{cm}} = 0.254 \times \sqrt{SHI}$ | Witt et al., 1998 |
+| **POH (Hail Probability)** | $POH = 22.22 \times (H_{45} - H_0)$ | Waldvogel et al., 1979 |
+| **Geodesic Distance** | Great-circle Haversine formula | Haversine Formula |
 
 ---
 
-## 🚀 Installazione & Avvio Rapido
+## 🚀 Installation & Quick Start
 
-### Prerequisiti
-- **Node.js** (v18.0 o superiore)
-- **npm** (v9.0 o superiore)
-- *(Opzionale per training ML)* **Python 3.10+**
+### Prerequisites
+- **Node.js** (v18.0 or higher)
+- **npm** (v9.0 or higher)
+- *(Optional, for ML training)* **Python 3.10+**
 
-### 1. Clona o apri il progetto
+### 1. Clone or open the project
 ```bash
 cd hailcast-ml
 ```
 
-### 2. Installa le dipendenze Node.js
+### 2. Install Node.js dependencies
 ```bash
 npm install
 ```
 
-### 3. Avvia il server di sviluppo
+### 3. Start the development server
 ```bash
 npm run dev
 ```
-Apri il browser su `http://localhost:5173`.
+Open your browser at `http://localhost:5173`.
 
-### 4. Esegui i Test Unitari
+### 4. Run the Unit Tests
 ```bash
 npm run test
 ```
 
-### 5. (Opzionale) Esegui il Training del Modello ML in Python
+### 5. (Optional) Train the ML Model in Python
 ```bash
 pip install -r ml_training/requirements.txt
 python ml_training/train_hail_model.py
@@ -92,50 +95,54 @@ python ml_training/train_hail_model.py
 
 ---
 
-## 📂 Struttura del Progetto
+## 📂 Project Structure
 
 ```
 hailcast-ml/
-├── index.html                      # Layout della dashboard meteorologica
-├── package.json                    # Dipendenze e script npm
-├── tsconfig.json                   # Configurazione TypeScript
-├── vite.config.ts                  # Configurazione bundler Vite
-├── EXAM_INFO.md                    # Specifiche accademiche e traccia esame orale
-├── codemap.md                      # Mappa architetturale dei moduli
-├── AGENTS.md                       # Linee guida operative per agenti
+├── index.html                      # Weather dashboard layout
+├── package.json                    # Dependencies and npm scripts
+├── tsconfig.json                   # TypeScript configuration
+├── vite.config.ts                  # Vite bundler configuration
+├── EXAM_INFO.md                    # Academic specifications and oral exam brief (private)
+├── codemap.md                      # Architectural module map
+├── AGENTS.md                       # Operational guidelines for agents
 ├── docs/
-│   ├── ARCHITECTURE.md             # Architettura di sistema e flussi dati
-│   └── MATHEMATICAL_FOUNDATIONS.md # Derivazioni matematiche e radar equations
+│   ├── ARCHITECTURE.md             # System architecture and data flows
+│   └── MATHEMATICAL_FOUNDATIONS.md # Mathematical derivations and radar equations
 ├── ml_training/
-│   ├── requirements.txt            # Dipendenze Python (scikit-learn, pandas)
-│   └── train_hail_model.py         # Pipeline di training Gradient Boosting
+│   ├── requirements.txt            # Python dependencies (scikit-learn, pandas)
+│   └── train_hail_model.py         # Gradient Boosting training pipeline
 ├── tests/
-│   └── meteorology.test.ts         # Test unitari Vitest su fisica e cinematica
+│   └── meteorology.test.ts         # Vitest unit tests on physics and kinematics
 └── src/
-    ├── main.ts                     # Orchestratore centrale dell'app
-    ├── style.css                   # Tema scuro meteorologico & glassmorphism
+    ├── main.ts                     # Central app orchestrator
+    ├── style.css                   # Dark meteorological theme & glassmorphism
     ├── types/
-    │   └── meteorology.ts          # Definizioni TypeScript
+    │   └── meteorology.ts          # TypeScript definitions
     ├── services/
-    │   ├── rainviewer.ts           # API radar in tempo reale RainViewer
-    │   ├── openmeteo.ts            # API radiosondaggi convettivi Open-Meteo
-    │   ├── geocoding.ts            # Ricerca geografica Nominatim
-    │   └── spotter-feed.ts         # Feed segnalazioni e simulatore supercelle
+    │   ├── rainviewer.ts           # RainViewer real-time radar API
+    │   ├── openmeteo.ts            # Open-Meteo convective sounding API
+    │   ├── geocoding.ts            # Nominatim geographic search
+    │   ├── spotter-feed.ts         # Spotter reports feed and supercell simulator
+    │   ├── alert-notification-service.ts # Email alert subscriptions (FormSubmit)
+    │   └── multi-source-tracker.ts # Multi-source storm data aggregation
     ├── ml/
-    │   ├── mesh-poh.ts             # Formule Witt MESH, SHI e Waldvogel POH
-    │   ├── hail-ml-model.ts        # Modello di Machine Learning in TypeScript
-    │   └── storm-tracker.ts        # Centroid tracking, vettori e coni nowcast
+    │   ├── mesh-poh.ts             # Witt MESH, SHI and Waldvogel POH formulas
+    │   ├── hail-ml-model.ts        # Machine Learning model in TypeScript
+    │   └── storm-tracker.ts        # Centroid tracking, vectors and nowcast cones
     └── components/
-        ├── RadarMap.ts             # Mappa Leaflet & radar overlays
-        ├── TimelineController.ts   # Player timeline e scrubber radar
-        ├── AlertFeed.ts            # Lista celle e feed allarmi
-        ├── ConvectiveTelemetry.ts  # Drawer indici convettivi & grafici
-        ├── LocationSearch.ts       # Barra ricerca comune e card di rischio
-        └── SpotterModal.ts         # Modale segnalazione grandine spotter
+        ├── RadarMap.ts             # Leaflet map & radar overlays
+        ├── TimelineController.ts   # Timeline player and radar scrubber
+        ├── AlertFeed.ts            # Cell list and alert feed
+        ├── ConvectiveTelemetry.ts  # Convective indices drawer & charts
+        ├── LocationSearch.ts       # Town search bar and risk card
+        ├── SpotterModal.ts         # Spotter hail report modal
+        ├── NotificationModal.ts    # Alert subscription modal
+        └── WeatherFXOverlay.ts     # Immersive particle FX animations (hail loop)
 ```
 
 ---
 
-## 📄 Licenza
+## 📄 License
 
-Distribuito sotto licenza **MIT**. Consulta `LICENSE` per ulteriori dettagli.
+Distributed under the **MIT** license. See `LICENSE` for details.

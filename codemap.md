@@ -1,63 +1,71 @@
-# 🗺️ Codemap di Architettura — HailCast-ML
+# 🗺️ Architecture Codemap — HailCast-ML
 
-> **Progetto:** HailCast-ML / GrandineRadar AI  
-> **Versione:** 1.0.0  
+> **Project:** HailCast-ML / GrandineRadar AI  
+> **Version:** 1.0.0  
 > **Stack:** Vite, TypeScript, Leaflet.js, Chart.js, Python (scikit-learn)  
 
 ---
 
 ## 📌 Entry Points
-- **Web App:** [`src/main.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/main.ts) — Inizializza mappe, servizi API, feed radar e controller.
-- **HTML UI:** [`index.html`](file:///c:/Users/franc/Documents/hailcast-ml/index.html) — Layout principale con header glassmorphism, mappa, sidebar e timeline.
-- **ML Training Pipeline:** [`ml_training/train_hail_model.py`](file:///c:/Users/franc/Documents/hailcast-ml/ml_training/train_hail_model.py) — Script di training dei modelli ML su dataset meteorologici.
-- **Test Suite:** [`tests/meteorology.test.ts`](file:///c:/Users/franc/Documents/hailcast-ml/tests/meteorology.test.ts) — Test unitari Vitest per formule fisiche e cinematica.
+- **Web App:** [`src/main.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/main.ts) — Initializes maps, API services, radar feed and controllers.
+- **HTML UI:** [`index.html`](file:///c:/Users/franc/Documents/hailcast-ml/index.html) — Main layout with glassmorphism header, map, sidebar and timeline.
+- **ML Training Pipeline:** [`ml_training/train_hail_model.py`](file:///c:/Users/franc/Documents/hailcast-ml/ml_training/train_hail_model.py) — ML model training script on meteorological datasets.
+- **Test Suite:** [`tests/meteorology.test.ts`](file:///c:/Users/franc/Documents/hailcast-ml/tests/meteorology.test.ts) — Vitest unit tests for physical formulas and kinematics.
 
 ---
 
-## 🧩 Mappa dei Moduli & Responsabilità
+## 🧩 Module Map & Responsibilities
 
-### 1. Motore di Machine Learning & Fisica Meteorologica (`src/ml/`)
+### 1. Machine Learning Engine & Meteorological Physics (`src/ml/`)
 - [`src/ml/mesh-poh.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/ml/mesh-poh.ts):
-  - Calcolo del flusso di energia cinetica $\dot{E}(Z)$ (Witt et al., 1998).
-  - Funzione di peso in quota $W(H)$ basata su isoterme 0°C e -20°C.
-  - Integrazione del Severe Hail Index ($SHI$).
-  - Stima del diametro massimo della grandine ($MESH$).
-  - Calcolo della probabilità di grandine ($POH$, Waldvogel) e severa ($POSH$).
+  - Kinetic energy flux computation $\dot{E}(Z)$ (Witt et al., 1998).
+  - Height weighting function $W(H)$ based on 0°C and -20°C isotherms.
+  - Severe Hail Index ($SHI$) integration.
+  - Maximum hail diameter estimation ($MESH$).
+  - Hail probability ($POH$, Waldvogel) and severe hail probability ($POSH$) computation.
 - [`src/ml/hail-ml-model.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/ml/hail-ml-model.ts):
-  - Modello di inferenza ad alberi decisionali Gradient Boosted nel browser.
-  - Fusione ibrida Physics-Informed ML per la stima del diametro e della classe di rischio.
+  - In-browser Gradient Boosted decision tree inference model.
+  - Hybrid Physics-Informed ML fusion for diameter and risk class estimation.
 - [`src/ml/storm-tracker.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/ml/storm-tracker.ts):
-  - Calcolo geodesico Haversine e Bearing angolare.
-  - Generazione dei poligoni di incertezza conica (Nowcast +15m, +30m, +45m, +60m).
-  - Calcolo dell'ETA d'impatto per coordinate cercate o cliccate.
+  - Haversine geodesic and angular bearing computation.
+  - Conical uncertainty polygon generation (Nowcast +15m, +30m, +45m, +60m).
+  - Impact ETA calculation for searched or clicked coordinates.
 
-### 2. Servizi Dati & API Esterne (`src/services/`)
+### 2. Data Services & External APIs (`src/services/`)
 - [`src/services/rainviewer.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/rainviewer.ts):
-  - Connessione a RainViewer API (`weather-maps.json`) per radar Doppler mondiali e frame temporali.
+  - RainViewer API connection (`weather-maps.json`) for global Doppler radar and time frames.
 - [`src/services/openmeteo.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/openmeteo.ts):
-  - Connessione a Open-Meteo API per radiosondaggi ($CAPE$, $CIN$, Lifted Index, Zero Termico, Wind Shear).
+  - Open-Meteo API connection for soundings ($CAPE$, $CIN$, Lifted Index, Freezing Level, Wind Shear).
 - [`src/services/geocoding.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/geocoding.ts):
-  - Ricerca geografica con OpenStreetMap Nominatim e cache locale per città italiane ed europee.
+  - Geographic search with OpenStreetMap Nominatim and local cache for Italian and European cities.
 - [`src/services/spotter-feed.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/spotter-feed.ts):
-  - Gestione del feed crowdsourced delle segnalazioni grandine e simulatore di supercelle convettive.
+  - Crowdsourced hail report feed management and convective supercell simulator.
+- [`src/services/alert-notification-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/alert-notification-service.ts):
+  - Email alert subscriptions via FormSubmit with hail/rain thresholds and lead-time configuration.
+- [`src/services/multi-source-tracker.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/multi-source-tracker.ts):
+  - Aggregation and reconciliation of storm data from multiple sources.
 
-### 3. Componenti UI Interattivi (`src/components/`)
+### 3. Interactive UI Components (`src/components/`)
 - [`src/components/RadarMap.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/RadarMap.ts):
-  - Gestione mappa Leaflet, layer tile dark/satellite/topo, overlay radar animato, poligoni di celle e vettori.
+  - Leaflet map management, dark/satellite/topo tile layers, animated radar overlay, cell polygons and vectors.
 - [`src/components/TimelineController.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/TimelineController.ts):
-  - Player temporale con scrubber, velocità 1x/2x/4x e transizione frame passati/nowcast.
+  - Temporal player with scrubber, 1x/2x/4x speed and past/nowcast frame transitions.
 - [`src/components/AlertFeed.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/AlertFeed.ts):
-  - Sidebar con lista celle convettive attive, badge di severità e feed degli allarmi in tempo reale.
+  - Sidebar with active convective cell list, severity badges and real-time alert feed.
 - [`src/components/ConvectiveTelemetry.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/ConvectiveTelemetry.ts):
-  - Drawer laterale con indici del radiosondaggio, metriche ML e grafico Chart.js del profilo verticale dBZ.
+  - Side drawer with sounding indices, ML metrics and Chart.js vertical dBZ profile chart.
 - [`src/components/LocationSearch.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/LocationSearch.ts):
-  - Barra di ricerca con geocoding e card di rischio istantaneo per la località selezionata.
+  - Search bar with geocoding and instant risk card for the selected location.
 - [`src/components/SpotterModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/SpotterModal.ts):
-  - Modale per la pubblicazione di segnalazioni grandine con comparatore visivo dei chicchi.
+  - Modal for publishing hail reports with visual hailstone comparators.
+- [`src/components/NotificationModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/NotificationModal.ts):
+  - Modal for managing email alert subscriptions (thresholds, lead time, history).
+- [`src/components/WeatherFXOverlay.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/WeatherFXOverlay.ts):
+  - Immersive canvas particle animations (bouncing hail, torrential rain, wind downburst, lightning) triggered by cell, trajectory and spotter clicks; hail runs in continuous loop.
 
 ---
 
-## 🔒 Confini & Dipendenze
+## 🔒 Boundaries & Dependencies
 ```mermaid
 graph TD
     App[src/main.ts] --> RadarMap[components/RadarMap.ts]
@@ -66,13 +74,18 @@ graph TD
     App --> Telemetry[components/ConvectiveTelemetry.ts]
     App --> LocSearch[components/LocationSearch.ts]
     App --> Spotter[components/SpotterModal.ts]
+    App --> Notification[components/NotificationModal.ts]
 
     RadarMap --> RainViewer[services/rainviewer.ts]
     RadarMap --> StormTracker[ml/storm-tracker.ts]
+    RadarMap --> WeatherFX[components/WeatherFXOverlay.ts]
     
     StormTracker --> HailML[ml/hail-ml-model.ts]
     HailML --> MeshPoh[ml/mesh-poh.ts]
     
     LocSearch --> Geocoding[services/geocoding.ts]
     LocSearch --> OpenMeteo[services/openmeteo.ts]
+
+    Notification --> AlertService[services/alert-notification-service.ts]
+    App --> MultiSource[services/multi-source-tracker.ts]
 ```
