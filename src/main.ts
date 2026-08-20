@@ -119,15 +119,20 @@ class HailCastApp {
       }
     });
 
-    // Invio nuova segnalazione spotter
+    // Invio nuova segnalazione spotter da terra
     this.spotterModal.setOnReportSubmitted((report: SpotterReport) => {
       this.currentSpotterReports = SpotterFeedService.getReports();
       this.radarMap.renderSpotterReports(this.currentSpotterReports);
+      this.radarMap.flyTo(report.coords, 11);
+
+      AlertNotificationService.playAlertChime();
+
+      const phenomEmoji = report.phenomenon === 'downburst' ? '💨' : (report.phenomenon === 'lightning' ? '⚡' : (report.phenomenon === 'torrential_rain' ? '🌧️' : '❄️'));
       this.alertFeed.addAlert(
-        `Nuova segnalazione grandine da ${report.locationName}: chicchi di ${report.hailSizeCm} cm!`,
+        `${phenomEmoji} Nuova Segnalazione da ${report.locationName}: ${report.hailSizeCm > 0 ? report.hailSizeCm + ' cm' : 'vento ' + (report.windSpeedKmh || 65) + ' km/h'}!`,
         report.hailSizeCm > 3.0 ? 'danger' : 'warning'
       );
-      this.showToast(`Segnalazione inviata: ${report.locationName} (${report.hailSizeCm} cm)`, 'success');
+      this.showToast(`Segnalazione pubblicata live per ${report.locationName}!`, 'success');
     });
 
     // Tasti HUD mappa

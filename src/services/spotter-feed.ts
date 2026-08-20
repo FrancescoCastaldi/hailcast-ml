@@ -2,10 +2,21 @@ import { SpotterReport, StormCell } from '../types/meteorology';
 import { StormTracker } from '../ml/storm-tracker';
 
 export class SpotterFeedService {
+  private static STORAGE_KEY = 'hailcast_spotter_reports_v2';
   private static reports: SpotterReport[] = [];
 
   private static initDefaultReports(): void {
     if (this.reports.length === 0) {
+      try {
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        if (saved) {
+          this.reports = JSON.parse(saved) as SpotterReport[];
+          if (this.reports.length > 0) return;
+        }
+      } catch {
+        // Fallback to defaults
+      }
+
       const now = Date.now();
       const formatOffset = (minsAgo: number) => {
         return new Date(now - minsAgo * 60000).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -46,6 +57,15 @@ export class SpotterFeedService {
           notes: 'Forte attività elettrica con rovescio temporalesco e grandine media per 10 minuti.'
         }
       ];
+      this.saveToStorage();
+    }
+  }
+
+  private static saveToStorage(): void {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reports));
+    } catch {
+      // Ignore
     }
   }
 
@@ -55,11 +75,13 @@ export class SpotterFeedService {
   }
 
   public static addReport(report: Omit<SpotterReport, 'id'>): SpotterReport {
+    this.initDefaultReports();
     const newReport: SpotterReport = {
       ...report,
       id: `rep-${Date.now()}`
     };
     this.reports.unshift(newReport);
+    this.saveToStorage();
     return newReport;
   }
 
