@@ -166,11 +166,6 @@ class HailCastApp {
       this.showToast('Vista centrata sull\'Italia', 'info');
     });
 
-    // Pulsante Simulazione Supercella
-    document.getElementById('btnSimulateSupercell')?.addEventListener('click', () => {
-      this.runSupercellSimulation();
-    });
-
     // Gestione Welcome Modal (Made by Francesco Castaldi)
     const welcomeModal = document.getElementById('welcomeModal');
     const btnDismissWelcome = document.getElementById('btnDismissWelcome');
@@ -484,13 +479,6 @@ class HailCastApp {
         'danger'
       );
     }
-  }
-
-  private async runSupercellSimulation(): Promise<void> {
-    this.alertFeed.addAlert('▶ Avviata simulazione supercella convettiva padana (Evento Estremo 65 dBZ).', 'danger');
-    await this.loadConvectiveStorms();
-    this.radarMap.flyTo({ lat: 45.4, lng: 10.8 }, 9);
-    this.timelineController.play();
   }
 }
 
