@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T19:22:51.509Z",
+  "updatedAt": "2026-08-20T19:23:46.732Z",
   "generatedTimestamp": 1787253640,
   "host": "https://tilecache.rainviewer.com",
   "radar": {
@@ -62,9 +62,9 @@
         "windSpeedKmh": 3.6,
         "windGustsKmh": 15.8,
         "windDirectionDeg": 354,
-        "precipitationMm": 0.1,
+        "precipitationMm": 0.3,
         "weatherCode": 80,
-        "cape": 1010,
+        "cape": 310,
         "liftedIndex": -2.6
       }
     },
@@ -82,9 +82,9 @@
         "windSpeedKmh": 5,
         "windGustsKmh": 22,
         "windDirectionDeg": 339,
-        "precipitationMm": 0.1,
+        "precipitationMm": 0,
         "weatherCode": 80,
-        "cape": 70,
+        "cape": 20,
         "liftedIndex": -0.2
       }
     },
@@ -104,7 +104,7 @@
         "windDirectionDeg": 216,
         "precipitationMm": 0,
         "weatherCode": 3,
-        "cape": 690,
+        "cape": 210,
         "liftedIndex": -1.3
       }
     },
@@ -124,7 +124,7 @@
         "windDirectionDeg": 117,
         "precipitationMm": 0,
         "weatherCode": 3,
-        "cape": 1420,
+        "cape": 1520,
         "liftedIndex": -3.7
       }
     },
@@ -156,9 +156,9 @@
     "windSpeedKmh": 3.6,
     "windGustsKmh": 15.8,
     "windDirectionDeg": 354,
-    "precipitationMm": 0.1,
+    "precipitationMm": 0.3,
     "weatherCode": 80,
-    "cape": 1010,
+    "cape": 310,
     "liftedIndex": -2.6
   }
 }
