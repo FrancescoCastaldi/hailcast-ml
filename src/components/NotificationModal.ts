@@ -87,15 +87,20 @@ export class NotificationModalComponent {
       }
     });
 
-    // Test Email Alert
+    // Test Email Alert con invio HTTP reale tramite Gateway
     this.btnTestEmail?.addEventListener('click', async () => {
       const email = this.emailInput?.value?.trim();
       const location = this.locationInput?.value?.trim() || this.currentLocationName;
 
       if (!email || !email.includes('@')) {
-        alert('Inserisci un indirizzo email valido per testare la notifica.');
+        alert('Inserisci prima un indirizzo email valido (es. nome@gmail.com).');
+        this.emailInput?.focus();
         return;
       }
+
+      const originalBtnText = this.btnTestEmail.innerHTML;
+      this.btnTestEmail.innerHTML = '<span>⏳ Invio Email in corso verso i server...</span>';
+      (this.btnTestEmail as HTMLButtonElement).disabled = true;
 
       const tempSub: AlertSubscription = {
         enabled: true,
@@ -108,27 +113,41 @@ export class NotificationModalComponent {
         enableBrowserPush: this.pushCheckbox?.checked || false
       };
 
+      // Suona segnale acustico d'allerta
+      AlertNotificationService.playAlertChime();
+
       const res = await AlertNotificationService.sendEmailAlert(tempSub, 'hail', {
         cellName: 'Supercella Gardesana (Cell #104)',
-        hailSizeCm: 3.5,
-        etaMinutes: 25,
+        hailSizeCm: 3.8,
+        etaMinutes: 22,
         maxDbz: 64
       });
 
+      this.btnTestEmail.innerHTML = originalBtnText;
+      (this.btnTestEmail as HTMLButtonElement).disabled = false;
+
       if (this.emailPreviewContainer) {
         this.emailPreviewContainer.innerHTML = `
-          <div class="test-email-success-badge">✅ Email di Test Generata & Inviata a <strong>${email}</strong>!</div>
+          <div class="test-email-success-badge">
+            ✅ <strong>Email Inviata con Successo a ${email}!</strong>
+            <p style="margin: 6px 0 0 0; font-size: 0.8rem; font-weight: normal; color: #cbd5e1;">
+              Controlla la tua casella di posta (inclusa la cartella <em>Spam / Posta Indesiderata o Promozioni</em>).
+              <br><small style="color: #94a3b8;">La prima volta, FormSubmit invia una mail di attivazione per autorizzare le notifiche automatiche.</small>
+            </p>
+          </div>
           ${res.previewHtml}
         `;
         this.emailPreviewContainer.style.display = 'block';
       }
 
       if (tempSub.enableBrowserPush) {
-        await AlertNotificationService.requestBrowserPermission();
-        AlertNotificationService.sendBrowserNotification(
-          `⚡ HailCast Test: Allerta per ${location}`,
-          `Notifiche meteo configurate con successo per ${email}!`
-        );
+        const granted = await AlertNotificationService.requestBrowserPermission();
+        if (granted) {
+          AlertNotificationService.sendBrowserNotification(
+            `⚡ HailCast: Allerta per ${location}`,
+            `Notifiche meteo live collegate alla tua email ${email}!`
+          );
+        }
       }
     });
 
