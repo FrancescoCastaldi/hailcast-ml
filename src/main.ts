@@ -59,8 +59,8 @@ class HailCastApp {
     // 5. Connettiti a RainViewer API per i frame radar in tempo reale
     await this.fetchLiveRadar();
     
-    // Avvio automatico della timeline (il tempo avanza da solo)
-    this.timelineController.play();
+    // Posiziona il player esattamente sul frame LIVE (Ora) all'avvio in pausa
+    this.timelineController.jumpToLive();
     
     // Avvia orologio live in tempo reale (aggiornato ogni secondo)
     this.startLiveClockTicker();
