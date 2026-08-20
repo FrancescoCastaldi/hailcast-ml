@@ -1379,3 +1379,381 @@ body.dark-theme {
   border-radius: 50%;
   box-shadow: 0 0 8px var(--accent-cyan);
 }
+
+/* ==========================================================================
+   Welcome Creator Modal (Made by Francesco Castaldi)
+   ========================================================================== */
+.welcome-modal-card {
+  max-width: 520px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 32px rgba(0, 240, 255, 0.2);
+}
+
+.welcome-badge-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.welcome-creator-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(255, 0, 127, 0.15));
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+  animation: glow-pulse 3s infinite ease-in-out;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(0, 240, 255, 0.25); }
+  50% { box-shadow: 0 0 24px rgba(255, 0, 127, 0.4); }
+}
+
+.welcome-creator-tag strong {
+  color: var(--accent-cyan);
+  font-weight: 800;
+}
+
+.welcome-header {
+  margin-bottom: 18px;
+}
+
+.welcome-logo-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.radar-pulse-icon.large {
+  width: 44px;
+  height: 44px;
+}
+
+.radar-pulse-icon.large .pulse-core {
+  width: 14px;
+  height: 14px;
+}
+
+.welcome-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.welcome-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.welcome-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.welcome-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.welcome-feature-item:hover {
+  background: rgba(0, 240, 255, 0.08);
+}
+
+.feature-icon {
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+
+.feature-desc strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.feature-desc p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.welcome-actions {
+  margin-bottom: 12px;
+}
+
+.btn-block {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+}
+
+.welcome-footer-info {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   Mobile Bottom Navigation Bar
+   ========================================================================== */
+.mobile-nav-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 60px;
+  background: rgba(10, 15, 26, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-glass);
+  border-radius: 0;
+  z-index: 2500;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+}
+
+.mobile-nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-btn svg {
+  stroke-width: 2.2;
+}
+
+.mobile-nav-btn.active {
+  color: var(--accent-cyan);
+}
+
+.mobile-nav-btn.active svg {
+  filter: drop-shadow(0 0 6px var(--accent-cyan));
+}
+
+.mobile-badge {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  background: var(--accent-pink);
+  color: #ffffff;
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 8px;
+}
+
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-close-btn {
+  display: none;
+}
+
+/* ==========================================================================
+   Mobile & Tablet Responsiveness (@media)
+   ========================================================================== */
+@media (max-width: 900px) {
+  :root {
+    --header-height: 56px;
+    --timeline-height: 70px;
+  }
+
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .search-box-container {
+    width: 220px;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .radar-status-badge {
+    display: none;
+  }
+
+  .header-right .btn-sm span {
+    display: none;
+  }
+
+  .header-right .btn-sm {
+    padding: 6px 8px;
+  }
+
+  /* Left Sidebar as a Mobile Drawer */
+  .left-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 88vw;
+    max-width: 360px;
+    height: 100vh;
+    z-index: 2200;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
+  }
+
+  .left-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .mobile-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Right Sidebar (Telemetry) full width on mobile */
+  .right-sidebar {
+    width: 100vw;
+    max-width: 100vw;
+    z-index: 2300;
+  }
+
+  /* Radar Legend Bar */
+  .radar-legend-bar {
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 120px);
+  }
+
+  .legend-gradient {
+    width: 120px;
+    height: 8px;
+  }
+
+  .hail-risk-indicator {
+    display: none;
+  }
+
+  /* Floating map controls */
+  .map-floating-controls {
+    top: 10px;
+    right: 10px;
+    padding: 4px;
+  }
+
+  .map-control-btn span {
+    display: none;
+  }
+
+  .map-control-btn {
+    padding: 6px 8px;
+  }
+
+  /* Location Risk Card on Mobile */
+  .location-risk-card {
+    left: 12px;
+    right: 12px;
+    width: calc(100% - 24px);
+    bottom: 135px;
+    padding: 12px;
+  }
+
+  /* Timeline Bar (positioned above mobile nav) */
+  .timeline-bar {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100vw;
+    height: 64px;
+    padding: 0 12px;
+    gap: 10px;
+    background: rgba(8, 12, 20, 0.92);
+  }
+
+  .time-label.future {
+    display: none;
+  }
+
+  .timeline-meta {
+    gap: 8px;
+  }
+
+  .speed-selector {
+    display: none;
+  }
+
+  .frame-mode-badge {
+    display: none;
+  }
+
+  .frame-clock {
+    font-size: 0.72rem;
+  }
+
+  /* Show Mobile Navigation Bar */
+  .mobile-nav-bar {
+    display: flex;
+  }
+
+  .map-viewport {
+    height: calc(100vh - var(--header-height) - 124px);
+  }
+}
+
+@media (max-width: 480px) {
+  .search-box-container {
+    width: 150px;
+  }
+
+  .search-input-wrapper {
+    padding: 4px 8px;
+  }
+
+  .search-input-wrapper input {
+    font-size: 0.75rem;
+  }
+
+  .diameter-selector-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .modal-content {
+    padding: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}

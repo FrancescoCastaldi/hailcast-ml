@@ -77,9 +77,12 @@
           <div class="sidebar-header">
             <div class="sidebar-title">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              <span>Celle Temporalesche Attive</span>
+              <span>Celle Temporalesche</span>
             </div>
-            <span class="badge badge-accent" id="activeCellsCount">0 Rilevate</span>
+            <div class="sidebar-header-actions">
+              <span class="badge badge-accent" id="activeCellsCount">0 Rilevate</span>
+              <button class="btn-icon-sm mobile-close-btn" id="btnCloseLeftSidebar" title="Chiudi">&times;</button>
+            </div>
           </div>
 
           <!-- Storm Cells List Container -->
@@ -327,6 +330,31 @@
         </div>
       </footer>
 
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-nav-bar glass-panel" id="mobileNavBar">
+        <button class="mobile-nav-btn active" id="btnNavMap" title="Mappa Radar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+          <span>Mappa</span>
+        </button>
+        <button class="mobile-nav-btn" id="btnNavCells" title="Celle Temporalesche">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Celle</span>
+          <span class="mobile-badge" id="mobileCellsBadge">3</span>
+        </button>
+        <button class="mobile-nav-btn" id="btnNavSearch" title="Cerca Località">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Cerca</span>
+        </button>
+        <button class="mobile-nav-btn" id="btnNavTelemetry" title="Telemetria & ML">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+          <span>ML & Indici</span>
+        </button>
+        <button class="mobile-nav-btn" id="btnNavSpotter" title="Segnala Grandine">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          <span>Segnala</span>
+        </button>
+      </nav>
+
       <!-- Spotter Report Modal -->
       <div class="modal-backdrop" id="spotterModal" style="display: none;">
         <div class="modal-content glass-panel">
@@ -417,6 +445,63 @@
               <button type="submit" class="btn btn-primary">Pubblica Segnalazione Live</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- Welcome Creator Popup (Made by Francesco Castaldi) -->
+      <div class="modal-backdrop" id="welcomeModal" style="display: none;">
+        <div class="modal-content glass-panel welcome-modal-card">
+          <div class="welcome-badge-wrapper">
+            <div class="welcome-creator-tag">
+              <span class="creator-sparkle">✨</span>
+              <span>Made by <strong>Francesco Castaldi</strong></span>
+            </div>
+          </div>
+          
+          <div class="welcome-header">
+            <div class="welcome-logo-box">
+              <div class="radar-pulse-icon large">
+                <div class="pulse-ring"></div>
+                <div class="pulse-core"></div>
+              </div>
+            </div>
+            <h2 class="welcome-title">HailCast<span class="brand-accent">.ML</span></h2>
+            <p class="welcome-subtitle">Piattaforma di Nowcasting & Radar Grandine AI in Tempo Reale</p>
+          </div>
+
+          <div class="welcome-features-list">
+            <div class="welcome-feature-item">
+              <span class="feature-icon">🛰️</span>
+              <div class="feature-desc">
+                <strong>Radar Doppler Open-Source</strong>
+                <p>Overlay in tempo reale mondiale (RainViewer) con risoluzione automatica zoom.</p>
+              </div>
+            </div>
+            <div class="welcome-feature-item">
+              <span class="feature-icon">⚡</span>
+              <div class="feature-desc">
+                <strong>Physics-Informed Machine Learning</strong>
+                <p>Algoritmi Witt MESH, Waldvogel POH ed ensemble per stima diametro chicchi.</p>
+              </div>
+            </div>
+            <div class="welcome-feature-item">
+              <span class="feature-icon">🎯</span>
+              <div class="feature-desc">
+                <strong>Storm Cell Tracking & Calcolo ETA</strong>
+                <p>Vettori di traiettoria e coni di previsione d'impatto a 15, 30, 45 e 60 minuti.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="welcome-actions">
+            <button class="btn btn-primary btn-block" id="btnDismissWelcome">
+              <span>🚀 Esplora la Mappa & Inizia il Monitoraggio</span>
+            </button>
+          </div>
+
+          <div class="welcome-footer-info">
+            <span>© 2026 HailCast-ML • Open Source Meteorological System</span>
+          </div>
         </div>
       </div>
     </div>

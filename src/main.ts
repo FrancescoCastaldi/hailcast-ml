@@ -128,6 +128,68 @@ class HailCastApp {
     document.getElementById('btnSimulateSupercell')?.addEventListener('click', () => {
       this.runSupercellSimulation();
     });
+
+    // Gestione Welcome Modal (Made by Francesco Castaldi)
+    const welcomeModal = document.getElementById('welcomeModal');
+    const btnDismissWelcome = document.getElementById('btnDismissWelcome');
+    
+    // Mostra il welcome popup all'avvio
+    if (welcomeModal) {
+      welcomeModal.style.display = 'flex';
+    }
+
+    btnDismissWelcome?.addEventListener('click', () => {
+      if (welcomeModal) {
+        welcomeModal.style.display = 'none';
+      }
+    });
+
+    // Gestione Navigazione Mobile
+    const leftSidebar = document.getElementById('leftSidebar');
+    const btnCloseLeftSidebar = document.getElementById('btnCloseLeftSidebar');
+    const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
+
+    const setMobileNavActive = (btnId: string) => {
+      mobileNavBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.id === btnId);
+      });
+    };
+
+    document.getElementById('btnNavMap')?.addEventListener('click', () => {
+      leftSidebar?.classList.remove('mobile-open');
+      this.telemetry.close();
+      setMobileNavActive('btnNavMap');
+    });
+
+    document.getElementById('btnNavCells')?.addEventListener('click', () => {
+      leftSidebar?.classList.toggle('mobile-open');
+      this.telemetry.close();
+      setMobileNavActive('btnNavCells');
+    });
+
+    document.getElementById('btnNavSearch')?.addEventListener('click', () => {
+      leftSidebar?.classList.remove('mobile-open');
+      this.telemetry.close();
+      const input = document.getElementById('locationSearchInput') as HTMLInputElement;
+      input?.focus();
+      setMobileNavActive('btnNavSearch');
+    });
+
+    document.getElementById('btnNavTelemetry')?.addEventListener('click', () => {
+      leftSidebar?.classList.remove('mobile-open');
+      this.telemetry.toggle();
+      setMobileNavActive('btnNavTelemetry');
+    });
+
+    document.getElementById('btnNavSpotter')?.addEventListener('click', () => {
+      this.spotterModal.open();
+      setMobileNavActive('btnNavSpotter');
+    });
+
+    btnCloseLeftSidebar?.addEventListener('click', () => {
+      leftSidebar?.classList.remove('mobile-open');
+      setMobileNavActive('btnNavMap');
+    });
   }
 
   private async fetchLiveRadar(): Promise<void> {

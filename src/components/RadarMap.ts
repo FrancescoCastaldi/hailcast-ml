@@ -98,6 +98,8 @@ export class RadarMapComponent {
 
     this.radarLayer = L.tileLayer(tileUrl, {
       opacity: 0.72,
+      minZoom: 2,
+      maxNativeZoom: 12,
       maxZoom: 19,
       zIndex: 200
     });
