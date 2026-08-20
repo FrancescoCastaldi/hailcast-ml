@@ -1,0 +1,37 @@
+name: Radar & Convective Data Sync
+
+on:
+  schedule:
+    # Esegue ogni 15 minuti per validare e mantenere attivi i feed radar e nowcasting
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  radar-health-and-sync:
+    name: Sync & Health Check Radar Feeds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test RainViewer & Open-Meteo Endpoints
+        run: |
+          echo "📡 Verifico connettività RainViewer API..."
+          node -e "fetch('https://api.rainviewer.com/public/weather-maps.json').then(r=>r.json()).then(d=>{ console.log('✅ RainViewer Online! Generated timestamp:', new Date(d.generated*1000).toISOString(), 'Past frames:', d.radar.past.length); }).catch(e=>{ console.error('❌ Errore RainViewer:', e); process.exit(1); })"
+          echo "🌦️ Verifico connettività Open-Meteo Convective Sounding..."
+          node -e "fetch('https://api.open-meteo.com/v1/forecast?latitude=45.4&longitude=10.8&current=temperature_2m,relative_humidity_2m,cape,lifted_index').then(r=>r.json()).then(d=>{ console.log('✅ Open-Meteo Online! Current CAPE:', d.current?.cape); }).catch(e=>{ console.error('❌ Errore Open-Meteo:', e); process.exit(1); })"
+
+      - name: Run Meteorology & ML Unit Tests
+        run: npm test
+
+      - name: Build Verification
+        run: npm run build

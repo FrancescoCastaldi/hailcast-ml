@@ -3,6 +3,9 @@ name: Deploy HailCast-ML to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Aggiornamento automatico e continuo ogni 30 minuti
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:

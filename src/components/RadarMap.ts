@@ -203,10 +203,11 @@ export class RadarMapComponent {
   }
 
   /**
-   * Disegna le proiezioni coniche a 15, 30, 45, 60 minuti
+   * Disegna le proiezioni coniche a 15, 30, 45, 60 minuti e le frecce dinamiche di moto
    */
   private renderTrajectoryAndCones(cell: StormCell): void {
     const startPoint: [number, number] = [cell.centroid.lat, cell.centroid.lng];
+    const heading = Math.round(cell.velocity.directionDeg);
 
     // Coni di probabilità d'impatto a ventaglio
     for (const cone of cell.nowcastCones) {
@@ -215,33 +216,69 @@ export class RadarMapComponent {
 
       const conePoly = L.polygon(coneLatLngs, {
         color: '#ff3366',
-        weight: 1,
+        weight: 1.5,
         fillColor: '#ff3366',
         fillOpacity: opacity,
-        dashArray: '3, 6'
+        dashArray: '4, 6',
+        className: 'nowcast-cone-poly'
       });
 
       this.trajectoriesLayerGroup.addLayer(conePoly);
 
-      // Marker con tempo stimato sul centroide futuro
+      // Marker con tempo stimato e freccia direzionale
       const timeIcon = L.divIcon({
         className: 'nowcast-time-icon',
-        html: `<div class="time-pill">+${cone.minutesAhead}m</div>`,
-        iconSize: [34, 18],
-        iconAnchor: [17, 9]
+        html: `
+          <div class="nowcast-time-badge">
+            <span class="time-pill">+${cone.minutesAhead}m</span>
+          </div>
+        `,
+        iconSize: [38, 20],
+        iconAnchor: [19, 10]
       });
 
       const timeMarker = L.marker([cone.projectedCentroid.lat, cone.projectedCentroid.lng], { icon: timeIcon });
       this.trajectoriesLayerGroup.addLayer(timeMarker);
     }
 
-    // Linea principale del vettore di avanzamento (60 min)
+    // Frecce dinamiche che anticipano il verso della perturbazione lungo il percorso
+    const waypoints = [
+      cell.centroid,
+      ...cell.nowcastCones.map(c => c.projectedCentroid)
+    ];
+
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const p1 = waypoints[i];
+      const p2 = waypoints[i + 1];
+      const midLat = (p1.lat + p2.lat) / 2;
+      const midLng = (p1.lng + p2.lng) / 2;
+
+      const arrowIcon = L.divIcon({
+        className: 'dynamic-motion-arrow-icon',
+        html: `
+          <div class="motion-arrow-wrapper" style="transform: rotate(${heading}deg);">
+            <div class="motion-arrow-pulse"></div>
+            <svg class="motion-arrow-svg" viewBox="0 0 24 24" width="24" height="24">
+              <path d="M12 2L20 15L12 11.5L4 15L12 2Z" fill="#ffbb00" stroke="#ffffff" stroke-width="1.5" />
+            </svg>
+          </div>
+        `,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const arrowMarker = L.marker([midLat, midLng], { icon: arrowIcon });
+      this.trajectoriesLayerGroup.addLayer(arrowMarker);
+    }
+
+    // Linea principale del vettore di avanzamento (60 min) con animazione tratteggiata
     const end60 = cell.nowcastCones[cell.nowcastCones.length - 1]?.projectedCentroid;
     if (end60) {
       const vectorLine = L.polyline([startPoint, [end60.lat, end60.lng]], {
-        color: '#ff9900',
+        color: '#ffaa00',
         weight: 3,
-        dashArray: '6, 6'
+        dashArray: '8, 8',
+        className: 'animated-trajectory-line'
       });
       this.trajectoriesLayerGroup.addLayer(vectorLine);
     }
