@@ -249,10 +249,10 @@ export class AlertNotificationService {
           <p style="line-height: 1.5; color: #e2e8f0; margin: 0;">${bodyText}</p>
         </div>
         <div style="background: rgba(255, 170, 0, 0.15); border-left: 4px solid #ffaa00; padding: 12px; border-radius: 6px; margin: 15px 0;">
-          <strong style="color: #ffaa00;">🛡️ Istruzioni per Iniziare a Ricevere Allerte:</strong>
+          <strong style="color: #ffaa00;">${alertType === 'test' ? '🛡️ Istruzioni di Attivazione Ricezione:' : '🛡️ Consigli di Autoprotezione:'}</strong>
           <p style="margin: 5px 0 0 0; color: #fef08a; font-size: 0.9rem;">${advice}</p>
         </div>
-        <p style="font-size: 11px; color: #64748b; margin-top: 15px;">Avviso generato dalla piattaforma di Nowcasting HailCast-ML.</p>
+        <p style="font-size: 11px; color: #64748b; margin-top: 15px;">Avviso meteorologico generato automaticamente dalla piattaforma HailCast-ML.</p>
       </div>
     `;
 
@@ -276,17 +276,17 @@ export class AlertNotificationService {
           Orario: timestamp
         }
       : {
-          _subject: `⚡ [HailCast Alert] ${alertType === 'hail' ? 'Grandine' : 'Pioggia'} per ${subscription.locationName}`,
+          _subject: `⚡ [HailCast Alert] ${alertType === 'hail' ? 'Grandine' : 'Pioggia/Temporale'} per ${subscription.locationName}`,
           _template: 'box',
           _captcha: 'false',
           _replyto: 'no-reply@hailcast.ml',
-          Allerta: alertType === 'hail' ? 'RISCHIO GRANDINE' : 'PIOGGIA INTENSA',
+          Allerta: alertType === 'hail' ? 'RISCHIO GRANDINE' : 'PIOGGIA INTENSA / TEMPORALE',
           Località: subscription.locationName,
           Coordinate: `${subscription.coords.lat.toFixed(4)}°N, ${subscription.coords.lng.toFixed(4)}°E`,
-          Cella: details.cellName || 'Supercella Convettiva',
-          Diametro_Stimato: `${details.hailSizeCm || 2.5} cm`,
-          Riflettività: `${details.maxDbz || 60} dBZ`,
-          ETA_Arrivo: `~${details.etaMinutes || 20} min`,
+          Cella: details.cellName || 'Cella Temporalesca',
+          Diametro_Grandine: `${details.hailSizeCm || 0} cm`,
+          Riflettività_Radar: `${details.maxDbz || 50} dBZ`,
+          ETA_Arrivo: details.etaMinutes === 0 ? 'IN CORSO SULLA ZONA' : `~${details.etaMinutes || 15} min`,
           Orario: timestamp,
           Consigli: advice,
           Dettagli: bodyText
@@ -416,8 +416,10 @@ export class AlertNotificationService {
 
         if (!nearestCell) continue;
 
-        const isHailThreat = nearestCell.meshDiameterCm >= sub.hailThresholdCm;
-        const isRainThreat = nearestCell.maxDbz >= (sub.rainThresholdMm >= 25 ? 52 : 44);
+        // Soglia dBZ basata su Marshall-Palmer Z-R
+        const rainDbzThreshold = Math.round(10 * Math.log10(200 * Math.pow(Math.max(1, sub.rainThresholdMm || 10), 1.6)));
+        const isHailThreat = nearestCell.meshDiameterCm >= (sub.hailThresholdCm || 0) && nearestCell.meshDiameterCm > 0;
+        const isRainThreat = nearestCell.maxDbz >= Math.max(38, Math.min(58, rainDbzThreshold));
 
         if (isHailThreat || isRainThreat) {
           if (
@@ -435,10 +437,10 @@ export class AlertNotificationService {
           const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
           const title = isHailThreat
             ? `⚠️ ALLERTA GRANDINE su ${sub.locationName}!`
-            : `🌧️ ALLERTA PIOGGIA FORTE su ${sub.locationName}!`;
+            : `🌧️ ALLERTA PIOGGIA INTENSA su ${sub.locationName}!`;
           const message = isHailThreat
-            ? `Cella ${nearestCell.name} (${nearestCell.meshDiameterCm} cm MESH) in arrivo in ~${assessment.estimatedArrivalMinutes} min.`
-            : `Temporale ad alta intensità (${nearestCell.maxDbz} dBZ) in arrivo in ~${assessment.estimatedArrivalMinutes} min.`;
+            ? `Cella ${nearestCell.name} (${nearestCell.meshDiameterCm} cm MESH) ${assessment.estimatedArrivalMinutes === 0 ? 'sopra la zona' : `in arrivo in ~${assessment.estimatedArrivalMinutes} min`}.`
+            : `Temporale ad alta intensità (${nearestCell.maxDbz} dBZ) ${assessment.estimatedArrivalMinutes === 0 ? 'sopra la zona' : `in arrivo in ~${assessment.estimatedArrivalMinutes} min`}.`;
 
           this.playAlertChime();
 
