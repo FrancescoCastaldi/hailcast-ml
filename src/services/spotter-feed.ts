@@ -18,8 +18,10 @@ export class SpotterFeedService {
           coords: { lat: 45.3951, lng: 10.4908 },
           timestamp: formatOffset(12),
           hailSizeCm: 4.8,
+          phenomenon: 'hail',
+          windSpeedKmh: 85,
           damageLevel: 'cars',
-          notes: 'Grandine molto fitta con chicchi discoidali durissimi, parabrezza scheggiati e fogliame tranciato.'
+          notes: 'Grandine molto fitta con chicchi durissimi, parabrezza scheggiati e fogliame tranciato.'
         },
         {
           id: 'rep-02',
@@ -27,8 +29,10 @@ export class SpotterFeedService {
           coords: { lat: 45.4389, lng: 10.6933 },
           timestamp: formatOffset(24),
           hailSizeCm: 3.5,
+          phenomenon: 'downburst',
+          windSpeedKmh: 95,
           damageLevel: 'leaves',
-          notes: 'Raffica di downburst violenta prima della grandinata, chicchi come noci.'
+          notes: 'Raffica di downburst violenta (95 km/h) prima della grandinata, chicchi come noci.'
         },
         {
           id: 'rep-03',
@@ -36,8 +40,10 @@ export class SpotterFeedService {
           coords: { lat: 45.3992, lng: 11.2755 },
           timestamp: formatOffset(45),
           hailSizeCm: 2.0,
+          phenomenon: 'lightning',
+          windSpeedKmh: 60,
           damageLevel: 'none',
-          notes: 'Forte rovescio temporalesco misto a grandine piccola/media per 10 minuti.'
+          notes: 'Forte attività elettrica con rovescio temporalesco e grandine media per 10 minuti.'
         }
       ];
     }

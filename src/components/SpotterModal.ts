@@ -86,8 +86,12 @@ export class SpotterModalComponent {
 
   private handleSubmit(): void {
     const locName = this.locationInput.value.trim();
+    const selectedPhenomRadio = document.querySelector('input[name="spotterPhenomenon"]:checked') as HTMLInputElement;
+    const phenomenon = (selectedPhenomRadio ? selectedPhenomRadio.value : 'hail') as any;
     const selectedSizeRadio = document.querySelector('input[name="hailSize"]:checked') as HTMLInputElement;
     const hailSizeCm = parseFloat(selectedSizeRadio ? selectedSizeRadio.value : '2.0');
+    const windSelect = document.getElementById('spotterWind') as HTMLSelectElement;
+    const windSpeedKmh = windSelect ? parseInt(windSelect.value, 10) : 65;
     const timeStr = this.timeInput.value;
     const damageLevel = this.damageSelect.value as any;
     const notes = this.notesInput.value.trim();
@@ -103,8 +107,10 @@ export class SpotterModalComponent {
       coords,
       timestamp: timeStr,
       hailSizeCm,
+      phenomenon,
+      windSpeedKmh,
       damageLevel,
-      notes: notes || 'Segnalazione grandine inviata tramite HailCast AI Spotter Network.'
+      notes: notes || 'Segnalazione convalidata tramite HailCast Spotter Network.'
     });
 
     if (this.onReportSubmittedCallback) {

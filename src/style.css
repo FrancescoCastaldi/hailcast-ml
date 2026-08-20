@@ -1697,6 +1697,55 @@ body.dark-theme {
   gap: 6px;
 }
 
+/* Phenomenon Emoji Selector Grid in Spotter Modal */
+.phenomenon-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.phenomenon-chip input {
+  display: none;
+}
+
+.phenomenon-chip-inner {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.phenomenon-chip-inner:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.phenom-emoji {
+  font-size: 1.3rem;
+}
+
+.phenom-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.phenomenon-chip input:checked + .phenomenon-chip-inner {
+  background: rgba(0, 240, 255, 0.16);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+}
+
 .diameter-card input {
   display: none;
 }

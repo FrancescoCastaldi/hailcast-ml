@@ -341,33 +341,63 @@ export class RadarMapComponent {
     }
   }
 
+  private getPhenomenonEmoji(phenomenon?: string): string {
+    switch (phenomenon) {
+      case 'downburst': return '💨';
+      case 'lightning': return '⚡';
+      case 'torrential_rain': return '🌧️';
+      case 'tornado': return '🌪️';
+      default: return '❄️';
+    }
+  }
+
+  private getPhenomenonLabel(phenomenon?: string): string {
+    switch (phenomenon) {
+      case 'downburst': return 'Downburst & Raffiche Forti';
+      case 'lightning': return 'Fulmini & Attività Elettrica';
+      case 'torrential_rain': return 'Nubifragio Torrenziale';
+      case 'tornado': return 'Tromba d\'Aria / Tornado';
+      default: return 'Grandinata Severa';
+    }
+  }
+
   /**
-   * Disegna i marker delle segnalazioni spotter a terra
+   * Disegna i marker delle segnalazioni spotter a terra con emoticon associate
    */
   public renderSpotterReports(reports: SpotterReport[]): void {
     this.spottersLayerGroup.clearLayers();
     if (!this.showSpotters) return;
 
     for (const rep of reports) {
+      const emoji = this.getPhenomenonEmoji(rep.phenomenon);
+      const phenomLabel = this.getPhenomenonLabel(rep.phenomenon);
+      const windKmh = rep.windSpeedKmh ? `${rep.windSpeedKmh} km/h` : '65 km/h';
+
       const icon = L.divIcon({
         className: 'spotter-report-icon',
         html: `
-          <div class="spotter-pin" title="Segnalazione Grandine: ${rep.hailSizeCm} cm">
-            <span class="spotter-emoji">❄️</span>
-            <span class="spotter-size">${rep.hailSizeCm}cm</span>
+          <div class="spotter-pin" title="${phenomLabel}: ${rep.hailSizeCm} cm | Raffiche: ${windKmh}">
+            <span class="spotter-emoji">${emoji}</span>
+            <span class="spotter-size">${rep.hailSizeCm > 0 ? rep.hailSizeCm + 'cm' : windKmh}</span>
           </div>
         `,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
+        iconSize: [38, 38],
+        iconAnchor: [19, 19]
       });
 
       const marker = L.marker([rep.coords.lat, rep.coords.lng], { icon });
       marker.bindPopup(`
         <div class="spotter-popup">
-          <div class="popup-title">📍 ${rep.locationName}</div>
+          <div class="popup-title">${emoji} ${rep.locationName}</div>
           <div class="popup-time">🕒 Segnalato alle ore ${rep.timestamp}</div>
           <div class="popup-detail">
-            <strong>Diametro Grandine:</strong> <span class="hail-highlight">${rep.hailSizeCm} cm</span>
+            <strong>Fenomeno:</strong> <span>${phenomLabel}</span>
+          </div>
+          <div class="popup-detail">
+            <strong>Grandine Rilevata:</strong> <span class="hail-highlight">${rep.hailSizeCm} cm</span>
+          </div>
+          <div class="popup-detail">
+            <strong>Raffiche di Vento:</strong> <span>💨 ~${windKmh}</span>
           </div>
           <div class="popup-detail">
             <strong>Danni:</strong> ${rep.damageLevel}

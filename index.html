@@ -475,7 +475,48 @@
             </div>
 
             <div class="form-group">
-              <label>Diametro Chicchi di Grandine (Seleziona Dimensione):</label>
+              <label>Tipo di Perturbazione / Fenomeno Convettivo:</label>
+              <div class="phenomenon-selector-grid">
+                <label class="phenomenon-chip">
+                  <input type="radio" name="spotterPhenomenon" value="hail" checked />
+                  <div class="phenomenon-chip-inner">
+                    <span class="phenom-emoji">❄️</span>
+                    <span class="phenom-title">Grandinata</span>
+                  </div>
+                </label>
+                <label class="phenomenon-chip">
+                  <input type="radio" name="spotterPhenomenon" value="downburst" />
+                  <div class="phenomenon-chip-inner">
+                    <span class="phenom-emoji">💨</span>
+                    <span class="phenom-title">Downburst / Raffiche</span>
+                  </div>
+                </label>
+                <label class="phenomenon-chip">
+                  <input type="radio" name="spotterPhenomenon" value="lightning" />
+                  <div class="phenomenon-chip-inner">
+                    <span class="phenom-emoji">⚡</span>
+                    <span class="phenom-title">Fulmini & Supercella</span>
+                  </div>
+                </label>
+                <label class="phenomenon-chip">
+                  <input type="radio" name="spotterPhenomenon" value="torrential_rain" />
+                  <div class="phenomenon-chip-inner">
+                    <span class="phenom-emoji">🌧️</span>
+                    <span class="phenom-title">Nubifragio</span>
+                  </div>
+                </label>
+                <label class="phenomenon-chip">
+                  <input type="radio" name="spotterPhenomenon" value="tornado" />
+                  <div class="phenomenon-chip-inner">
+                    <span class="phenom-emoji">🌪️</span>
+                    <span class="phenom-title">Tromba d'Aria</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Diametro Grandine / Dimensione Chicchi:</label>
               <div class="diameter-selector-grid">
                 <label class="diameter-card">
                   <input type="radio" name="hailSize" value="1.5" checked />
@@ -522,8 +563,13 @@
 
             <div class="form-row">
               <div class="form-group half">
-                <label for="spotterTime">Orario di Inizio:</label>
-                <input type="time" id="spotterTime" required />
+                <label for="spotterWind">Raffiche di Vento Stimate:</label>
+                <select id="spotterWind">
+                  <option value="40">🍃 Vento debole (&lt; 40 km/h)</option>
+                  <option value="65" selected>💨 Raffiche forti (50-70 km/h)</option>
+                  <option value="90">🌪️ Downburst violento (80-100 km/h)</option>
+                  <option value="120">🚨 Vento tempestoso (&gt; 100 km/h)</option>
+                </select>
               </div>
               <div class="form-group half">
                 <label for="spotterDamage">Danni Riscontrati:</label>
@@ -537,9 +583,15 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="spotterNotes">Note Aggiuntive / Dinamica del Vento:</label>
-              <textarea id="spotterNotes" rows="2" placeholder="Es. Raffiche di downburst fortissime da Nord-Ovest, grandine a secco..."></textarea>
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="spotterTime">Orario di Inizio Rilevato:</label>
+                <input type="time" id="spotterTime" required />
+              </div>
+              <div class="form-group half">
+                <label for="spotterNotes">Dinamica e Dettagli:</label>
+                <input type="text" id="spotterNotes" placeholder="Es. Raffiche improvvise, grandine a secco..." />
+              </div>
             </div>
 
             <div class="modal-footer">

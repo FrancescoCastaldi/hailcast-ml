@@ -63,12 +63,16 @@ export interface HailPrediction {
   recommendations: string[];
 }
 
+export type StormPhenomenon = 'hail' | 'wind_gust' | 'downburst' | 'lightning' | 'torrential_rain' | 'tornado';
+
 export interface SpotterReport {
   id: string;
   locationName: string;
   coords: Coordinates;
   timestamp: string;
   hailSizeCm: number;
+  phenomenon?: StormPhenomenon;
+  windSpeedKmh?: number;
   damageLevel: 'none' | 'leaves' | 'cars' | 'windows' | 'severe';
   notes: string;
 }
