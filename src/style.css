@@ -2542,106 +2542,146 @@ body.dark-theme {
     transform: scale(0.8);
   }
 
-  /* Location Risk Card on Mobile - Clean Bottom Sheet */
+  /* Location Risk Card on Mobile - Clean Floating Glass Card */
   .location-risk-card {
-    left: 8px;
-    right: 8px;
+    left: 10px;
+    right: 10px;
     width: auto;
     max-width: none;
-    bottom: 110px;
-    padding: 10px 12px;
+    bottom: 84px;
+    padding: 12px 14px;
     max-height: min(42vh, 42dvh);
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
+    z-index: 1300;
   }
 
-  /* Streamlined Single-Line Timeline Bar */
+  /* Hide the rectangular bottom timeline bar on mobile to eliminate all clutter */
   .timeline-bar {
+    display: none !important;
+  }
+
+  /* Full Screen Immersive Map Viewport on Mobile */
+  .map-viewport {
+    height: calc(100vh - var(--header-height)) !important;
+    height: calc(100dvh - var(--header-height)) !important;
+  }
+
+  /* Mobile Floating Circular Action Buttons (Round FABs) */
+  .mobile-nav-bar {
     position: fixed;
-    bottom: 54px;
+    bottom: 18px;
     left: 0;
     width: 100vw;
     width: 100dvw;
-    height: var(--timeline-height);
-    padding: 0 6px;
-    gap: 5px;
-    background: rgba(8, 12, 20, 0.96);
-    backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border-glass);
-    z-index: 1000;
-  }
-
-  .timeline-step-btn {
-    display: none !important; /* Remove step buttons to prevent crowding */
-  }
-
-  .timeline-play-btn {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-  }
-
-  .btn-go-live {
-    padding: 3px 6px !important;
-    font-size: 0.6rem !important;
-    height: 28px !important;
-  }
-
-  .time-label.future {
-    display: none !important;
-  }
-
-  .time-label.past {
-    display: none !important;
-  }
-
-  .timeline-meta {
-    gap: 3px;
-    margin-left: auto;
-  }
-
-  .speed-selector {
-    display: none !important;
-  }
-
-  .frame-mode-badge {
-    display: none !important;
-  }
-
-  .frame-clock {
-    font-size: 0.68rem;
-    padding: 2px 5px;
-    font-weight: 700;
-  }
-
-  /* Bottom Navigation Bar - Sleek 54px */
-  .mobile-nav-bar {
+    height: auto;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
     display: flex;
-    height: 54px;
-    background: rgba(6, 10, 18, 0.98);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    z-index: 1100;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    pointer-events: none; /* Allows interacting with map through empty space */
+    z-index: 1200;
   }
 
   .mobile-nav-btn {
-    flex: 1;
-    padding: 5px 0;
-    gap: 1px;
+    pointer-events: auto;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 50%;
+    background: rgba(10, 16, 28, 0.88);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s, background 0.2s;
   }
 
-  .mobile-nav-btn svg {
-    width: 17px;
-    height: 17px;
+  .mobile-nav-btn:active {
+    transform: scale(0.92);
   }
 
   .mobile-nav-btn span {
-    font-size: 0.62rem;
+    display: none !important; /* Hide text, keep sleek round icon */
   }
 
-  .map-viewport {
-    height: calc(100vh - var(--header-height) - 102px);
-    height: calc(100dvh - var(--header-height) - 102px);
+  .mobile-nav-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Prominent Glowing GPS Phone Locator FAB */
+  #btnNavGpsLocation {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    background: linear-gradient(135deg, #00f0ff, #0284c7);
+    color: #0b1322;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 28px rgba(0, 240, 255, 0.5), 0 0 16px rgba(0, 240, 255, 0.35);
+  }
+
+  #btnNavGpsLocation svg {
+    stroke: #0b1322;
+    stroke-width: 2.4;
+  }
+
+  /* Temporali Live FAB */
+  #btnNavCells {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: rgba(255, 170, 0, 0.5);
+    color: #ffaa00;
+  }
+
+  #btnNavCells svg {
+    stroke: #ffaa00;
+  }
+
+  #btnNavCells .mobile-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #f43f5e;
+    color: #ffffff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #0b1322;
+  }
+
+  /* Spotter Segnala FAB */
+  #btnNavSpotter {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: rgba(0, 240, 255, 0.4);
+    color: #00f0ff;
+  }
+
+  #btnNavSpotter svg {
+    stroke: #00f0ff;
+  }
+
+  /* Allerte Email FAB */
+  #btnNavAlerts {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: rgba(244, 63, 94, 0.45);
+    color: #f43f5e;
+  }
+
+  #btnNavAlerts svg {
+    stroke: #f43f5e;
   }
 
   /* Modals as Clean Sliding Bottom Sheets */
