@@ -1,18 +1,27 @@
-name: Radar & Convective Data Sync
+name: Automated Radar & Convective Data Sync
 
 on:
   schedule:
-    # Esegue ogni 15 minuti per validare e mantenere attivi i feed radar e nowcasting
+    # Esegue automaticamente ogni 15 minuti H24
     - cron: '*/15 * * * *'
+  push:
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
-  radar-health-and-sync:
-    name: Sync & Health Check Radar Feeds
+  sync-and-deploy:
+    name: Sync Radar Feeds & Deploy Snapshot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -23,15 +32,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Test RainViewer & Open-Meteo Endpoints
-        run: |
-          echo "📡 Verifico connettività RainViewer API..."
-          node -e "fetch('https://api.rainviewer.com/public/weather-maps.json').then(r=>r.json()).then(d=>{ console.log('✅ RainViewer Online! Generated timestamp:', new Date(d.generated*1000).toISOString(), 'Past frames:', d.radar.past.length); }).catch(e=>{ console.error('❌ Errore RainViewer:', e); process.exit(1); })"
-          echo "🌦️ Verifico connettività Open-Meteo Convective Sounding..."
-          node -e "fetch('https://api.open-meteo.com/v1/forecast?latitude=45.4&longitude=10.8&current=temperature_2m,relative_humidity_2m,cape,lifted_index').then(r=>r.json()).then(d=>{ console.log('✅ Open-Meteo Online! Current CAPE:', d.current?.cape); }).catch(e=>{ console.error('❌ Errore Open-Meteo:', e); process.exit(1); })"
+      - name: Fetch Live Radar & Convective Sounding Snapshot
+        run: node scripts/sync-radar-data.mjs
 
-      - name: Run Meteorology & ML Unit Tests
+      - name: Run Meteorological Verification Tests
         run: npm test
 
-      - name: Build Verification
+      - name: Commit Updated Radar Data (if changed)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/live-radar-feed.json
+          git commit -m "chore(data): auto-update live radar and convective snapshot [skip ci]" || echo "Nessuna variazione nei dati radar"
+          git push || echo "Push non necessario o già aggiornato"
+
+      - name: Build Application Bundle
         run: npm run build
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
