@@ -5,7 +5,13 @@ export class AlertNotificationService {
   private static STORAGE_KEY_SUBS = 'hailcast_alert_subscriptions_v2';
   private static STORAGE_KEY_OLD = 'hailcast_alert_subscription';
   private static STORAGE_KEY_HISTORY = 'hailcast_alert_history_v2';
-  private static NOTIFICATION_COOLDOWN_MS = 10 * 60 * 1000; // 10 minuti di cooldown tra avvisi per la stessa cella
+  
+  // Cooldown rigorosi per prevenire spam email
+  private static LOCATION_COOLDOWN_MS = 15 * 60 * 1000; // Al massimo 1 email ogni 15 minuti per la stessa località
+  private static SAME_CELL_COOLDOWN_MS = 30 * 60 * 1000; // Al massimo 1 email ogni 30 minuti per la stessa cella temporalesca
+  
+  // Lock in memoria per prevenire invii simultanei/concorrenti (race condition)
+  private static activeDispatchLocks = new Set<string>();
 
   /**
    * Recupera tutte le sottoscrizioni salvate (con migrazione automatica da legacy)
@@ -292,6 +298,31 @@ export class AlertNotificationService {
           Dettagli: bodyText
         };
 
+    // Verifica Anti-Spam: Previeni invii doppi della stessa notifica nello stesso intervallo temporale
+    const lockKey = `${subscription.email}_${subscription.locationName}_${alertType}`;
+    if (this.activeDispatchLocks.has(lockKey)) {
+      console.warn(`[AntiSpam] Invio già in corso per ${lockKey}, richiesta duplicata ignorata.`);
+      return { success: true, message: 'Invio già in corso per questa notifica.', previewHtml };
+    }
+
+    // Controlla se la stessa notifica è già stata inviata negli ultimi 10 minuti (tranne se test manuale)
+    if (alertType !== 'test') {
+      const history = this.getHistory();
+      const recentDuplicate = history.find(h => 
+        h.email === subscription.email &&
+        h.locationName === subscription.locationName &&
+        h.alertType === alertType &&
+        (Date.now() - new Date(h.timestamp).getTime()) < this.LOCATION_COOLDOWN_MS
+      );
+
+      if (recentDuplicate) {
+        console.log(`[AntiSpam] Email recente già inviata a ${subscription.email} per ${subscription.locationName}. Ignorata per evitare spam.`);
+        return { success: true, message: 'Allerta già notificata di recente per questa località.', previewHtml };
+      }
+    }
+
+    this.activeDispatchLocks.add(lockKey);
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -322,6 +353,9 @@ export class AlertNotificationService {
       this.dispatchViaHiddenForm(subscription.email, payloadMap);
       gatewaySuccess = true;
       gatewayMessage = `Email inviata a ${subscription.email}.`;
+    } finally {
+      // Rilascia il lock dopo 5 secondi per prevenire chiamate doppie
+      setTimeout(() => this.activeDispatchLocks.delete(lockKey), 5000);
     }
 
     // Salva sempre nello storico delle allerte
@@ -422,10 +456,19 @@ export class AlertNotificationService {
         const isRainThreat = nearestCell.maxDbz >= Math.max(38, Math.min(58, rainDbzThreshold));
 
         if (isHailThreat || isRainThreat) {
+          // Cooldown 1: Stessa cella già notificata negli ultimi 30 minuti -> Salta
           if (
             sub.lastNotifiedCellId === nearestCell.id &&
             sub.lastNotifiedAt &&
-            now - sub.lastNotifiedAt < this.NOTIFICATION_COOLDOWN_MS
+            now - sub.lastNotifiedAt < this.SAME_CELL_COOLDOWN_MS
+          ) {
+            continue;
+          }
+
+          // Cooldown 2: Qualsiasi altra notifica inviata alla stessa località negli ultimi 15 minuti -> Salta
+          if (
+            sub.lastNotifiedAt &&
+            now - sub.lastNotifiedAt < this.LOCATION_COOLDOWN_MS
           ) {
             continue;
           }
@@ -448,7 +491,7 @@ export class AlertNotificationService {
             this.sendBrowserNotification(title, message);
           }
 
-          // Invia email automatica
+          // Invia email automatica (protetta da anti-spam e deduplicazione)
           this.sendEmailAlert(sub, type, {
             cellName: nearestCell.name,
             hailSizeCm: nearestCell.meshDiameterCm,
