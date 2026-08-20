@@ -169,15 +169,22 @@ class HailCastApp {
     // Gestione Welcome Modal (Made by Francesco Castaldi)
     const welcomeModal = document.getElementById('welcomeModal');
     const btnDismissWelcome = document.getElementById('btnDismissWelcome');
+    const WELCOME_SEEN_KEY = 'hailcast_welcome_dismissed_v1';
+    const isWelcomeDismissed = localStorage.getItem(WELCOME_SEEN_KEY) === 'true';
     
-    // Mostra il welcome popup all'avvio
-    if (welcomeModal) {
+    // Mostra il welcome popup all'avvio solo se l'utente non lo ha già chiuso in precedenza
+    if (welcomeModal && !isWelcomeDismissed) {
       welcomeModal.style.display = 'flex';
     }
 
     const closeWelcomeModal = () => {
       if (welcomeModal) {
         welcomeModal.style.display = 'none';
+        try {
+          localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+        } catch {
+          // Ignore storage errors in private mode
+        }
       }
     };
 
