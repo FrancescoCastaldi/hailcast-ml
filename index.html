@@ -65,6 +65,17 @@
             <span class="status-dot live"></span>
             <span class="status-text" id="radarStatusText">RADAR: INIZIALIZZAZIONE...</span>
           </div>
+
+          <div class="refresh-controls">
+            <select id="refreshIntervalSelect" class="refresh-interval-select" title="Frequenza aggiornamento dati radar">
+              <option value="30000">30s</option>
+              <option value="60000">1 min</option>
+              <option value="300000">5 min</option>
+            </select>
+            <button class="btn-refresh" id="btnManualRefresh" title="Aggiorna ora i dati radar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            </button>
+          </div>
         </div>
 
         <div class="header-center">
@@ -625,6 +636,11 @@
               <div class="notification-desc-box">
                 <span class="desc-icon">🛰️</span>
                 <p>Ricevi un avviso immediato via <strong>Email</strong> e <strong>Notifica Browser</strong> quando il radar e i modelli AI rilevano grandine o nubifragi in rotta verso la tua zona.</p>
+              </div>
+
+              <div class="notification-limits-box">
+                <span class="limits-icon">⚠️</span>
+                <p><strong>I limiti, detti chiaramente:</strong> la probabilità di grandine (POH) misura il rischio in quota, non la certezza che la grandine cada al suolo. I dati hanno scopo informativo e non sostituiscono le allerte ufficiali della Protezione Civile.</p>
               </div>
 
               <div class="form-row">

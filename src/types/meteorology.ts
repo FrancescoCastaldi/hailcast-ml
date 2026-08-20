@@ -122,6 +122,7 @@ export interface AlertSubscription {
   enableBrowserPush: boolean;
   lastNotifiedAt?: number;
   lastNotifiedCellId?: string;
+  alertActive?: boolean;   // Isteresi: true = allerta già scattata, in attesa che la minaccia rientri sotto la banda
 }
 
 export interface AlertHistoryEntry {

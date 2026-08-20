@@ -9,6 +9,11 @@ export class AlertNotificationService {
   // Cooldown rigorosi per prevenire spam email
   private static LOCATION_COOLDOWN_MS = 15 * 60 * 1000; // Al massimo 1 email ogni 15 minuti per la stessa località
   private static SAME_CELL_COOLDOWN_MS = 30 * 60 * 1000; // Al massimo 1 email ogni 30 minuti per la stessa cella temporalesca
+
+  // Isteresi anti "avvisi a singhiozzo" (ispirata a Grandina.it): la minaccia deve rientrare
+  // sotto una banda inferiore prima che l'allerta possa scattare di nuovo
+  private static HYSTERESIS_FACTOR = 0.7;   // Grandine: riarmo al 70% della soglia (es. 2.0 cm -> 1.4 cm)
+  private static RAIN_HYSTERESIS_DBZ = 3;   // Pioggia: riarmo a 3 dBZ sotto la soglia
   
   // Lock in memoria per prevenire invii simultanei/concorrenti (race condition)
   private static activeDispatchLocks = new Set<string>();
@@ -437,78 +442,100 @@ export class AlertNotificationService {
 
     for (const sub of subscriptions) {
       const assessment = StormTracker.assessLocationRisk(sub.locationName, sub.coords, cells);
-
-      if (
+      const onTrack =
         assessment.estimatedArrivalMinutes !== null &&
-        assessment.estimatedArrivalMinutes <= sub.leadTimeMinutes
-      ) {
-        const nearestCell = cells.find(c => {
-          const dLat = (c.centroid.lat - sub.coords.lat) * 111.32;
-          const dLng = (c.centroid.lng - sub.coords.lng) * (111.32 * Math.cos((sub.coords.lat * Math.PI) / 180));
-          return Math.sqrt(dLat * dLat + dLng * dLng) <= assessment.nearestStormDistanceKm + 5;
-        }) || cells[0];
+        assessment.estimatedArrivalMinutes <= sub.leadTimeMinutes;
 
-        if (!nearestCell) continue;
+      const nearestCell = onTrack
+        ? (cells.find(c => {
+            const dLat = (c.centroid.lat - sub.coords.lat) * 111.32;
+            const dLng = (c.centroid.lng - sub.coords.lng) * (111.32 * Math.cos((sub.coords.lat * Math.PI) / 180));
+            return Math.sqrt(dLat * dLat + dLng * dLng) <= assessment.nearestStormDistanceKm + 5;
+          }) || cells[0])
+        : null;
 
-        // Soglia dBZ basata su Marshall-Palmer Z-R
-        const rainDbzThreshold = Math.round(10 * Math.log10(200 * Math.pow(Math.max(1, sub.rainThresholdMm || 10), 1.6)));
-        const isHailThreat = nearestCell.meshDiameterCm >= (sub.hailThresholdCm || 0) && nearestCell.meshDiameterCm > 0;
-        const isRainThreat = nearestCell.maxDbz >= Math.max(38, Math.min(58, rainDbzThreshold));
-
-        if (isHailThreat || isRainThreat) {
-          // Cooldown 1: Stessa cella già notificata negli ultimi 30 minuti -> Salta
-          if (
-            sub.lastNotifiedCellId === nearestCell.id &&
-            sub.lastNotifiedAt &&
-            now - sub.lastNotifiedAt < this.SAME_CELL_COOLDOWN_MS
-          ) {
-            continue;
-          }
-
-          // Cooldown 2: Qualsiasi altra notifica inviata alla stessa località negli ultimi 15 minuti -> Salta
-          if (
-            sub.lastNotifiedAt &&
-            now - sub.lastNotifiedAt < this.LOCATION_COOLDOWN_MS
-          ) {
-            continue;
-          }
-
-          sub.lastNotifiedAt = now;
-          sub.lastNotifiedCellId = nearestCell.id;
+      // Nessuna cella in rotta entro il preavviso: riarma l'allerta se era attiva
+      if (!nearestCell) {
+        if (sub.alertActive) {
+          sub.alertActive = false;
           this.saveSubscription(sub);
+        }
+        continue;
+      }
 
-          const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
-          const title = isHailThreat
-            ? `⚠️ ALLERTA GRANDINE su ${sub.locationName}!`
-            : `🌧️ ALLERTA PIOGGIA INTENSA su ${sub.locationName}!`;
-          const message = isHailThreat
-            ? `Cella ${nearestCell.name} (${nearestCell.meshDiameterCm} cm MESH) ${assessment.estimatedArrivalMinutes === 0 ? 'sopra la zona' : `in arrivo in ~${assessment.estimatedArrivalMinutes} min`}.`
-            : `Temporale ad alta intensità (${nearestCell.maxDbz} dBZ) ${assessment.estimatedArrivalMinutes === 0 ? 'sopra la zona' : `in arrivo in ~${assessment.estimatedArrivalMinutes} min`}.`;
+      // Soglia dBZ basata su Marshall-Palmer Z-R
+      const rainDbzThreshold = Math.round(10 * Math.log10(200 * Math.pow(Math.max(1, sub.rainThresholdMm || 10), 1.6)));
+      const isHailThreat = nearestCell.meshDiameterCm >= (sub.hailThresholdCm || 0) && nearestCell.meshDiameterCm > 0;
+      const isRainThreat = nearestCell.maxDbz >= Math.max(38, Math.min(58, rainDbzThreshold));
+      const threatActive = isHailThreat || isRainThreat;
 
-          this.playAlertChime();
+      if (threatActive) {
+        // Isteresi: se l'allerta è già scattata, non ri-inviare finché la minaccia non rientra sotto la banda
+        if (sub.alertActive) {
+          continue;
+        }
 
-          if (sub.enableBrowserPush) {
-            this.sendBrowserNotification(title, message);
+        // Cooldown 1: Stessa cella già notificata negli ultimi 30 minuti -> Salta
+        if (
+          sub.lastNotifiedCellId === nearestCell.id &&
+          sub.lastNotifiedAt &&
+          now - sub.lastNotifiedAt < this.SAME_CELL_COOLDOWN_MS
+        ) {
+          continue;
+        }
+
+        // Cooldown 2: Qualsiasi altra notifica inviata alla stessa località negli ultimi 15 minuti -> Salta
+        if (
+          sub.lastNotifiedAt &&
+          now - sub.lastNotifiedAt < this.LOCATION_COOLDOWN_MS
+        ) {
+          continue;
+        }
+
+        sub.alertActive = true;
+        sub.lastNotifiedAt = now;
+        sub.lastNotifiedCellId = nearestCell.id;
+        this.saveSubscription(sub);
+
+        const type: 'hail' | 'rain' = isHailThreat ? 'hail' : 'rain';
+        const title = isHailThreat
+          ? `⚠️ ALLERTA GRANDINE su ${sub.locationName}!`
+          : `🌧️ ALLERTA PIOGGIA INTENSA su ${sub.locationName}!`;
+        const message = isHailThreat
+          ? `Cella ${nearestCell.name} (${nearestCell.meshDiameterCm} cm MESH) ${assessment.estimatedArrivalMinutes === 0 ? 'sopra la zona' : `in arrivo in ~${assessment.estimatedArrivalMinutes} min`}.`
+          : `Temporale ad alta intensità (${nearestCell.maxDbz} dBZ) ${assessment.estimatedArrivalMinutes === 0 ? 'sopra la zona' : `in arrivo in ~${assessment.estimatedArrivalMinutes} min`}.`;
+
+        this.playAlertChime();
+
+        if (sub.enableBrowserPush) {
+          this.sendBrowserNotification(title, message);
+        }
+
+        // Invia email automatica (protetta da anti-spam e deduplicazione)
+        this.sendEmailAlert(sub, type, {
+          cellName: nearestCell.name,
+          hailSizeCm: nearestCell.meshDiameterCm,
+          maxDbz: nearestCell.maxDbz,
+          etaMinutes: assessment.estimatedArrivalMinutes ?? undefined
+        });
+
+        lastTriggeredAlert = {
+          triggered: true,
+          alert: {
+            type,
+            title,
+            message,
+            cell: nearestCell,
+            eta: assessment.estimatedArrivalMinutes
           }
-
-          // Invia email automatica (protetta da anti-spam e deduplicazione)
-          this.sendEmailAlert(sub, type, {
-            cellName: nearestCell.name,
-            hailSizeCm: nearestCell.meshDiameterCm,
-            maxDbz: nearestCell.maxDbz,
-            etaMinutes: assessment.estimatedArrivalMinutes
-          });
-
-          lastTriggeredAlert = {
-            triggered: true,
-            alert: {
-              type,
-              title,
-              message,
-              cell: nearestCell,
-              eta: assessment.estimatedArrivalMinutes
-            }
-          };
+        };
+      } else {
+        // Banda di isteresi: riarma solo quando la minaccia scende sotto la soglia di riarmo
+        const rearmHail = nearestCell.meshDiameterCm < (sub.hailThresholdCm || 0) * this.HYSTERESIS_FACTOR;
+        const rearmRain = nearestCell.maxDbz < Math.max(38, Math.min(58, rainDbzThreshold)) - this.RAIN_HYSTERESIS_DBZ;
+        if (sub.alertActive && rearmHail && rearmRain) {
+          sub.alertActive = false;
+          this.saveSubscription(sub);
         }
       }
     }

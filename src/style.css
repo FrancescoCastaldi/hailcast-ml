@@ -229,6 +229,80 @@ body.dark-theme {
   50% { opacity: 0.4; }
 }
 
+/* Refresh Controls (intervallo aggiornamento dati + pulsante manuale) */
+.refresh-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.refresh-interval-select {
+  background: rgba(10, 15, 24, 0.85);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.refresh-interval-select:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+.btn-refresh {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s, background 0.2s;
+}
+
+.btn-refresh:hover {
+  background: rgba(0, 240, 255, 0.18);
+  transform: rotate(180deg);
+}
+
+@media (max-width: 640px) {
+  .refresh-interval-select {
+    display: none;
+  }
+}
+
+/* Notification limits disclaimer ("I limiti, detti chiaramente") */
+.notification-limits-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.notification-limits-box .limits-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.notification-limits-box strong {
+  color: #fbbf24;
+}
+
 /* Search Bar */
 .search-box-container {
   position: relative;

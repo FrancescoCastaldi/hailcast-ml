@@ -16,6 +16,8 @@ import { SpotterModalComponent } from './components/SpotterModal';
 import { NotificationModalComponent } from './components/NotificationModal';
 
 class HailCastApp {
+  private static REFRESH_INTERVAL_KEY = 'hailcast_refresh_interval_ms';
+
   private radarMap!: RadarMapComponent;
   private timelineController!: TimelineControllerComponent;
   private alertFeed!: AlertFeedComponent;
@@ -29,6 +31,7 @@ class HailCastApp {
   private currentSpotterReports: SpotterReport[] = [];
   private rainViewerHost: string = 'https://tilecache.rainviewer.com';
   private inspectedLocation: { coords: Coordinates; name: string } | null = null;
+  private refreshTimer: number | null = null;
 
   constructor() {
     this.init();
@@ -65,11 +68,8 @@ class HailCastApp {
     // Avvia orologio live in tempo reale (aggiornato ogni secondo)
     this.startLiveClockTicker();
 
-    // Refresh automatico continuo multi-sorgente ogni 30 secondi per avere sempre i dati radar più recenti
-    setInterval(async () => {
-      await this.fetchLiveRadar(true);
-      await this.refreshMultiSourceStorms();
-    }, 30000);
+    // Refresh automatico multi-sorgente con intervallo configurabile (30s / 1min / 5min)
+    this.setupAutoRefresh();
 
     // 6. Esegui la prima valutazione di telemetria sulla prima cella attiva
     if (this.currentStormCells.length > 0) {
@@ -348,6 +348,46 @@ class HailCastApp {
         setTimeout(() => toast.remove(), 250);
       }
     }, 4000);
+  }
+
+  /**
+   * Configura il refresh automatico dei dati radar con intervallo selezionabile
+   * (30s / 1min / 5min, persistito in localStorage) e pulsante di aggiornamento manuale
+   */
+  private setupAutoRefresh(): void {
+    const saved = parseInt(localStorage.getItem(HailCastApp.REFRESH_INTERVAL_KEY) || '30000', 10);
+    const intervalMs = [30000, 60000, 300000].includes(saved) ? saved : 30000;
+
+    const select = document.getElementById('refreshIntervalSelect') as HTMLSelectElement;
+    if (select) select.value = intervalMs.toString();
+
+    this.startAutoRefresh(intervalMs);
+
+    select?.addEventListener('change', () => {
+      const ms = parseInt(select.value, 10);
+      localStorage.setItem(HailCastApp.REFRESH_INTERVAL_KEY, ms.toString());
+      this.startAutoRefresh(ms);
+      const label = ms >= 60000 ? `${ms / 60000} min` : `${ms / 1000}s`;
+      this.showToast(`🔄 Aggiornamento dati radar ogni ${label}`, 'info');
+    });
+
+    document.getElementById('btnManualRefresh')?.addEventListener('click', async () => {
+      this.showToast('🔄 Aggiornamento dati radar in corso...', 'info');
+      await this.fetchLiveRadar(true);
+      await this.refreshMultiSourceStorms();
+      this.showToast('✅ Dati radar aggiornati', 'success');
+    });
+  }
+
+  private startAutoRefresh(intervalMs: number): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+    this.refreshTimer = window.setInterval(async () => {
+      await this.fetchLiveRadar(true);
+      await this.refreshMultiSourceStorms();
+    }, intervalMs);
   }
 
   private lastRadarScanTimeStr: string = '';
