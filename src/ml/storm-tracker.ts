@@ -271,47 +271,62 @@ export class StormTracker {
   ): StormCell[] {
     if (offsetMinutes === 0) return baseCells;
 
-    return baseCells.map(cell => {
-      // Distanza percorsa in km in base alla velocità della cella
-      const distanceKm = (cell.velocity.speedKmh * offsetMinutes) / 60;
-      const newCentroid = destinationPoint(cell.centroid, distanceKm, cell.velocity.directionDeg);
+    return baseCells
+      .filter(cell => {
+        // Se la cella temporalesca è di nuova formazione/iniziazione (isNew), nel passato non esisteva ancora
+        if (offsetMinutes < 0) {
+          if (cell.isNew || cell.formationStage === 'new_initiation') {
+            return false;
+          }
+          // Per celle regolari, se nel passato remoto l'intensità stimata scende sotto i 36 dBZ, la cella non era ancora formata
+          const historicalDbz = cell.maxDbz - Math.abs(offsetMinutes) * 0.25;
+          if (historicalDbz < 36 && offsetMinutes <= -30) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map(cell => {
+        // Distanza percorsa in km in base alla velocità della cella
+        const distanceKm = (cell.velocity.speedKmh * offsetMinutes) / 60;
+        const newCentroid = destinationPoint(cell.centroid, distanceKm, cell.velocity.directionDeg);
 
-      const dLat = newCentroid.lat - cell.centroid.lat;
-      const dLng = newCentroid.lng - cell.centroid.lng;
+        const dLat = newCentroid.lat - cell.centroid.lat;
+        const dLng = newCentroid.lng - cell.centroid.lng;
 
-      // Sposta tutti i vertici del poligono riflettente
-      const newPolygon = cell.polygon.map(pt => ({
-        lat: pt.lat + dLat,
-        lng: pt.lng + dLng
-      }));
+        // Sposta tutti i vertici del poligono riflettente
+        const newPolygon = cell.polygon.map(pt => ({
+          lat: pt.lat + dLat,
+          lng: pt.lng + dLng
+        }));
 
-      // Ricalcola i coni di nowcasting centrati sulla nuova posizione della cella
-      const newNowcastCones = generateNowcastCones(newCentroid, cell.velocity.speedKmh, cell.velocity.directionDeg);
+        // Ricalcola i coni di nowcasting centrati sulla nuova posizione della cella
+        const newNowcastCones = generateNowcastCones(newCentroid, cell.velocity.speedKmh, cell.velocity.directionDeg);
 
-      // Evoluzione fisiologica di intensità lungo il ciclo di vita (sviluppo nel passato, picco, transizione)
-      let adjustedDbz = cell.maxDbz;
-      if (offsetMinutes < 0) {
-        // Nel passato la cella era in fase di sviluppo
-        adjustedDbz = Math.max(38, Math.round(cell.maxDbz - Math.abs(offsetMinutes) * 0.15));
-      } else if (offsetMinutes > 30) {
-        // Nel nowcast a lungo termine (>30 min) la cella tende gradualmente a esaurire l'energia convettiva
-        adjustedDbz = Math.max(42, Math.round(cell.maxDbz - (offsetMinutes - 30) * 0.18));
-      }
+        // Evoluzione fisiologica di intensità lungo il ciclo di vita (sviluppo nel passato, picco, transizione)
+        let adjustedDbz = cell.maxDbz;
+        if (offsetMinutes < 0) {
+          // Nel passato la cella era in fase di sviluppo/crescita
+          adjustedDbz = Math.max(36, Math.round(cell.maxDbz - Math.abs(offsetMinutes) * 0.2));
+        } else if (offsetMinutes > 30) {
+          // Nel nowcast a lungo termine (>30 min) la cella tende gradualmente a esaurire l'energia convettiva
+          adjustedDbz = Math.max(40, Math.round(cell.maxDbz - (offsetMinutes - 30) * 0.18));
+        }
 
-      const prediction = HailPredictorML.predict(adjustedDbz, cell.sounding);
+        const prediction = HailPredictorML.predict(adjustedDbz, cell.sounding);
 
-      return {
-        ...cell,
-        centroid: newCentroid,
-        polygon: newPolygon,
-        maxDbz: adjustedDbz,
-        meshDiameterCm: prediction.expectedDiameterCm,
-        pohPercentage: prediction.probability,
-        poshPercentage: prediction.posh,
-        severity: prediction.severityClass,
-        nowcastCones: newNowcastCones
-      };
-    });
+        return {
+          ...cell,
+          centroid: newCentroid,
+          polygon: newPolygon,
+          maxDbz: adjustedDbz,
+          meshDiameterCm: prediction.expectedDiameterCm,
+          pohPercentage: prediction.probability,
+          poshPercentage: prediction.posh,
+          severity: prediction.severityClass,
+          nowcastCones: newNowcastCones
+        };
+      });
   }
 
   private static isPointInPolygon(pt: Coordinates, poly: Coordinates[]): boolean {
