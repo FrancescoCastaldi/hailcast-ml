@@ -166,34 +166,34 @@ class HailCastApp {
       this.showToast('Vista centrata sull\'Italia', 'info');
     });
 
-    // Gestione Welcome Modal (Made by Francesco Castaldi)
+    // Gestione Welcome Modal (Made by Francesco Castaldi) - Disabilitato all'avvio per non ostacolare la vista radar
     const welcomeModal = document.getElementById('welcomeModal');
     const btnDismissWelcome = document.getElementById('btnDismissWelcome');
-    const WELCOME_SEEN_KEY = 'hailcast_welcome_dismissed_v1';
-    const isWelcomeDismissed = localStorage.getItem(WELCOME_SEEN_KEY) === 'true';
     
-    // Mostra il welcome popup all'avvio solo se l'utente non lo ha già chiuso in precedenza
-    if (welcomeModal && !isWelcomeDismissed) {
-      welcomeModal.style.display = 'flex';
+    // Assicura che il popup non compaia mai automaticamente all'apertura del sito
+    if (welcomeModal) {
+      welcomeModal.style.display = 'none';
     }
 
     const closeWelcomeModal = () => {
       if (welcomeModal) {
         welcomeModal.style.display = 'none';
-        try {
-          localStorage.setItem(WELCOME_SEEN_KEY, 'true');
-        } catch {
-          // Ignore storage errors in private mode
-        }
       }
     };
 
     btnDismissWelcome?.addEventListener('click', closeWelcomeModal);
 
-    // Light dismiss per welcome modal (click sullo sfondo scuro)
+    // Chiusura al click sullo sfondo
     welcomeModal?.addEventListener('click', (e) => {
       if (e.target === welcomeModal) {
         closeWelcomeModal();
+      }
+    });
+
+    // Apribile solo su richiesta esplicita cliccando sul logo
+    document.querySelector('.logo-container')?.addEventListener('click', () => {
+      if (welcomeModal) {
+        welcomeModal.style.display = 'flex';
       }
     });
 
