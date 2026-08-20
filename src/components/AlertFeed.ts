@@ -73,6 +73,15 @@ export class AlertFeedComponent {
           </div>
         </div>
 
+        ${cell.impactedTowns && cell.impactedTowns.length > 0 ? `
+          <div class="cell-towns-box">
+            <div class="towns-title">📍 In arrivo nei comuni:</div>
+            <div class="towns-badges">
+              ${cell.impactedTowns.map(t => `<span class="town-badge">${t}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
         <div class="cell-card-footer">
           <button class="btn-inspect-cell">Centra su Mappa & Dettagli →</button>
         </div>

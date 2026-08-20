@@ -200,6 +200,12 @@ export class RadarMapComponent {
             <div>Avanzamento: <b>${cell.velocity.speedKmh} km/h</b></div>
             <div>Direzione: <b>${Math.round(cell.velocity.directionDeg)}°</b></div>
           </div>
+          ${cell.impactedTowns && cell.impactedTowns.length > 0 ? `
+            <div class="tooltip-towns-row">
+              <span class="towns-icon">📍</span>
+              <span><b>In rotta:</b> ${cell.impactedTowns.join(', ')}</span>
+            </div>
+          ` : ''}
         </div>
       `, { sticky: true, className: 'custom-map-tooltip' });
 

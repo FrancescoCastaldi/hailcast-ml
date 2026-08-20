@@ -43,6 +43,7 @@ export interface StormCell {
   severity: HailSeverity;
   trend: 'intensifying' | 'steady' | 'weakening';
   nowcastCones: NowcastCone[];
+  impactedTowns?: string[];
 }
 
 export interface NowcastCone {

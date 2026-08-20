@@ -102,6 +102,100 @@ export function generateNowcastCones(
   return cones;
 }
 
+const ITALIAN_TOWNS: { name: string; coords: Coordinates }[] = [
+  // Veneto & Garda
+  { name: 'Verona', coords: { lat: 45.438, lng: 10.991 } },
+  { name: 'Villafranca', coords: { lat: 45.352, lng: 10.843 } },
+  { name: 'Peschiera del Garda', coords: { lat: 45.438, lng: 10.693 } },
+  { name: 'Desenzano del Garda', coords: { lat: 45.468, lng: 10.536 } },
+  { name: 'Sirmione', coords: { lat: 45.492, lng: 10.608 } },
+  { name: 'Lazise', coords: { lat: 45.505, lng: 10.732 } },
+  { name: 'Bardolino', coords: { lat: 45.547, lng: 10.722 } },
+  { name: 'Sommacampagna', coords: { lat: 45.405, lng: 10.857 } },
+  { name: 'San Bonifacio', coords: { lat: 45.399, lng: 11.275 } },
+  { name: 'Legnago', coords: { lat: 45.193, lng: 11.309 } },
+  { name: 'Vicenza', coords: { lat: 45.545, lng: 11.535 } },
+  { name: 'Padova', coords: { lat: 45.406, lng: 11.876 } },
+  { name: 'Treviso', coords: { lat: 45.666, lng: 12.243 } },
+  { name: 'Venezia', coords: { lat: 45.440, lng: 12.315 } },
+  { name: 'Rovigo', coords: { lat: 45.071, lng: 11.790 } },
+  // Lombardia
+  { name: 'Milano', coords: { lat: 45.464, lng: 9.190 } },
+  { name: 'Brescia', coords: { lat: 45.541, lng: 10.211 } },
+  { name: 'Bergamo', coords: { lat: 45.698, lng: 9.677 } },
+  { name: 'Mantova', coords: { lat: 45.156, lng: 10.791 } },
+  { name: 'Cremona', coords: { lat: 45.133, lng: 10.022 } },
+  { name: 'Castiglione d/S', coords: { lat: 45.395, lng: 10.490 } },
+  { name: 'Montichiari', coords: { lat: 45.414, lng: 10.395 } },
+  { name: 'Lonato', coords: { lat: 45.461, lng: 10.485 } },
+  { name: 'Salò', coords: { lat: 45.607, lng: 10.528 } },
+  { name: 'Monza', coords: { lat: 45.584, lng: 9.274 } },
+  { name: 'Pavia', coords: { lat: 45.184, lng: 9.158 } },
+  { name: 'Lodi', coords: { lat: 45.313, lng: 9.503 } },
+  { name: 'Crema', coords: { lat: 45.364, lng: 9.685 } },
+  // Emilia-Romagna
+  { name: 'Bologna', coords: { lat: 44.494, lng: 11.342 } },
+  { name: 'Modena', coords: { lat: 44.647, lng: 10.925 } },
+  { name: 'Reggio Emilia', coords: { lat: 44.698, lng: 10.631 } },
+  { name: 'Parma', coords: { lat: 44.801, lng: 10.327 } },
+  { name: 'Piacenza', coords: { lat: 45.052, lng: 9.693 } },
+  { name: 'Ferrara', coords: { lat: 44.838, lng: 11.619 } },
+  { name: 'Ravenna', coords: { lat: 44.418, lng: 12.203 } },
+  { name: 'Forlì', coords: { lat: 44.222, lng: 12.040 } },
+  { name: 'Rimini', coords: { lat: 44.067, lng: 12.569 } },
+  { name: 'Carpi', coords: { lat: 44.784, lng: 10.885 } },
+  // Piemonte & Liguria
+  { name: 'Torino', coords: { lat: 45.070, lng: 7.686 } },
+  { name: 'Novara', coords: { lat: 45.446, lng: 8.620 } },
+  { name: 'Alessandria', coords: { lat: 44.913, lng: 8.618 } },
+  { name: 'Asti', coords: { lat: 44.900, lng: 8.206 } },
+  { name: 'Cuneo', coords: { lat: 44.384, lng: 7.542 } },
+  { name: 'Genova', coords: { lat: 44.405, lng: 8.946 } },
+  { name: 'La Spezia', coords: { lat: 44.102, lng: 9.824 } },
+  // Trentino & Friuli
+  { name: 'Trento', coords: { lat: 46.074, lng: 11.121 } },
+  { name: 'Rovereto', coords: { lat: 45.890, lng: 11.043 } },
+  { name: 'Riva del Garda', coords: { lat: 45.885, lng: 10.841 } },
+  { name: 'Bolzano', coords: { lat: 46.498, lng: 11.354 } },
+  { name: 'Udine', coords: { lat: 46.071, lng: 13.234 } },
+  { name: 'Pordenone', coords: { lat: 45.956, lng: 12.660 } },
+  { name: 'Trieste', coords: { lat: 45.649, lng: 13.776 } },
+  // Centro
+  { name: 'Firenze', coords: { lat: 43.769, lng: 11.255 } },
+  { name: 'Pisa', coords: { lat: 43.722, lng: 10.401 } },
+  { name: 'Livorno', coords: { lat: 43.548, lng: 10.310 } },
+  { name: 'Arezzo', coords: { lat: 43.463, lng: 11.879 } },
+  { name: 'Lucca', coords: { lat: 43.842, lng: 10.502 } },
+  { name: 'Perugia', coords: { lat: 43.110, lng: 12.390 } },
+  { name: 'Ancona', coords: { lat: 43.615, lng: 13.518 } },
+  { name: 'Roma', coords: { lat: 41.902, lng: 12.496 } }
+];
+
+export function findImpactedTowns(
+  centroid: Coordinates,
+  speedKmh: number,
+  directionDeg: number,
+  maxMinutes: number = 60
+): string[] {
+  const towns: { name: string; eta: number }[] = [];
+  const maxDistanceKm = (speedKmh * maxMinutes) / 60;
+
+  for (const town of ITALIAN_TOWNS) {
+    const dist = calculateHaversineDistanceKm(centroid, town.coords);
+    if (dist <= maxDistanceKm + 12) {
+      const bearing = calculateBearingDeg(centroid, town.coords);
+      const angleDiff = Math.abs((directionDeg - bearing + 180) % 360 - 180);
+      if (angleDiff <= 40) {
+        const eta = Math.max(5, Math.round((dist / speedKmh) * 60));
+        towns.push({ name: town.name, eta });
+      }
+    }
+  }
+
+  towns.sort((a, b) => a.eta - b.eta);
+  return towns.map(t => `${t.name} (~${t.eta}m)`).slice(0, 4);
+}
+
 /**
  * Motore di Tracking & Proiezione Nowcasting delle celle temporalesche
  */
@@ -138,6 +232,7 @@ export class StormTracker {
 
     const nowcastCones = generateNowcastCones(centroid, speedKmh, directionDeg);
     const prediction = HailPredictorML.predict(maxDbz, sounding);
+    const impactedTowns = findImpactedTowns(centroid, speedKmh, directionDeg, 60);
 
     return {
       id,
@@ -157,7 +252,8 @@ export class StormTracker {
       poshPercentage: prediction.posh,
       severity: prediction.severityClass,
       trend: maxDbz > 58 ? 'intensifying' : 'steady',
-      nowcastCones
+      nowcastCones,
+      impactedTowns
     };
   }
 
