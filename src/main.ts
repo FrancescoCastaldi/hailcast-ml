@@ -20,9 +20,11 @@ class HailCastApp {
   private locationSearch!: LocationSearchComponent;
   private spotterModal!: SpotterModalComponent;
 
+  private baseStormCells: StormCell[] = [];
   private currentStormCells: StormCell[] = [];
   private currentSpotterReports: SpotterReport[] = [];
   private rainViewerHost: string = 'https://tilecache.rainviewer.com';
+  private inspectedLocation: { coords: Coordinates; name: string } | null = null;
 
   constructor() {
     this.init();
@@ -92,9 +94,22 @@ class HailCastApp {
       await this.handleLocationInspection(coords, name);
     });
 
-    // Cambio frame radar dalla timeline
-    this.timelineController.setOnFrameChange((frame: RainViewerFrame) => {
+    // Cambio frame radar dalla timeline: muove sia i tile radar che i nuclei e le traiettorie di grandine
+    this.timelineController.setOnFrameChange((frame: RainViewerFrame, _index: number, _isNowcast: boolean, offsetMinutes: number) => {
       this.radarMap.updateRadarFrame(frame, this.rainViewerHost);
+
+      // Spostamento e animazione continua dei temporali e della grandine nel tempo
+      if (this.baseStormCells.length > 0) {
+        this.currentStormCells = StormTracker.projectStormCellsForOffset(this.baseStormCells, offsetMinutes);
+        this.radarMap.renderStormCells(this.currentStormCells);
+        this.alertFeed.renderStormCells(this.currentStormCells);
+
+        // Se l'utente sta monitorando una località, aggiorna l'ETA e la distanza in tempo reale
+        if (this.inspectedLocation) {
+          const assessment = StormTracker.assessLocationRisk(this.inspectedLocation.name, this.inspectedLocation.coords, this.currentStormCells);
+          this.locationSearch.showRiskCard(assessment);
+        }
+      }
     });
 
     // Invio nuova segnalazione spotter
@@ -341,7 +356,8 @@ class HailCastApp {
   }
 
   private loadConvectiveStorms(): void {
-    this.currentStormCells = SpotterFeedService.getSimulatedSupercells();
+    this.baseStormCells = SpotterFeedService.getSimulatedSupercells();
+    this.currentStormCells = this.baseStormCells;
     this.radarMap.renderStormCells(this.currentStormCells);
     this.alertFeed.renderStormCells(this.currentStormCells);
 
@@ -365,6 +381,7 @@ class HailCastApp {
   }
 
   private async handleLocationInspection(coords: Coordinates, name: string): Promise<void> {
+    this.inspectedLocation = { coords, name };
     this.radarMap.highlightLocation(coords, name);
     
     // Valuta il rischio con lo storm tracker

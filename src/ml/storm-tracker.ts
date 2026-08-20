@@ -162,6 +162,59 @@ export class StormTracker {
   }
 
   /**
+   * Proietta le coordinate e i poligoni delle celle temporalesche in base all'offset temporale della timeline (in minuti)
+   * Consente l'animazione dinamica dello spostamento della grandine nel passato e nel futuro (nowcasting).
+   */
+  public static projectStormCellsForOffset(
+    baseCells: StormCell[],
+    offsetMinutes: number
+  ): StormCell[] {
+    if (offsetMinutes === 0) return baseCells;
+
+    return baseCells.map(cell => {
+      // Distanza percorsa in km in base alla velocità della cella
+      const distanceKm = (cell.velocity.speedKmh * offsetMinutes) / 60;
+      const newCentroid = destinationPoint(cell.centroid, distanceKm, cell.velocity.directionDeg);
+
+      const dLat = newCentroid.lat - cell.centroid.lat;
+      const dLng = newCentroid.lng - cell.centroid.lng;
+
+      // Sposta tutti i vertici del poligono riflettente
+      const newPolygon = cell.polygon.map(pt => ({
+        lat: pt.lat + dLat,
+        lng: pt.lng + dLng
+      }));
+
+      // Ricalcola i coni di nowcasting centrati sulla nuova posizione della cella
+      const newNowcastCones = generateNowcastCones(newCentroid, cell.velocity.speedKmh, cell.velocity.directionDeg);
+
+      // Evoluzione fisiologica di intensità lungo il ciclo di vita (sviluppo nel passato, picco, transizione)
+      let adjustedDbz = cell.maxDbz;
+      if (offsetMinutes < 0) {
+        // Nel passato la cella era in fase di sviluppo
+        adjustedDbz = Math.max(38, Math.round(cell.maxDbz - Math.abs(offsetMinutes) * 0.15));
+      } else if (offsetMinutes > 30) {
+        // Nel nowcast a lungo termine (>30 min) la cella tende gradualmente a esaurire l'energia convettiva
+        adjustedDbz = Math.max(42, Math.round(cell.maxDbz - (offsetMinutes - 30) * 0.18));
+      }
+
+      const prediction = HailPredictorML.predict(adjustedDbz, cell.sounding);
+
+      return {
+        ...cell,
+        centroid: newCentroid,
+        polygon: newPolygon,
+        maxDbz: adjustedDbz,
+        meshDiameterCm: prediction.expectedDiameterCm,
+        pohPercentage: prediction.probability,
+        poshPercentage: prediction.posh,
+        severity: prediction.severityClass,
+        nowcastCones: newNowcastCones
+      };
+    });
+  }
+
+  /**
    * Valuta il rischio immediato e l'ETA d'impatto per una coordinata target
    */
   public static assessLocationRisk(

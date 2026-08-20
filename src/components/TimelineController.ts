@@ -6,6 +6,7 @@ export class TimelineControllerComponent {
   private isPlaying: boolean = false;
   private playbackSpeed: number = 1; // 1x, 2x, 4x
   private playIntervalId: number | null = null;
+  private pastFramesCount: number = 0;
 
   private scrubberInput: HTMLInputElement;
   private progressBar: HTMLElement;
@@ -15,7 +16,7 @@ export class TimelineControllerComponent {
   private iconPlay: HTMLElement;
   private iconPause: HTMLElement;
 
-  private onFrameChangeCallback?: (frame: RainViewerFrame, index: number, isNowcast: boolean) => void;
+  private onFrameChangeCallback?: (frame: RainViewerFrame, index: number, isNowcast: boolean, offsetMinutes: number) => void;
 
   constructor() {
     this.scrubberInput = document.getElementById('timelineScrubber') as HTMLInputElement;
@@ -30,7 +31,7 @@ export class TimelineControllerComponent {
   }
 
   private bindEvents(): void {
-    this.scrubberInput.addEventListener('input', (e) => {
+    this.scrubberInput?.addEventListener('input', (e) => {
       const val = parseInt((e.target as HTMLInputElement).value, 10);
       this.goToFrame(val);
     });
@@ -62,39 +63,47 @@ export class TimelineControllerComponent {
     });
   }
 
-  private pastFramesCount: number = 0;
-
   public setFrames(past: RainViewerFrame[], nowcast: RainViewerFrame[]): void {
     this.pastFramesCount = past.length;
     this.frames = [...past, ...nowcast];
-    this.scrubberInput.max = (this.frames.length - 1).toString();
+    if (this.scrubberInput) {
+      this.scrubberInput.max = Math.max(0, this.frames.length - 1).toString();
+    }
     
     // Se non stava già riproducendo, posizionati sull'ultimo frame passato (LIVE)
     if (!this.isPlaying) {
       this.currentIndex = Math.max(0, past.length - 1);
-      this.scrubberInput.value = this.currentIndex.toString();
+      if (this.scrubberInput) {
+        this.scrubberInput.value = this.currentIndex.toString();
+      }
     } else {
       if (this.currentIndex >= this.frames.length) {
         this.currentIndex = 0;
       }
-      this.scrubberInput.value = this.currentIndex.toString();
+      if (this.scrubberInput) {
+        this.scrubberInput.value = this.currentIndex.toString();
+      }
     }
     this.updateUI();
   }
 
-  public setOnFrameChange(callback: (frame: RainViewerFrame, index: number, isNowcast: boolean) => void): void {
+  public setOnFrameChange(callback: (frame: RainViewerFrame, index: number, isNowcast: boolean, offsetMinutes: number) => void): void {
     this.onFrameChangeCallback = callback;
   }
 
   public goToFrame(index: number): void {
     if (index < 0 || index >= this.frames.length) return;
     this.currentIndex = index;
-    this.scrubberInput.value = index.toString();
+    if (this.scrubberInput) {
+      this.scrubberInput.value = index.toString();
+    }
     this.updateUI();
 
     if (this.onFrameChangeCallback && this.frames[index]) {
       const isNowcast = index >= this.pastFramesCount;
-      this.onFrameChangeCallback(this.frames[index], index, isNowcast);
+      const liveFrame = this.frames[Math.max(0, this.pastFramesCount - 1)] || this.frames[0];
+      const offsetMinutes = liveFrame ? Math.round((this.frames[index].time - liveFrame.time) / 60) : 0;
+      this.onFrameChangeCallback(this.frames[index], index, isNowcast, offsetMinutes);
     }
   }
 
@@ -124,15 +133,15 @@ export class TimelineControllerComponent {
 
   public play(): void {
     this.isPlaying = true;
-    this.iconPlay.style.display = 'none';
-    this.iconPause.style.display = 'block';
+    if (this.iconPlay) this.iconPlay.style.display = 'none';
+    if (this.iconPause) this.iconPause.style.display = 'block';
     this.startPlayLoop();
   }
 
   public pause(): void {
     this.isPlaying = false;
-    this.iconPlay.style.display = 'block';
-    this.iconPause.style.display = 'none';
+    if (this.iconPlay) this.iconPlay.style.display = 'block';
+    if (this.iconPause) this.iconPause.style.display = 'none';
     this.stopPlayLoop();
   }
 
@@ -166,23 +175,33 @@ export class TimelineControllerComponent {
     if (isNowcast) {
       const futureMins = Math.round((frameDate.getTime() - (this.frames[this.pastFramesCount - 1]?.time * 1000 || now.getTime())) / 60000);
       relativeStr = ` (+${futureMins}m)`;
-      this.frameModeBadge.className = 'frame-mode-badge nowcast';
-      this.frameModeBadge.textContent = `NOWCAST +${futureMins}m`;
+      if (this.frameModeBadge) {
+        this.frameModeBadge.className = 'frame-mode-badge nowcast';
+        this.frameModeBadge.textContent = `NOWCAST +${futureMins}m`;
+      }
     } else if (isLatestPast) {
       relativeStr = diffMinutes > 0 ? ` (Ultimo Scatto: -${diffMinutes}m)` : ` (Ultimo Scatto)`;
-      this.frameModeBadge.className = 'frame-mode-badge live';
-      this.frameModeBadge.textContent = 'RADAR REALE (LIVE)';
+      if (this.frameModeBadge) {
+        this.frameModeBadge.className = 'frame-mode-badge live';
+        this.frameModeBadge.textContent = 'RADAR REALE (LIVE)';
+      }
     } else {
       relativeStr = diffMinutes > 0 ? ` (-${diffMinutes}m)` : '';
-      this.frameModeBadge.className = 'frame-mode-badge live';
-      this.frameModeBadge.textContent = 'ARCHIVIO PASSATO';
+      if (this.frameModeBadge) {
+        this.frameModeBadge.className = 'frame-mode-badge live';
+        this.frameModeBadge.textContent = 'ARCHIVIO PASSATO';
+      }
     }
 
-    this.currentTimestampEl.textContent = `${timeStr}${relativeStr}`;
+    if (this.currentTimestampEl) {
+      this.currentTimestampEl.textContent = `${timeStr}${relativeStr}`;
+    }
 
-    const percentage = this.frames.length > 1 
-      ? (this.currentIndex / (this.frames.length - 1)) * 100 
-      : 100;
-    this.progressBar.style.width = `${percentage}%`;
+    if (this.progressBar) {
+      const percentage = this.frames.length > 1 
+        ? (this.currentIndex / (this.frames.length - 1)) * 100 
+        : 100;
+      this.progressBar.style.width = `${percentage}%`;
+    }
   }
 }
