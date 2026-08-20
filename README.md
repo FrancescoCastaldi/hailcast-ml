@@ -5,8 +5,12 @@
   <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Vite-6.1-646CFF.svg?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/Leaflet-1.9-199900.svg?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet" />
-  <img src="https://img.shields.io/badge/Python-ML-3776AB.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python ML" />
+  <img src="https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-success.svg?style=for-the-badge&logo=github" alt="Live Demo" />
   <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License" />
+</p>
+
+<p align="center">
+  🌐 <strong>Live Web App:</strong> <a href="https://francescocastaldi.github.io/hailcast-ml/">https://francescocastaldi.github.io/hailcast-ml/</a>
 </p>
 
 > **HailCast-ML** è una piattaforma avanzata per il monitoraggio, tracciamento e la previsione *nowcasting* in tempo reale della grandine e delle supercelle temporalesche violente. Combina i dati radar meteorologici open-source mondiali (**RainViewer API**), i radiosondaggi termodinamici (**Open-Meteo API**), i modelli fisici di riflettività (**Witt MESH, Waldvogel POH**) e algoritmi di **Machine Learning** basati su ensemble di alberi decisionali.
