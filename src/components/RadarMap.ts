@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import { Coordinates, RainViewerFrame, SpotterReport, StormCell } from '../types/meteorology';
 import { RainViewerService } from '../services/rainviewer';
+import { WeatherFXOverlay } from './WeatherFXOverlay';
 
 export class RadarMapComponent {
   private map!: L.Map;
@@ -181,6 +182,17 @@ export class RadarMapComponent {
 
       polygon.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
+        const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
+        const fxType = cell.meshDiameterCm >= 1.0 ? 'hail' : (cell.maxDbz >= 48 ? 'rain' : 'wind');
+        WeatherFXOverlay.getInstance().show({
+          type: fxType,
+          title: cell.name,
+          intensity: cell.meshDiameterCm >= 1.0 
+            ? `Chicchi MESH: ${cell.meshDiameterCm} cm (${sizeNickname})` 
+            : `Riflettività ${cell.maxDbz} dBZ • Pioggia violenta`,
+          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'settore avanzamento'}`
+        });
+
         if (this.onCellClickCallback) {
           this.onCellClickCallback(cell);
         }
@@ -249,6 +261,16 @@ export class RadarMapComponent {
       const centerMarker = L.marker([cell.centroid.lat, cell.centroid.lng], { icon: centerIcon });
       centerMarker.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
+        const fxType = cell.meshDiameterCm >= 1.0 ? 'hail' : (cell.maxDbz >= 48 ? 'rain' : 'wind');
+        WeatherFXOverlay.getInstance().show({
+          type: fxType,
+          title: cell.name,
+          intensity: cell.meshDiameterCm >= 1.0 
+            ? `Grandine stimata: ${cell.meshDiameterCm} cm (${sizeNickname})` 
+            : `Nubifragio radar ${cell.maxDbz} dBZ`,
+          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'aree limitrofe'}`
+        });
+
         if (this.onCellClickCallback) {
           this.onCellClickCallback(cell);
         }
@@ -292,6 +314,16 @@ export class RadarMapComponent {
         className: 'nowcast-cone-poly'
       });
 
+      conePoly.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        WeatherFXOverlay.getInstance().show({
+          type: 'wind',
+          title: `Previsione Traiettoria +${cone.minutesAhead} min`,
+          intensity: `Raffiche di Vento/Downburst fino a ${Math.round(cell.velocity.speedKmh * 1.5)} km/h`,
+          detail: `Arrivo previsto verso i comuni: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'settore in rotta'}`
+        });
+      });
+
       this.trajectoriesLayerGroup.addLayer(conePoly);
 
       // Marker con tempo stimato e freccia direzionale
@@ -307,6 +339,15 @@ export class RadarMapComponent {
       });
 
       const timeMarker = L.marker([cone.projectedCentroid.lat, cone.projectedCentroid.lng], { icon: timeIcon });
+      timeMarker.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        WeatherFXOverlay.getInstance().show({
+          type: 'wind',
+          title: `Impatto Previsto +${cone.minutesAhead}m`,
+          intensity: `Rischio Vento & Grandine ${cell.meshDiameterCm} cm`,
+          detail: `Comuni interessati dal fronte: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'in rotta'}`
+        });
+      });
       this.trajectoriesLayerGroup.addLayer(timeMarker);
     }
 
@@ -337,6 +378,15 @@ export class RadarMapComponent {
       });
 
       const arrowMarker = L.marker([midLat, midLng], { icon: arrowIcon });
+      arrowMarker.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        WeatherFXOverlay.getInstance().show({
+          type: 'wind',
+          title: 'Vettore di Spostamento',
+          intensity: `Velocità propagazione: ${cell.velocity.speedKmh} km/h`,
+          detail: `Direzione di avanzamento: ${Math.round(cell.velocity.directionDeg)}° NNE`
+        });
+      });
       this.trajectoriesLayerGroup.addLayer(arrowMarker);
     }
 
@@ -349,6 +399,15 @@ export class RadarMapComponent {
         weight: isNew ? 4 : 3,
         dashArray: isNew ? '6, 6' : '8, 8',
         className: isNew ? 'animated-new-trajectory-line' : 'animated-trajectory-line'
+      });
+      vectorLine.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        WeatherFXOverlay.getInstance().show({
+          type: 'wind',
+          title: 'Traiettoria Principale 60 Min',
+          intensity: `Avanzamento a ${cell.velocity.speedKmh} km/h`,
+          detail: `Comuni lungo la rotta: ${cell.impactedTowns?.join(', ') || 'territorio in avanzamento'}`
+        });
       });
       this.trajectoriesLayerGroup.addLayer(vectorLine);
     }
@@ -399,6 +458,15 @@ export class RadarMapComponent {
       });
 
       const marker = L.marker([rep.coords.lat, rep.coords.lng], { icon });
+      marker.on('click', () => {
+        const fxType = rep.phenomenon === 'downburst' ? 'wind' : (rep.phenomenon === 'lightning' ? 'lightning' : (rep.phenomenon === 'torrential_rain' ? 'rain' : 'hail'));
+        WeatherFXOverlay.getInstance().show({
+          type: fxType,
+          title: `Segnalazione: ${rep.locationName}`,
+          intensity: rep.hailSizeCm > 0 ? `Grandine ${rep.hailSizeCm} cm` : `Raffiche ${windKmh}`,
+          detail: rep.notes
+        });
+      });
       marker.bindPopup(`
         <div class="spotter-popup">
           <div class="popup-title">${emoji} ${rep.locationName}</div>
