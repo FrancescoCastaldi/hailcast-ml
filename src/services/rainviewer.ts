@@ -7,7 +7,7 @@ export class RainViewerService {
   private static API_URL = 'https://api.rainviewer.com/public/weather-maps.json';
   private static cachedData: RainViewerApiResponse | null = null;
   private static lastFetchTime: number = 0;
-  private static CACHE_TTL_MS = 20 * 1000; // 20 secondi di cache per avere dati sempre freschi
+  private static CACHE_TTL_MS = 10 * 1000; // 10 secondi di cache per avere scansioni radar sempre aggiornate all'istante
 
   /**
    * Recupera i metadati dei frame radar (passati e nowcast) da RainViewer

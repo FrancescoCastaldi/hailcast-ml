@@ -65,11 +65,11 @@ class HailCastApp {
     // Avvia orologio live in tempo reale (aggiornato ogni secondo)
     this.startLiveClockTicker();
 
-    // Refresh automatico continuo multi-sorgente ogni 60 secondi (1 minuto)
+    // Refresh automatico continuo multi-sorgente ogni 30 secondi per avere sempre i dati radar più recenti
     setInterval(async () => {
       await this.fetchLiveRadar(true);
       await this.refreshMultiSourceStorms();
-    }, 60000);
+    }, 30000);
 
     // 6. Esegui la prima valutazione di telemetria sulla prima cella attiva
     if (this.currentStormCells.length > 0) {
@@ -102,7 +102,8 @@ class HailCastApp {
 
     // Cambio frame radar dalla timeline: muove sia i tile radar che i nuclei e le traiettorie di grandine
     this.timelineController.setOnFrameChange((frame: RainViewerFrame, _index: number, _isNowcast: boolean, offsetMinutes: number) => {
-      this.radarMap.updateRadarFrame(frame, this.rainViewerHost);
+      const prevailingVelocity = this.baseStormCells[0]?.velocity;
+      this.radarMap.updateRadarFrame(frame, this.rainViewerHost, offsetMinutes, prevailingVelocity);
 
       // Spostamento e animazione continua dei temporali e della grandine nel tempo
       if (this.baseStormCells.length > 0) {

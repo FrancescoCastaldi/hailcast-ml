@@ -16,6 +16,9 @@ export class RadarMapComponent {
   private showVectors: boolean = true;
   private showSpotters: boolean = true;
 
+  private currentOffsetMinutes: number = 0;
+  private currentVelocity?: { speedKmh: number; directionDeg: number };
+
   private onMapClickCallback?: (coords: Coordinates) => void;
   private onCellClickCallback?: (cell: StormCell) => void;
 
@@ -74,6 +77,10 @@ export class RadarMapComponent {
         this.onMapClickCallback({ lat: e.latlng.lat, lng: e.latlng.lng });
       }
     });
+
+    // Riapplica la traslazione del radar durante pan e zoom
+    this.map.on('move', () => this.applyRadarDisplacement());
+    this.map.on('zoomend', () => this.applyRadarDisplacement());
   }
 
   public setMapClickHandler(callback: (coords: Coordinates) => void): void {
@@ -85,9 +92,16 @@ export class RadarMapComponent {
   }
 
   /**
-   * Aggiorna il layer radar visualizzato in base al frame selezionato
+   * Aggiorna il layer radar visualizzato in base al frame selezionato e alla propagazione
    */
-  public updateRadarFrame(frame: RainViewerFrame, host: string = 'https://tilecache.rainviewer.com'): void {
+  public updateRadarFrame(
+    frame: RainViewerFrame,
+    host: string = 'https://tilecache.rainviewer.com',
+    offsetMinutes: number = 0,
+    velocity?: { speedKmh: number; directionDeg: number }
+  ): void {
+    this.currentOffsetMinutes = offsetMinutes;
+    if (velocity) this.currentVelocity = velocity;
     if (!this.showRadar) return;
 
     const tileUrl = RainViewerService.getTileUrlTemplate(frame, host, 6, 1);
@@ -97,7 +111,7 @@ export class RadarMapComponent {
     }
 
     this.radarLayer = L.tileLayer(tileUrl, {
-      opacity: 0.72,
+      opacity: 0.78,
       minZoom: 1,
       maxNativeZoom: 6,
       maxZoom: 19,
@@ -106,6 +120,39 @@ export class RadarMapComponent {
     });
 
     this.radarLayer.addTo(this.map);
+    this.radarLayer.on('load', () => this.applyRadarDisplacement());
+    this.applyRadarDisplacement();
+  }
+
+  /**
+   * Applica lo spostamento dinamico del radar coerentemente con il vento convettivo
+   */
+  private applyRadarDisplacement(): void {
+    if (!this.radarLayer) return;
+    const container = this.radarLayer.getContainer();
+    if (!container) return;
+
+    if (this.currentOffsetMinutes === 0) {
+      container.style.transform = '';
+      return;
+    }
+
+    const speedKmh = this.currentVelocity?.speedKmh || 46;
+    const dirDeg = this.currentVelocity?.directionDeg || 76;
+    const dirRad = (dirDeg * Math.PI) / 180;
+    
+    const distanceKm = speedKmh * (this.currentOffsetMinutes / 60);
+    const dLat = (distanceKm * Math.cos(dirRad)) / 111.32;
+    const dLng = (distanceKm * Math.sin(dirRad)) / (111.32 * Math.cos((45.2 * Math.PI) / 180));
+
+    const center = this.map.getCenter();
+    const p1 = this.map.latLngToLayerPoint(center);
+    const p2 = this.map.latLngToLayerPoint([center.lat + dLat, center.lng + dLng]);
+
+    const dx = Math.round(p2.x - p1.x);
+    const dy = Math.round(p2.y - p1.y);
+
+    container.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
   }
 
   /**
