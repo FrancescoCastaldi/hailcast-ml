@@ -497,6 +497,98 @@ body.dark-theme {
   color: var(--text-primary);
 }
 
+/* Cell Hail Highlight Banner in Sidebar */
+.cell-hail-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-glass);
+}
+
+.cell-hail-banner.severity-destructive {
+  background: linear-gradient(135deg, rgba(214, 0, 214, 0.25), rgba(255, 0, 85, 0.2));
+  border-color: #ff33ff;
+}
+
+.cell-hail-banner.severity-severe {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.25), rgba(255, 102, 0, 0.2));
+  border-color: #ff4444;
+}
+
+.cell-hail-banner.severity-moderate {
+  background: linear-gradient(135deg, rgba(255, 136, 0, 0.2), rgba(255, 204, 0, 0.15));
+  border-color: #ffaa00;
+}
+
+.cell-hail-banner.severity-minor {
+  background: rgba(0, 204, 0, 0.15);
+  border-color: #00e676;
+}
+
+.hail-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hail-banner-icon {
+  font-size: 1.4rem;
+}
+
+.hail-banner-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.hail-banner-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hail-banner-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.hail-banner-val small {
+  font-size: 0.72rem;
+  color: var(--accent-cyan);
+  font-family: var(--font-main);
+  font-weight: 600;
+}
+
+.hail-banner-prob {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.prob-lbl {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.prob-val {
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+}
+
+.severity-tag {
+  font-weight: 800 !important;
+  color: var(--accent-yellow) !important;
+}
+
 .stat-val.hail-size {
   color: var(--accent-cyan);
 }
@@ -516,9 +608,16 @@ body.dark-theme {
   background: none;
   border: none;
   color: var(--accent-cyan);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s ease;
+}
+
+.btn-inspect-cell:hover {
+  color: #ffffff;
+  text-decoration: underline;
 }
 
 /* Alert Feed */
@@ -568,6 +667,11 @@ body.dark-theme {
   border-left: 3px solid var(--accent-orange);
 }
 
+.alert-danger {
+  background: rgba(255, 0, 85, 0.2);
+  border-left: 3px solid var(--accent-pink);
+}
+
 .alert-time {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -607,6 +711,13 @@ body.dark-theme {
   padding: 10px 16px;
   pointer-events: auto;
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 580px;
+}
+
+.legend-header-line {
+  display: flex;
   align-items: center;
   gap: 14px;
 }
@@ -644,20 +755,23 @@ body.dark-theme {
 .hail-risk-indicator {
   display: flex;
   gap: 6px;
-  margin-left: 8px;
+  flex-wrap: wrap;
 }
 
 .hail-tag {
   font-size: 0.68rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  border: 1px solid transparent;
 }
 
-.tag-low { background: rgba(0, 204, 0, 0.2); color: #00ff66; }
-.tag-med { background: rgba(255, 204, 0, 0.2); color: #ffdd00; }
-.tag-high { background: rgba(255, 0, 0, 0.2); color: #ff4444; }
-.tag-extreme { background: rgba(214, 0, 214, 0.25); color: #ff55ff; }
+.tag-low { background: rgba(0, 204, 0, 0.15); color: #00ff66; border-color: rgba(0, 255, 102, 0.3); }
+.tag-coin { background: rgba(0, 240, 255, 0.15); color: #00f0ff; border-color: rgba(0, 240, 255, 0.3); }
+.tag-nut { background: rgba(255, 204, 0, 0.15); color: #ffdd00; border-color: rgba(255, 221, 0, 0.3); }
+.tag-golf { background: rgba(255, 102, 0, 0.2); color: #ff9900; border-color: rgba(255, 153, 0, 0.4); }
+.tag-egg { background: rgba(255, 0, 85, 0.2); color: #ff3377; border-color: rgba(255, 51, 119, 0.4); }
+.tag-tennis { background: rgba(214, 0, 214, 0.25); color: #ff55ff; border-color: rgba(255, 85, 255, 0.5); }
 
 /* Floating Map Controls */
 .map-floating-controls {
@@ -761,6 +875,41 @@ body.dark-theme {
 .risk-moderate { background: rgba(255, 136, 0, 0.25); color: #ffaa00; border: 1px solid #ffaa00; }
 .risk-minor { background: rgba(0, 204, 0, 0.2); color: #00ff66; border: 1px solid #00ff66; }
 
+/* Risk Hail Hero Box */
+.risk-hail-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(255, 0, 127, 0.12));
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.risk-hail-icon {
+  font-size: 1.8rem;
+}
+
+.risk-hail-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.risk-hail-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.risk-hail-main-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
 .risk-metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -774,6 +923,13 @@ body.dark-theme {
 .risk-metric {
   display: flex;
   flex-direction: column;
+}
+
+.risk-metric.full-width {
+  grid-column: span 2;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 6px;
+  margin-top: 2px;
 }
 
 .metric-lbl {
@@ -814,10 +970,9 @@ body.dark-theme {
   border-radius: 0;
   border-right: none;
   border-top: none;
-  border-bottom: none;
-  z-index: 900;
   transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 600;
   display: flex;
   flex-direction: column;
 }
@@ -844,24 +999,25 @@ body.dark-theme {
 }
 
 .telemetry-card {
-  background: rgba(10, 15, 25, 0.7);
+  background: rgba(10, 16, 26, 0.7);
   border: 1px solid var(--border-glass);
   border-radius: 10px;
   padding: 14px;
 }
 
 .card-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--accent-cyan);
+  color: var(--text-muted);
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .ml-gauge-container {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-bottom: 14px;
 }
 
 .gauge-circle {
@@ -903,6 +1059,59 @@ body.dark-theme {
 
 .detail-row strong {
   color: var(--accent-cyan);
+}
+
+/* Visual Hail Scale Comparator in Telemetry */
+.hail-visual-scale-wrapper {
+  border-top: 1px solid var(--border-glass);
+  padding-top: 12px;
+}
+
+.scale-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.hail-scale-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.scale-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  border-radius: 6px;
+  padding: 6px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+
+.scale-item .item-icon {
+  font-size: 1.1rem;
+}
+
+.scale-item .item-lbl {
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.scale-item.active {
+  background: rgba(0, 240, 255, 0.18);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+}
+
+.scale-item.active .item-lbl {
+  color: #ffffff;
+  font-weight: 800;
 }
 
 .indices-grid {
@@ -1281,48 +1490,165 @@ body.dark-theme {
 }
 
 /* ==========================================================================
-   Leaflet Custom Elements & Icons
+   Leaflet Custom Elements & Icons (Hail Badges & Tooltips)
    ========================================================================== */
 .custom-map-tooltip {
-  background: rgba(10, 16, 28, 0.92) !important;
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border-glass) !important;
+  background: rgba(10, 16, 28, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(0, 240, 255, 0.3) !important;
   color: var(--text-primary) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75) !important;
   font-family: var(--font-main) !important;
-  font-size: 0.8rem !important;
-  padding: 8px 12px !important;
+  font-size: 0.82rem !important;
+  padding: 10px 14px !important;
 }
 
-.storm-core-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+.tooltip-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  color: #ffffff;
+}
+
+.tooltip-hail-highlight {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-glass);
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.tooltip-hail-highlight.severity-destructive {
+  background: rgba(214, 0, 214, 0.25);
+  border-color: #ff33ff;
+}
+
+.tooltip-hail-highlight.severity-severe {
+  background: rgba(255, 0, 0, 0.25);
+  border-color: #ff4444;
+}
+
+.tooltip-hail-highlight.severity-moderate {
+  background: rgba(255, 136, 0, 0.2);
+  border-color: #ffaa00;
+}
+
+.tooltip-hail-highlight.severity-minor {
+  background: rgba(0, 204, 0, 0.15);
+  border-color: #00e676;
+}
+
+.hail-highlight-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.hail-highlight-val {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.hail-highlight-val span {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+}
+
+.tooltip-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.tooltip-info-grid b {
+  color: #ffffff;
+}
+
+/* Hail Map Marker Badge */
+.hail-map-badge {
+  background: rgba(10, 16, 28, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid #ffffff;
+  border-radius: 20px;
+  padding: 3px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-weight: 800;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 240, 255, 0.3);
   cursor: pointer;
-  animation: pulse-core 2s infinite;
+  transition: transform 0.2s ease;
+  white-space: nowrap;
 }
 
-@keyframes pulse-core {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+.hail-map-badge:hover {
+  transform: scale(1.08);
 }
 
-.storm-core-badge.severity-destructive { background: #d600d6; border-color: #ff99ff; }
-.storm-core-badge.severity-severe { background: #ff0000; border-color: #ff9999; }
-.storm-core-badge.severity-moderate { background: #ff6600; border-color: #ffcc99; }
-.storm-core-badge.severity-minor { background: #00cc00; border-color: #99ff99; }
+.hail-map-badge.severity-destructive {
+  border-color: #ff33ff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 16px rgba(214, 0, 214, 0.6);
+}
 
-.core-dbz { font-size: 0.85rem; line-height: 1; font-family: var(--font-mono); }
-.core-unit { font-size: 0.5rem; line-height: 1; opacity: 0.8; }
+.hail-map-badge.severity-severe {
+  border-color: #ff4444;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 0, 0, 0.5);
+}
+
+.hail-map-badge.severity-moderate {
+  border-color: #ffaa00;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 14px rgba(255, 136, 0, 0.5);
+}
+
+.hail-map-badge.severity-minor {
+  border-color: #00e676;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 230, 118, 0.4);
+}
+
+.badge-top-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-hail-icon {
+  font-size: 0.85rem;
+}
+
+.badge-hail-size {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.badge-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-obj-name {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.badge-dbz-pill {
+  font-size: 0.55rem;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: #ffffff;
+}
 
 .time-pill {
   background: rgba(255, 51, 102, 0.85);

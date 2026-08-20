@@ -114,22 +114,26 @@
           
           <!-- Radar HUD Overlay -->
           <div class="map-hud-overlay">
-            <!-- Top Map Legend (dBZ Scale) -->
+            <!-- Top Map Legend (dBZ Scale & Grandine Guide) -->
             <div class="radar-legend-bar glass-panel">
-              <span class="legend-label">Riflettività (dBZ):</span>
-              <div class="legend-gradient">
-                <span class="legend-mark mark-10">10</span>
-                <span class="legend-mark mark-25">25</span>
-                <span class="legend-mark mark-40">40</span>
-                <span class="legend-mark mark-50">50</span>
-                <span class="legend-mark mark-60">60</span>
-                <span class="legend-mark mark-70">70+</span>
+              <div class="legend-header-line">
+                <span class="legend-label">Scala Riflettività Radar:</span>
+                <div class="legend-gradient">
+                  <span class="legend-mark mark-10">10</span>
+                  <span class="legend-mark mark-25">25</span>
+                  <span class="legend-mark mark-40">40</span>
+                  <span class="legend-mark mark-50">50</span>
+                  <span class="legend-mark mark-60">60</span>
+                  <span class="legend-mark mark-70">70+</span>
+                </div>
               </div>
               <div class="hail-risk-indicator">
-                <span class="hail-tag tag-low">Pioggia</span>
-                <span class="hail-tag tag-med">Grandine Piccola</span>
-                <span class="hail-tag tag-high">Grandine Severa &gt;3cm</span>
-                <span class="hail-tag tag-extreme">Distruttiva &gt;5cm</span>
+                <span class="hail-tag tag-low">🌧️ Pioggia</span>
+                <span class="hail-tag tag-coin">🪙 Moneta (1.5cm)</span>
+                <span class="hail-tag tag-nut">🌰 Noce (3cm)</span>
+                <span class="hail-tag tag-golf">⛳ Golf (4.5cm)</span>
+                <span class="hail-tag tag-egg">🥚 Uovo (6cm)</span>
+                <span class="hail-tag tag-tennis">🎾 Tennis (&gt;7cm)</span>
               </div>
             </div>
 
@@ -166,21 +170,27 @@
                 </div>
                 <div class="risk-badge" id="riskBadgeLevel">RISCHIO ELEVATO</div>
               </div>
+
+              <!-- Grandine Hero Box -->
+              <div class="risk-hail-hero" id="riskHailHero">
+                <span class="risk-hail-icon" id="riskHailIcon">❄️</span>
+                <div class="risk-hail-details">
+                  <span class="risk-hail-title">GRANDINE PREVISTA:</span>
+                  <span class="risk-hail-main-val" id="riskHailDiameter">4.2 cm (Pallina da Golf)</span>
+                </div>
+              </div>
+
               <div class="risk-metrics-grid">
                 <div class="risk-metric">
                   <span class="metric-lbl">Probabilità Grandine</span>
                   <span class="metric-val" id="riskHailProb">85%</span>
                 </div>
                 <div class="risk-metric">
-                  <span class="metric-lbl">Diametro Max MESH</span>
-                  <span class="metric-val" id="riskHailDiameter">4.2 cm</span>
-                </div>
-                <div class="risk-metric">
                   <span class="metric-lbl">Distanza Cella</span>
                   <span class="metric-val" id="riskStormDist">14.5 km</span>
                 </div>
-                <div class="risk-metric">
-                  <span class="metric-lbl">ETA Impatto</span>
+                <div class="risk-metric full-width">
+                  <span class="metric-lbl">Tempo Stimato d'Arrivo (ETA)</span>
                   <span class="metric-val alert-highlight" id="riskStormETA">~22 min</span>
                 </div>
               </div>
@@ -204,16 +214,16 @@
           <div class="telemetry-content">
             <!-- ML Hail Prediction Card -->
             <div class="telemetry-card">
-              <div class="card-subtitle">Algoritmo di Inferenza ML & Witt MESH</div>
+              <div class="card-subtitle">Stima Grandine ML & Witt MESH</div>
               <div class="ml-gauge-container">
                 <div class="gauge-circle" id="mlGaugeCircle">
                   <span class="gauge-value" id="mlHailProbability">78%</span>
-                  <span class="gauge-label">Hail Index</span>
+                  <span class="gauge-label">Probabilità</span>
                 </div>
                 <div class="ml-details">
                   <div class="detail-row">
                     <span>Diametro Stimato:</span>
-                    <strong id="mlEstimatedDiameter">3.8 cm (Golfball)</strong>
+                    <strong id="mlEstimatedDiameter">3.8 cm (Pallina da Golf)</strong>
                   </div>
                   <div class="detail-row">
                     <span>Severe Hail Index (SHI):</span>
@@ -222,6 +232,33 @@
                   <div class="detail-row">
                     <span>Prob. Grandine Severa (POSH):</span>
                     <strong id="mlPoshValue">92%</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Visual Hail Comparator -->
+              <div class="hail-visual-scale-wrapper">
+                <div class="scale-title">Scala Dimensionale Comparativa:</div>
+                <div class="hail-scale-bar" id="hailScaleBar">
+                  <div class="scale-item" data-size="1.5">
+                    <span class="item-icon">🪙</span>
+                    <span class="item-lbl">Moneta (1.5cm)</span>
+                  </div>
+                  <div class="scale-item" data-size="3.0">
+                    <span class="item-icon">🌰</span>
+                    <span class="item-lbl">Noce (3cm)</span>
+                  </div>
+                  <div class="scale-item active" data-size="4.5">
+                    <span class="item-icon">⛳</span>
+                    <span class="item-lbl">Golf (4.5cm)</span>
+                  </div>
+                  <div class="scale-item" data-size="6.0">
+                    <span class="item-icon">🥚</span>
+                    <span class="item-lbl">Uovo (6cm)</span>
+                  </div>
+                  <div class="scale-item" data-size="8.0">
+                    <span class="item-icon">🎾</span>
+                    <span class="item-lbl">Tennis (&gt;7cm)</span>
                   </div>
                 </div>
               </div>

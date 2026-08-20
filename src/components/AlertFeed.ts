@@ -31,6 +31,7 @@ export class AlertFeedComponent {
     this.cellsListEl.innerHTML = '';
 
     for (const cell of cells) {
+      const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
       const card = document.createElement('div');
       card.className = `storm-cell-card severity-${cell.severity}`;
       card.innerHTML = `
@@ -42,28 +43,38 @@ export class AlertFeedComponent {
           <div class="cell-dbz-pill">${cell.maxDbz} dBZ</div>
         </div>
 
+        <!-- Evidenza Rischio Grandine -->
+        <div class="cell-hail-banner severity-${cell.severity}">
+          <div class="hail-banner-left">
+            <span class="hail-banner-icon">❄️</span>
+            <div class="hail-banner-text">
+              <span class="hail-banner-label">GRANDINE ATTESA</span>
+              <span class="hail-banner-val">${cell.meshDiameterCm} cm <small>(${sizeNickname})</small></span>
+            </div>
+          </div>
+          <div class="hail-banner-prob">
+            <span class="prob-lbl">Prob.</span>
+            <span class="prob-val">${cell.pohPercentage}%</span>
+          </div>
+        </div>
+
         <div class="cell-stats-grid">
           <div class="stat-col">
-            <span class="stat-lbl">Diametro MESH</span>
-            <span class="stat-val hail-size">${cell.meshDiameterCm} cm</span>
-          </div>
-          <div class="stat-col">
-            <span class="stat-lbl">Probabilità POH</span>
-            <span class="stat-val">${cell.pohPercentage}%</span>
-          </div>
-          <div class="stat-col">
-            <span class="stat-lbl">Spostamento</span>
+            <span class="stat-lbl">Velocità</span>
             <span class="stat-val">${cell.velocity.speedKmh} km/h</span>
           </div>
           <div class="stat-col">
             <span class="stat-lbl">Direzione</span>
             <span class="stat-val">${Math.round(cell.velocity.directionDeg)}°</span>
           </div>
+          <div class="stat-col">
+            <span class="stat-lbl">Severità</span>
+            <span class="stat-val severity-tag">${this.getSeverityLabel(cell.severity)}</span>
+          </div>
         </div>
 
         <div class="cell-card-footer">
-          <span class="threat-level">Minaccia: <b>${this.getSeverityLabel(cell.severity)}</b></span>
-          <button class="btn-inspect-cell">Centra Mappa →</button>
+          <button class="btn-inspect-cell">Centra su Mappa & Dettagli →</button>
         </div>
       `;
 
@@ -101,5 +112,14 @@ export class AlertFeedComponent {
       case 'minor': return 'MARGINALE (<2 cm)';
       default: return 'NULLA / PIOGGIA';
     }
+  }
+
+  private getSizeNickname(diamCm: number): string {
+    if (diamCm < 1.0) return 'Granella';
+    if (diamCm < 2.2) return 'Moneta 1€';
+    if (diamCm < 3.5) return 'Noce';
+    if (diamCm < 5.2) return 'Pallina Golf';
+    if (diamCm < 7.0) return 'Uovo';
+    return 'Tennis / Gigante';
   }
 }

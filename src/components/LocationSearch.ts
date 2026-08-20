@@ -136,13 +136,28 @@ export class LocationSearchComponent {
     badgeEl.className = `risk-badge risk-${assessment.severityLevel}`;
     badgeEl.textContent = this.getBadgeText(assessment.severityLevel);
 
+    const sizeNickname = this.getSizeNickname(assessment.estimatedDiameterCm);
+    const diamText = assessment.estimatedDiameterCm > 0 
+      ? `${assessment.estimatedDiameterCm} cm (${sizeNickname})`
+      : 'Nessuna (Solo Pioggia)';
+
     hailProbEl.textContent = `${assessment.hailProbability}%`;
-    hailDiamEl.textContent = `${assessment.estimatedDiameterCm} cm`;
+    hailDiamEl.textContent = diamText;
     stormDistEl.textContent = assessment.nearestStormDistanceKm < 900 ? `${assessment.nearestStormDistanceKm} km` : 'Nessuna';
     stormEtaEl.textContent = assessment.estimatedArrivalMinutes ? `~${assessment.estimatedArrivalMinutes} min` : 'Non in rotta';
     advisoryEl.textContent = assessment.advisoryText;
 
     this.riskCardEl.style.display = 'block';
+  }
+
+  private getSizeNickname(diamCm: number): string {
+    if (diamCm < 0.5) return 'Assente';
+    if (diamCm < 1.0) return 'Granella';
+    if (diamCm < 2.2) return 'Moneta 1€';
+    if (diamCm < 3.5) return 'Noce';
+    if (diamCm < 5.2) return 'Pallina Golf';
+    if (diamCm < 7.0) return 'Uovo';
+    return 'Tennis / Gigante';
   }
 
   private getBadgeText(severity: string): string {

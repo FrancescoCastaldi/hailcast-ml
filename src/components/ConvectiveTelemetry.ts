@@ -69,6 +69,20 @@ export class ConvectiveTelemetryComponent {
     this.shiValEl.textContent = `${prediction.shi} J/(m·s)`;
     this.poshValEl.textContent = `${prediction.posh}%`;
 
+    // Aggiorna evidenziazione sulla scala dimensionale comparativa
+    const scaleItems = document.querySelectorAll('#hailScaleBar .scale-item');
+    scaleItems.forEach(item => {
+      const sizeVal = parseFloat((item as HTMLElement).dataset.size || '0');
+      const isTarget = (
+        (prediction.expectedDiameterCm <= 2.2 && sizeVal === 1.5) ||
+        (prediction.expectedDiameterCm > 2.2 && prediction.expectedDiameterCm <= 3.8 && sizeVal === 3.0) ||
+        (prediction.expectedDiameterCm > 3.8 && prediction.expectedDiameterCm <= 5.5 && sizeVal === 4.5) ||
+        (prediction.expectedDiameterCm > 5.5 && prediction.expectedDiameterCm <= 7.0 && sizeVal === 6.0) ||
+        (prediction.expectedDiameterCm > 7.0 && sizeVal === 8.0)
+      );
+      item.classList.toggle('active', isTarget);
+    });
+
     // Aggiorna indici convettivi
     this.valCapeEl.textContent = `${sounding.cape} J/kg`;
     this.valLiEl.textContent = `${sounding.liftedIndex} °C`;

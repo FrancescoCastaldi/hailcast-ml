@@ -134,28 +134,46 @@ export class RadarMapComponent {
         }
       });
 
+      const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
+
       polygon.bindTooltip(`
         <div class="cell-tooltip">
-          <strong>${cell.name}</strong><br/>
-          <span>Picco Riflettività: <b>${cell.maxDbz} dBZ</b></span><br/>
-          <span>Diametro MESH: <b>${cell.meshDiameterCm} cm</b></span><br/>
-          <span>Prob. Grandine: <b>${cell.pohPercentage}%</b></span>
+          <div class="tooltip-title-row">
+            <span class="tooltip-icon">❄️</span>
+            <strong>${cell.name}</strong>
+          </div>
+          <div class="tooltip-hail-highlight severity-${cell.severity}">
+            <div class="hail-highlight-label">STIMA GRANDINE:</div>
+            <div class="hail-highlight-val"><strong>${cell.meshDiameterCm} cm</strong> <span>(${sizeNickname})</span></div>
+          </div>
+          <div class="tooltip-info-grid">
+            <div>Probabilità: <b>${cell.pohPercentage}%</b></div>
+            <div>Intensità: <b>${cell.maxDbz} dBZ</b></div>
+            <div>Avanzamento: <b>${cell.velocity.speedKmh} km/h</b></div>
+            <div>Direzione: <b>${Math.round(cell.velocity.directionDeg)}°</b></div>
+          </div>
         </div>
       `, { sticky: true, className: 'custom-map-tooltip' });
 
       this.stormCellsLayerGroup.addLayer(polygon);
 
-      // 2. Marker centrale con icona di severità
+      // 2. Marker centrale con indicatore chiaro di GRANDINE (Icona + Diametro + Oggetto)
       const centerIcon = L.divIcon({
         className: 'storm-center-icon',
         html: `
-          <div class="storm-core-badge severity-${cell.severity}">
-            <span class="core-dbz">${cell.maxDbz}</span>
-            <span class="core-unit">dBZ</span>
+          <div class="hail-map-badge severity-${cell.severity}" title="Grandine: ${cell.meshDiameterCm} cm (${sizeNickname})">
+            <div class="badge-top-row">
+              <span class="badge-hail-icon">❄️</span>
+              <span class="badge-hail-size">${cell.meshDiameterCm > 0 ? cell.meshDiameterCm + ' cm' : 'Pioggia'}</span>
+            </div>
+            <div class="badge-bottom-row">
+              <span class="badge-obj-name">${sizeNickname}</span>
+              <span class="badge-dbz-pill">${cell.maxDbz} dBZ</span>
+            </div>
           </div>
         `,
-        iconSize: [38, 38],
-        iconAnchor: [19, 19]
+        iconSize: [110, 44],
+        iconAnchor: [55, 22]
       });
 
       const centerMarker = L.marker([cell.centroid.lat, cell.centroid.lng], { icon: centerIcon });
@@ -172,6 +190,15 @@ export class RadarMapComponent {
         this.renderTrajectoryAndCones(cell);
       }
     }
+  }
+
+  private getSizeNickname(diamCm: number): string {
+    if (diamCm < 1.0) return 'Granella';
+    if (diamCm < 2.2) return 'Moneta 1€';
+    if (diamCm < 3.5) return 'Noce';
+    if (diamCm < 5.2) return 'Pallina Golf';
+    if (diamCm < 7.0) return 'Uovo';
+    return 'Tennis / Gigante';
   }
 
   /**
