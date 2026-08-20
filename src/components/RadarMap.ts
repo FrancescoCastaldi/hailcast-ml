@@ -190,7 +190,8 @@ export class RadarMapComponent {
           intensity: cell.meshDiameterCm >= 1.0 
             ? `Chicchi MESH: ${cell.meshDiameterCm} cm (${sizeNickname})` 
             : `Riflettività ${cell.maxDbz} dBZ • Pioggia violenta`,
-          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'settore avanzamento'}`
+          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'settore avanzamento'}`,
+          loop: fxType === 'hail'
         });
 
         if (this.onCellClickCallback) {
@@ -268,7 +269,8 @@ export class RadarMapComponent {
           intensity: cell.meshDiameterCm >= 1.0 
             ? `Grandine stimata: ${cell.meshDiameterCm} cm (${sizeNickname})` 
             : `Nubifragio radar ${cell.maxDbz} dBZ`,
-          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'aree limitrofe'}`
+          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'aree limitrofe'}`,
+          loop: fxType === 'hail'
         });
 
         if (this.onCellClickCallback) {
@@ -464,7 +466,8 @@ export class RadarMapComponent {
           type: fxType,
           title: `Segnalazione: ${rep.locationName}`,
           intensity: rep.hailSizeCm > 0 ? `Grandine ${rep.hailSizeCm} cm` : `Raffiche ${windKmh}`,
-          detail: rep.notes
+          detail: rep.notes,
+          loop: fxType === 'hail'
         });
       });
       marker.bindPopup(`

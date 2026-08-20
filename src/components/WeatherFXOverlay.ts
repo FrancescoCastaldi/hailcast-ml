@@ -6,6 +6,7 @@ export interface WeatherFXOptions {
   intensity: string;
   detail: string;
   durationMs?: number; // default 3500ms
+  loop?: boolean; // true = animazione in loop continuo (nessuna chiusura automatica)
 }
 
 export class WeatherFXOverlay {
@@ -20,6 +21,7 @@ export class WeatherFXOverlay {
 
   private animationFrameId: number | null = null;
   private dismissTimer: number | null = null;
+  private hideTimer: number | null = null;
   private particles: any[] = [];
   private currentType: WeatherFXType = 'hail';
 
@@ -79,6 +81,7 @@ export class WeatherFXOverlay {
    */
   public show(options: WeatherFXOptions): void {
     if (this.dismissTimer) clearTimeout(this.dismissTimer);
+    if (this.hideTimer) clearTimeout(this.hideTimer);
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
 
     this.currentType = options.type;
@@ -109,17 +112,20 @@ export class WeatherFXOverlay {
 
     this.startAnimation();
 
-    // Chiusura automatica dopo il tempo stabilito
-    const duration = options.durationMs || 3500;
-    this.dismissTimer = window.setTimeout(() => {
-      this.hide();
-    }, duration);
+    // Chiusura automatica dopo il tempo stabilito (in loop continuo se richiesto)
+    if (!options.loop) {
+      const duration = options.durationMs || 3500;
+      this.dismissTimer = window.setTimeout(() => {
+        this.hide();
+      }, duration);
+    }
   }
 
   public hide(): void {
     if (this.dismissTimer) clearTimeout(this.dismissTimer);
     this.containerEl.classList.add('hiding');
-    setTimeout(() => {
+    this.hideTimer = window.setTimeout(() => {
+      this.hideTimer = null;
       this.containerEl.classList.remove('active', 'hiding');
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
@@ -138,7 +144,7 @@ export class WeatherFXOverlay {
       for (let i = 0; i < 35; i++) {
         this.particles.push({
           x: Math.random() * w,
-          y: Math.random() * -h,
+          y: Math.random() * (h + 40) - h,
           radius: 3 + Math.random() * 5,
           speedY: 7 + Math.random() * 8,
           speedX: (Math.random() - 0.3) * 3,
