@@ -440,23 +440,17 @@ export class NotificationModalComponent {
 
       AlertNotificationService.playAlertChime();
 
-      const res = await AlertNotificationService.sendEmailAlert(tempSub, 'hail', {
-        cellName: 'Supercella Gardesana (Cell #104)',
-        hailSizeCm: 3.8,
-        etaMinutes: 22,
-        maxDbz: 64
-      });
+      const res = await AlertNotificationService.sendEmailAlert(tempSub, 'test', {});
 
       this.btnTestEmail.innerHTML = originalBtnText;
       (this.btnTestEmail as HTMLButtonElement).disabled = false;
 
       if (this.emailPreviewContainer) {
         this.emailPreviewContainer.innerHTML = `
-          <div class="test-email-success-badge">
-            ✅ <strong>Email Inviata con Successo a ${email}!</strong>
-            <p style="margin: 6px 0 0 0; font-size: 0.8rem; font-weight: normal; color: #cbd5e1;">
-              Controlla la tua casella di posta (inclusa la cartella <em>Spam / Posta Indesiderata o Promozioni</em>).
-              <br><small style="color: #94a3b8;">La prima volta, FormSubmit invia una mail di attivazione per autorizzare le notifiche automatiche.</small>
+          <div class="test-email-success-badge" style="border-color: #00f0ff; background: rgba(0, 240, 255, 0.12);">
+            ✅ <strong>Email di Attivazione Inviata a ${email}!</strong>
+            <p style="margin: 8px 0 0 0; font-size: 0.84rem; font-weight: 500; color: #e2e8f0; line-height: 1.45;">
+              📩 <strong>Azione Richiesta:</strong> Apri la tua casella di posta (controlla anche in <em>Spam / Posta Indesiderata o Promozioni</em>) e <strong>fai clic sul pulsante "Activate Form"</strong> per accettare e iniziare a ricevere le allerte automatiche per <strong>${location}</strong>!
             </p>
           </div>
           ${res.previewHtml}

@@ -230,29 +230,29 @@ export class AlertNotificationService {
       bodyText = `Nucleo temporalesco ad elevata riflettività (${details.maxDbz || 55} dBZ) in avvicinamento su ${subscription.locationName} (ETA ~${details.etaMinutes || 20} min).`;
       advice = `Prestare massima attenzione a possibili allagamenti, sottopassi e raffiche di vento improvvise.`;
     } else {
-      subject = `🔔 TEST ALLERTA HAILCAST per ${subscription.locationName}`;
-      bodyText = `Invio di verifica per le allerte meteo e grandine collegate a ${subscription.locationName}.`;
-      advice = `Il sistema di notifica è attivo e pronto a inviarti allerte tempestive.`;
+      subject = `🔔 [HailCast] Attivazione Ricezione Allerte Meteo per ${subscription.locationName}`;
+      bodyText = `Questa è un'email di attivazione per confermare il monitoraggio radar automatico su ${subscription.locationName}.`;
+      advice = `IMPORTANTE: Per completare l'abilitazione e ricevere le future allerte grandine e nubifragi in tempo reale, fai clic sul pulsante/link di conferma "Activate Form" inviato da FormSubmit nella tua casella di posta (inclusa la cartella Spam / Promozioni).`;
     }
 
     const previewHtml = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b1322; color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 240, 255, 0.4);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 10px;">
           <h2 style="color: #00f0ff; margin: 0; font-size: 1.2rem;">⚡ HailCast-ML Alert System</h2>
-          <span style="background: #f43f5e; color: #fff; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px;">LIVE DISPATCH</span>
+          <span style="background: ${alertType === 'test' ? '#0ea5e9' : '#f43f5e'}; color: #fff; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px;">${alertType === 'test' ? 'ATTIVAZIONE FORM' : 'LIVE DISPATCH'}</span>
         </div>
         <p style="font-size: 14px; margin: 6px 0;"><strong>Destinatario:</strong> ${subscription.email}</p>
         <p style="font-size: 14px; margin: 6px 0;"><strong>Località Monitorata:</strong> ${subscription.locationName} (${subscription.coords.lat.toFixed(3)}°N, ${subscription.coords.lng.toFixed(3)}°E)</p>
-        <p style="font-size: 14px; margin: 6px 0;"><strong>Orario di Rilevamento:</strong> ${timestamp}</p>
-        <div style="background: rgba(255, 170, 0, 0.1); border-left: 4px solid #ffaa00; padding: 12px; border-radius: 6px; margin: 15px 0;">
-          <h3 style="color: #ffaa00; margin: 0 0 8px 0; font-size: 1.05rem;">${subject}</h3>
+        <p style="font-size: 14px; margin: 6px 0;"><strong>Orario Richiesta:</strong> ${timestamp}</p>
+        <div style="background: rgba(0, 240, 255, 0.1); border-left: 4px solid #00f0ff; padding: 12px; border-radius: 6px; margin: 15px 0;">
+          <h3 style="color: #00f0ff; margin: 0 0 8px 0; font-size: 1.05rem;">${subject}</h3>
           <p style="line-height: 1.5; color: #e2e8f0; margin: 0;">${bodyText}</p>
         </div>
-        <div style="background: rgba(244, 63, 94, 0.15); border-left: 4px solid #f43f5e; padding: 12px; border-radius: 6px; margin: 15px 0;">
-          <strong style="color: #fda4af;">🛡️ Azioni Immediate Consigliate:</strong>
-          <p style="margin: 5px 0 0 0; color: #fecdd3; font-size: 0.9rem;">${advice}</p>
+        <div style="background: rgba(255, 170, 0, 0.15); border-left: 4px solid #ffaa00; padding: 12px; border-radius: 6px; margin: 15px 0;">
+          <strong style="color: #ffaa00;">🛡️ Istruzioni per Iniziare a Ricevere Allerte:</strong>
+          <p style="margin: 5px 0 0 0; color: #fef08a; font-size: 0.9rem;">${advice}</p>
         </div>
-        <p style="font-size: 11px; color: #64748b; margin-top: 15px;">Avviso generato ed inviato in tempo reale dal motore di Nowcasting HailCast-ML.</p>
+        <p style="font-size: 11px; color: #64748b; margin-top: 15px;">Avviso generato dalla piattaforma di Nowcasting HailCast-ML.</p>
       </div>
     `;
 
@@ -264,6 +264,39 @@ export class AlertNotificationService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 secondi di timeout
 
+      const requestPayload = alertType === 'test'
+        ? {
+            _subject: `🔔 [HailCast] Conferma attivazione ricezione allerte per ${subscription.locationName}`,
+            _template: 'box',
+            _captcha: 'false',
+            _replyto: 'no-reply@hailcast.ml',
+            Stato: 'ATTIVAZIONE MONITORAGGIO ALLERTE',
+            Istruzioni: 'Fai clic sul link/pulsante "Activate Form" per confermare la ricezione automatica degli avvisi grandine e temporali.',
+            Località_Monitorata: subscription.locationName,
+            Coordinate: `${subscription.coords.lat.toFixed(4)}°N, ${subscription.coords.lng.toFixed(4)}°E`,
+            Email_Destinatario: subscription.email,
+            Soglia_Grandine: `> ${subscription.hailThresholdCm} cm`,
+            Soglia_Pioggia: `> ${subscription.rainThresholdMm} mm/h`,
+            Preavviso_ETA: `${subscription.leadTimeMinutes} minuti`,
+            Orario_Invio: timestamp
+          }
+        : {
+            _subject: `⚡ [HailCast Alert] ${alertType === 'hail' ? 'Grandine' : 'Pioggia'} per ${subscription.locationName}`,
+            _template: 'box',
+            _captcha: 'false',
+            _replyto: 'no-reply@hailcast.ml',
+            Allerta: alertType === 'hail' ? 'RISCHIO GRANDINE' : 'PIOGGIA INTENSA',
+            Località: subscription.locationName,
+            Coordinate: `${subscription.coords.lat.toFixed(4)}°N, ${subscription.coords.lng.toFixed(4)}°E`,
+            Cella_Temporalesca: details.cellName || 'Supercella Convettiva',
+            Diametro_Stimato_MESH: `${details.hailSizeCm || 2.5} cm`,
+            Riflettività_Radar: `${details.maxDbz || 60} dBZ`,
+            Tempo_Arrivo_ETA: `~${details.etaMinutes || 20} min`,
+            Orario_Invio: timestamp,
+            Consigli_Sicurezza: advice,
+            Dettagli: bodyText
+          };
+
       const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(subscription.email)}`, {
         method: 'POST',
         headers: {
@@ -271,22 +304,7 @@ export class AlertNotificationService {
           'Accept': 'application/json'
         },
         signal: controller.signal,
-        body: JSON.stringify({
-          _subject: `⚡ [HailCast Alert] ${alertType === 'hail' ? 'Grandine' : alertType === 'rain' ? 'Pioggia' : 'Test'} per ${subscription.locationName}`,
-          _template: 'box',
-          _captcha: 'false',
-          _replyto: 'no-reply@hailcast.ml',
-          Allerta: alertType === 'hail' ? 'RISCHIO GRANDINE' : alertType === 'rain' ? 'PIOGGIA INTENSA' : 'TEST VERIFICA',
-          Località: subscription.locationName,
-          Coordinate: `${subscription.coords.lat.toFixed(4)}°N, ${subscription.coords.lng.toFixed(4)}°E`,
-          Cella_Temporalesca: details.cellName || 'Supercella Convettiva',
-          Diametro_Stimato_MESH: `${details.hailSizeCm || 2.5} cm`,
-          Riflettività_Radar: `${details.maxDbz || 60} dBZ`,
-          Tempo_Arrivo_ETA: `~${details.etaMinutes || 20} min`,
-          Orario_Invio: timestamp,
-          Consigli_Sicurezza: advice,
-          Dettagli: bodyText
-        })
+        body: JSON.stringify(requestPayload)
       });
 
       clearTimeout(timeoutId);
