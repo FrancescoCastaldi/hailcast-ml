@@ -215,13 +215,23 @@ export class RadarMapComponent {
 
       this.stormCellsLayerGroup.addLayer(polygon);
 
-      // 2. Marker centrale con indicatore chiaro di GRANDINE (Icona + Diametro + Oggetto)
-      const isNew = !!cell.isNew;
+      // 2. Marker centrale con indicatore dinamico di GRANDINE e stadio evolutivo
+      const stage = cell.formationStage || (cell.isNew ? 'new_initiation' : 'established');
+      const isNew = stage === 'new_initiation';
+      let stageBadgeHtml = '';
+      if (stage === 'new_initiation') {
+        stageBadgeHtml = '<div class="new-genesis-tag">⚡ NUOVO SVILUPPO</div>';
+      } else if (stage === 'rapid_intensification') {
+        stageBadgeHtml = '<div class="new-genesis-tag" style="background: linear-gradient(90deg, #ff0055, #ff7700); color: #fff;">🚀 IN CRESCITA</div>';
+      } else if (stage === 'dissipating') {
+        stageBadgeHtml = '<div class="new-genesis-tag" style="background: #475569; color: #cbd5e1;">🌫️ DISSOLVIMENTO</div>';
+      }
+
       const centerIcon = L.divIcon({
         className: `storm-center-icon ${isNew ? 'new-trajectory-marker' : ''}`,
         html: `
           <div class="hail-map-badge severity-${cell.severity} ${isNew ? 'pulse-new-genesis' : ''}" title="Grandine: ${cell.meshDiameterCm} cm (${sizeNickname})">
-            ${isNew ? '<div class="new-genesis-tag">⚡ NUOVO SVILUPPO</div>' : ''}
+            ${stageBadgeHtml}
             <div class="badge-top-row">
               <span class="badge-hail-icon">${isNew ? '⚡' : '❄️'}</span>
               <span class="badge-hail-size">${cell.meshDiameterCm > 0 ? cell.meshDiameterCm + ' cm' : 'Pioggia'}</span>
@@ -232,8 +242,8 @@ export class RadarMapComponent {
             </div>
           </div>
         `,
-        iconSize: [isNew ? 124 : 110, isNew ? 56 : 44],
-        iconAnchor: [isNew ? 62 : 55, isNew ? 28 : 22]
+        iconSize: [stage !== 'established' ? 124 : 110, stage !== 'established' ? 56 : 44],
+        iconAnchor: [stage !== 'established' ? 62 : 55, stage !== 'established' ? 28 : 22]
       });
 
       const centerMarker = L.marker([cell.centroid.lat, cell.centroid.lng], { icon: centerIcon });

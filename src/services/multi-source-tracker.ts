@@ -117,26 +117,83 @@ export class MultiSourceStormDetector {
       const driftedLat = spot.coords.lat + (driftKm * Math.cos(rad)) / 111.32;
       const driftedLng = spot.coords.lng + (driftKm * Math.sin(rad)) / (111.32 * Math.cos((spot.coords.lat * Math.PI) / 180));
 
-      // Rilevamento celle in fase di genesi/innesco rapido
-      const isGenesis = i === 1 || sounding.cape > 2200;
+      // Rilevamento innesco convettivo iniziale in base a CAPE e hotspot
+      const isGenesisTrigger = i === 1 || sounding.cape > 2200;
+      const lifecycle = this.getCellLifecycle(`${spot.id}-${i}`, isGenesisTrigger);
+
+      // Modula i dBZ in base alla fase del ciclo vitale della cella
+      let lifecycleDbz = maxDbz;
+      if (lifecycle.stage === 'rapid_intensification') {
+        lifecycleDbz = Math.min(68, maxDbz + 3);
+      } else if (lifecycle.stage === 'dissipating') {
+        lifecycleDbz = Math.max(38, maxDbz - 6);
+      }
 
       const cell = StormTracker.createStormCell(
         `${spot.id}-${i}`,
         spot.name,
         { lat: driftedLat, lng: driftedLng },
-        maxDbz,
+        lifecycleDbz,
         speedKmh,
         directionDeg,
         sounding,
         spot.areaRadiusKm,
-        isGenesis,
-        isGenesis ? 'new_initiation' : 'established'
+        lifecycle.isNew,
+        lifecycle.stage
       );
 
+      cell.trend = lifecycle.trend;
       detectedCells.push(cell);
     }
 
     return detectedCells;
+  }
+
+  private static STORAGE_KEY_REGISTRY = 'hailcast_cell_lifecycle_registry_v1';
+
+  /**
+   * Monitora e fa evolvere lo stato temporale della traiettoria (nuovo sviluppo -> intensificazione -> matura/normale -> dissolvimento)
+   */
+  private static getCellLifecycle(cellId: string, isInitialGenesis: boolean): { 
+    isNew: boolean; 
+    stage: 'new_initiation' | 'rapid_intensification' | 'established' | 'dissipating'; 
+    trend: 'intensifying' | 'steady' | 'weakening' 
+  } {
+    try {
+      const now = Date.now();
+      const raw = localStorage.getItem(this.STORAGE_KEY_REGISTRY);
+      const registry: Record<string, { firstSeen: number; lastSeen: number }> = raw ? JSON.parse(raw) : {};
+
+      if (!registry[cellId]) {
+        registry[cellId] = { firstSeen: now, lastSeen: now };
+      } else {
+        registry[cellId].lastSeen = now;
+      }
+      localStorage.setItem(this.STORAGE_KEY_REGISTRY, JSON.stringify(registry));
+
+      const ageMinutes = (now - registry[cellId].firstSeen) / (60 * 1000);
+
+      // Fase 1: Appena comparsa (0-8 min) -> Nuovo Sviluppo
+      if (isInitialGenesis && ageMinutes < 8) {
+        return { isNew: true, stage: 'new_initiation', trend: 'intensifying' };
+      }
+      // Fase 2: Intensificazione e Picco (8-20 min) -> Cella in rapida crescita
+      if (ageMinutes < 20) {
+        return { isNew: false, stage: 'rapid_intensification', trend: 'intensifying' };
+      }
+      // Fase 3: Stabilizzata / Matura (20-60 min) -> Cella normale
+      if (ageMinutes < 60) {
+        return { isNew: false, stage: 'established', trend: 'steady' };
+      }
+      // Fase 4: Esaurimento / Dissolvimento (> 60 min) -> Dissipazione
+      return { isNew: false, stage: 'dissipating', trend: 'weakening' };
+    } catch {
+      return { 
+        isNew: isInitialGenesis, 
+        stage: isInitialGenesis ? 'new_initiation' : 'established', 
+        trend: 'steady' 
+      };
+    }
   }
 
   private static findNearbySpotter(
