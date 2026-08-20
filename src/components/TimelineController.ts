@@ -16,6 +16,12 @@ export class TimelineControllerComponent {
   private iconPlay: HTMLElement;
   private iconPause: HTMLElement;
 
+  private lblMinus60: HTMLElement | null;
+  private lblMinus30: HTMLElement | null;
+  private lblNow: HTMLElement | null;
+  private lblPlus30: HTMLElement | null;
+  private lblPlus60: HTMLElement | null;
+
   private onFrameChangeCallback?: (frame: RainViewerFrame, index: number, isNowcast: boolean, offsetMinutes: number) => void;
 
   constructor() {
@@ -27,7 +33,52 @@ export class TimelineControllerComponent {
     this.iconPlay = document.getElementById('iconPlay') as HTMLElement;
     this.iconPause = document.getElementById('iconPause') as HTMLElement;
 
+    this.lblMinus60 = document.getElementById('lblTimeMinus60');
+    this.lblMinus30 = document.getElementById('lblTimeMinus30');
+    this.lblNow = document.getElementById('lblTimeNow');
+    this.lblPlus30 = document.getElementById('lblTimePlus30');
+    this.lblPlus60 = document.getElementById('lblTimePlus60');
+
     this.bindEvents();
+    this.startLiveTimeTicker();
+  }
+
+  private startLiveTimeTicker(): void {
+    const tick = () => {
+      const now = new Date();
+      const formatHm = (d: Date) => d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      const formatHms = (d: Date) => d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      // Aggiorna le etichette della barra temporale con l'orario reale calcolato dal momento corrente
+      if (this.lblMinus60) {
+        this.lblMinus60.textContent = `-60m (${formatHm(new Date(now.getTime() - 60 * 60000))})`;
+      }
+      if (this.lblMinus30) {
+        this.lblMinus30.textContent = `-30m (${formatHm(new Date(now.getTime() - 30 * 60000))})`;
+      }
+      if (this.lblNow) {
+        this.lblNow.textContent = `LIVE (${formatHm(now)})`;
+      }
+      if (this.lblPlus30) {
+        this.lblPlus30.textContent = `+30m (${formatHm(new Date(now.getTime() + 30 * 60000))})`;
+      }
+      if (this.lblPlus60) {
+        this.lblPlus60.textContent = `+60m (${formatHm(new Date(now.getTime() + 60 * 60000))})`;
+      }
+
+      // Se l'utente è posizionato sul frame LIVE (o non ci sono frame caricati), aggiorna i secondi in tempo reale
+      const isLiveFrame = this.frames.length === 0 || this.currentIndex === (this.pastFramesCount - 1);
+      if (isLiveFrame && this.currentTimestampEl) {
+        this.currentTimestampEl.textContent = `${formatHms(now)} [LIVE ORA]`;
+        if (this.frameModeBadge) {
+          this.frameModeBadge.className = 'frame-mode-badge live';
+          this.frameModeBadge.textContent = 'RADAR REALE (LIVE 🟢)';
+        }
+      }
+    };
+
+    tick();
+    setInterval(tick, 1000);
   }
 
   private bindEvents(): void {
@@ -70,7 +121,7 @@ export class TimelineControllerComponent {
       this.scrubberInput.max = Math.max(0, this.frames.length - 1).toString();
     }
     
-    // Se non stava già riproducendo, posizionati sull'ultimo frame passato (LIVE)
+    // Posizionati sull'ultimo frame passato (LIVE)
     if (!this.isPlaying) {
       this.currentIndex = Math.max(0, past.length - 1);
       if (this.scrubberInput) {
@@ -91,6 +142,21 @@ export class TimelineControllerComponent {
     this.onFrameChangeCallback = callback;
   }
 
+  private getOffsetMinutesForIndex(index: number): number {
+    if (this.frames.length === 0) return 0;
+    const liveIndex = Math.max(0, this.pastFramesCount - 1);
+    
+    // Se abbiamo i frame di RainViewer con timestamp reale
+    const currentFrame = this.frames[index];
+    const liveFrame = this.frames[liveIndex];
+    if (currentFrame && liveFrame && currentFrame.time && liveFrame.time) {
+      return Math.round((currentFrame.time - liveFrame.time) / 60);
+    }
+
+    // Fallback: scatti da 10 minuti
+    return (index - liveIndex) * 10;
+  }
+
   public goToFrame(index: number): void {
     if (index < 0 || index >= this.frames.length) return;
     this.currentIndex = index;
@@ -101,8 +167,7 @@ export class TimelineControllerComponent {
 
     if (this.onFrameChangeCallback && this.frames[index]) {
       const isNowcast = index >= this.pastFramesCount;
-      const liveFrame = this.frames[Math.max(0, this.pastFramesCount - 1)] || this.frames[0];
-      const offsetMinutes = liveFrame ? Math.round((this.frames[index].time - liveFrame.time) / 60) : 0;
+      const offsetMinutes = this.getOffsetMinutesForIndex(index);
       this.onFrameChangeCallback(this.frames[index], index, isNowcast, offsetMinutes);
     }
   }
@@ -163,38 +228,39 @@ export class TimelineControllerComponent {
     const frame = this.frames[this.currentIndex];
     if (!frame) return;
 
-    const frameDate = new Date(frame.time * 1000);
-    const timeStr = frameDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const offsetMinutes = this.getOffsetMinutesForIndex(this.currentIndex);
+    const now = new Date();
+    // Calcola l'orario reale dinamico basato sul momento esatto in cui l'utente guarda la pagina
+    const dynamicFrameDate = new Date(now.getTime() + offsetMinutes * 60000);
+    const timeStr = dynamicFrameDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
     const isNowcast = this.currentIndex >= this.pastFramesCount;
     const isLatestPast = this.currentIndex === (this.pastFramesCount - 1);
 
-    const now = new Date();
-    const diffMinutes = Math.round((now.getTime() - frameDate.getTime()) / 60000);
-
-    let relativeStr = '';
     if (isNowcast) {
-      const futureMins = Math.round((frameDate.getTime() - (this.frames[this.pastFramesCount - 1]?.time * 1000 || now.getTime())) / 60000);
-      relativeStr = ` (+${futureMins}m)`;
       if (this.frameModeBadge) {
         this.frameModeBadge.className = 'frame-mode-badge nowcast';
-        this.frameModeBadge.textContent = `NOWCAST +${futureMins}m`;
+        this.frameModeBadge.textContent = `NOWCAST +${offsetMinutes}m`;
+      }
+      if (this.currentTimestampEl) {
+        this.currentTimestampEl.textContent = `${timeStr} (Previsione +${offsetMinutes}m)`;
       }
     } else if (isLatestPast) {
-      relativeStr = diffMinutes > 0 ? ` (Ultimo Scatto: -${diffMinutes}m)` : ` (Ultimo Scatto)`;
       if (this.frameModeBadge) {
         this.frameModeBadge.className = 'frame-mode-badge live';
-        this.frameModeBadge.textContent = 'RADAR REALE (LIVE)';
+        this.frameModeBadge.textContent = 'RADAR REALE (LIVE 🟢)';
+      }
+      if (this.currentTimestampEl) {
+        this.currentTimestampEl.textContent = `${timeStr} [LIVE ORA]`;
       }
     } else {
-      relativeStr = diffMinutes > 0 ? ` (-${diffMinutes}m)` : '';
       if (this.frameModeBadge) {
         this.frameModeBadge.className = 'frame-mode-badge live';
-        this.frameModeBadge.textContent = 'ARCHIVIO PASSATO';
+        this.frameModeBadge.textContent = `ARCHIVIO (${offsetMinutes}m)`;
       }
-    }
-
-    if (this.currentTimestampEl) {
-      this.currentTimestampEl.textContent = `${timeStr}${relativeStr}`;
+      if (this.currentTimestampEl) {
+        this.currentTimestampEl.textContent = `${timeStr} (${offsetMinutes} min fa)`;
+      }
     }
 
     if (this.progressBar) {

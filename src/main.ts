@@ -338,9 +338,9 @@ class HailCastApp {
       const statusTextEl = document.getElementById('radarStatusText') as HTMLElement;
       if (statusTextEl) {
         if (this.lastRadarScanTimeStr) {
-          statusTextEl.textContent = `LIVE • RADAR: ${this.lastRadarScanTimeStr} | ORA: ${liveTimeStr}`;
+          statusTextEl.textContent = `RADAR LIVE 🟢 • SCANSIONE: ${this.lastRadarScanTimeStr} | ORA: ${liveTimeStr}`;
         } else {
-          statusTextEl.textContent = `LIVE | ORA: ${liveTimeStr}`;
+          statusTextEl.textContent = `RADAR LIVE 🟢 • ORA: ${liveTimeStr}`;
         }
       }
     };

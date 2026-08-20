@@ -2,37 +2,49 @@ import { SpotterReport, StormCell } from '../types/meteorology';
 import { StormTracker } from '../ml/storm-tracker';
 
 export class SpotterFeedService {
-  private static reports: SpotterReport[] = [
-    {
-      id: 'rep-01',
-      locationName: 'Castiglione delle Stiviere (MN)',
-      coords: { lat: 45.3951, lng: 10.4908 },
-      timestamp: '19:15',
-      hailSizeCm: 4.8,
-      damageLevel: 'cars',
-      notes: 'Grandine molto fitta con chicchi discoidali durissimi, parabrezza scheggiati e fogliame tranciato.'
-    },
-    {
-      id: 'rep-02',
-      locationName: 'Peschiera del Garda (VR)',
-      coords: { lat: 45.4389, lng: 10.6933 },
-      timestamp: '19:28',
-      hailSizeCm: 3.5,
-      damageLevel: 'leaves',
-      notes: 'Raffica di downburst violenta prima della grandinata, chicchi come noci.'
-    },
-    {
-      id: 'rep-03',
-      locationName: 'San Bonifacio (VR)',
-      coords: { lat: 45.3992, lng: 11.2755 },
-      timestamp: '18:50',
-      hailSizeCm: 2.0,
-      damageLevel: 'none',
-      notes: 'Forte rovescio temporalesco misto a grandine piccola/media per 10 minuti.'
+  private static reports: SpotterReport[] = [];
+
+  private static initDefaultReports(): void {
+    if (this.reports.length === 0) {
+      const now = Date.now();
+      const formatOffset = (minsAgo: number) => {
+        return new Date(now - minsAgo * 60000).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      };
+
+      this.reports = [
+        {
+          id: 'rep-01',
+          locationName: 'Castiglione delle Stiviere (MN)',
+          coords: { lat: 45.3951, lng: 10.4908 },
+          timestamp: formatOffset(12),
+          hailSizeCm: 4.8,
+          damageLevel: 'cars',
+          notes: 'Grandine molto fitta con chicchi discoidali durissimi, parabrezza scheggiati e fogliame tranciato.'
+        },
+        {
+          id: 'rep-02',
+          locationName: 'Peschiera del Garda (VR)',
+          coords: { lat: 45.4389, lng: 10.6933 },
+          timestamp: formatOffset(24),
+          hailSizeCm: 3.5,
+          damageLevel: 'leaves',
+          notes: 'Raffica di downburst violenta prima della grandinata, chicchi come noci.'
+        },
+        {
+          id: 'rep-03',
+          locationName: 'San Bonifacio (VR)',
+          coords: { lat: 45.3992, lng: 11.2755 },
+          timestamp: formatOffset(45),
+          hailSizeCm: 2.0,
+          damageLevel: 'none',
+          notes: 'Forte rovescio temporalesco misto a grandine piccola/media per 10 minuti.'
+        }
+      ];
     }
-  ];
+  }
 
   public static getReports(): SpotterReport[] {
+    this.initDefaultReports();
     return [...this.reports];
   }
 

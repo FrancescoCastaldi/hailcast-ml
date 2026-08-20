@@ -404,11 +404,11 @@
         <!-- Timeline Slider & Markers -->
         <div class="timeline-slider-wrapper">
           <div class="timeline-labels">
-            <span class="time-label past">-60m</span>
-            <span class="time-label past">-30m</span>
-            <span class="time-label current active">ADESSO</span>
-            <span class="time-label future">+30m</span>
-            <span class="time-label future">+60m (Nowcast)</span>
+            <span class="time-label past" id="lblTimeMinus60">-60m</span>
+            <span class="time-label past" id="lblTimeMinus30">-30m</span>
+            <span class="time-label current active" id="lblTimeNow">LIVE ORA</span>
+            <span class="time-label future" id="lblTimePlus30">+30m</span>
+            <span class="time-label future" id="lblTimePlus60">+60m (Nowcast)</span>
           </div>
           <input type="range" id="timelineScrubber" min="0" max="100" value="60" class="timeline-range-input" />
           <div class="timeline-progress-bar" id="timelineProgressBar"></div>
@@ -416,8 +416,8 @@
 
         <div class="timeline-meta">
           <div class="current-frame-time" id="currentFrameTimestamp">
-            <span class="frame-mode-badge live" id="frameModeBadge">LIVE</span>
-            <span class="frame-clock" id="frameClock">2026-08-20 19:34 UTC</span>
+            <span class="frame-mode-badge live" id="frameModeBadge">LIVE 🟢</span>
+            <span class="frame-clock" id="frameClock">--:--:--</span>
           </div>
           
           <div class="speed-selector">
