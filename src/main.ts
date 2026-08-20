@@ -51,6 +51,15 @@ class HailCastApp {
 
     // 5. Connettiti a RainViewer API per i frame radar in tempo reale
     await this.fetchLiveRadar();
+    
+    // Avvio automatico della timeline (il tempo avanza da solo)
+    this.timelineController.play();
+    
+    // Refresh automatico dei dati radar ogni 5 minuti (300000 ms)
+    setInterval(() => {
+      console.log('🔄 Aggiornamento automatico dei dati radar...');
+      this.fetchLiveRadar();
+    }, 300000);
 
     // 6. Esegui la prima valutazione di telemetria sulla prima cella attiva
     if (this.currentStormCells.length > 0) {
