@@ -2375,18 +2375,30 @@ body.dark-theme {
 /* ==========================================================================
    Mobile & Tablet Responsiveness (@media)
    ========================================================================== */
+/* ==========================================================================
+   Mobile & Tablet Responsiveness (@media) - Modern UX & Simplified Layout
+   ========================================================================== */
 @media (max-width: 900px) {
   :root {
-    --header-height: 54px;
-    --timeline-height: 68px;
+    --header-height: 50px;
+    --timeline-height: 52px;
   }
 
   .app-header {
     padding: 0 10px;
+    height: var(--header-height);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .search-box-container {
-    width: 200px;
+  .brand-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-title {
+    font-size: 1.05rem;
   }
 
   .brand-subtitle {
@@ -2397,27 +2409,54 @@ body.dark-theme {
     display: none;
   }
 
+  .header-center {
+    flex: 1;
+    max-width: 190px;
+    margin: 0 6px;
+  }
+
+  .search-box-container {
+    width: 100%;
+  }
+
+  .search-input-wrapper {
+    padding: 5px 8px;
+    height: 34px;
+    gap: 6px;
+  }
+
+  .search-input-wrapper input {
+    font-size: 0.78rem;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
   .header-right .btn-sm span {
     display: none;
   }
 
   .header-right .btn-sm {
     padding: 6px 8px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 8px;
   }
 
-  /* Left Sidebar as a Mobile Drawer */
+  /* Left Sidebar as a Clean Mobile Bottom Drawer / Slide */
   .left-sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: min(360px, 88vw);
-    max-width: 88vw;
+    width: min(360px, 90vw);
+    max-width: 90vw;
     height: 100vh;
     height: 100dvh;
     z-index: 2200;
     transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.9);
   }
 
   .left-sidebar.mobile-open {
@@ -2442,30 +2481,32 @@ body.dark-theme {
     z-index: 2300;
   }
 
-  /* Radar Legend Bar */
+  /* Radar Legend Bar - Compact pill at top-left */
   .radar-legend-bar {
     top: 8px;
     left: 8px;
-    padding: 6px 10px;
+    padding: 4px 8px;
     gap: 4px;
     max-width: calc(100vw - 120px);
+    background: rgba(8, 12, 20, 0.78);
+    backdrop-filter: blur(12px);
   }
 
   .legend-gradient-wrapper {
-    min-width: 130px;
+    min-width: 110px;
   }
 
   .legend-gradient {
-    height: 6px;
+    height: 5px;
   }
 
   .legend-intensity-labels {
-    font-size: 0.52rem;
+    font-size: 0.5rem;
   }
 
   .legend-indicators-container {
     gap: 3px;
-    padding-top: 3px;
+    padding-top: 2px;
   }
 
   .sub-row-label {
@@ -2473,15 +2514,16 @@ body.dark-theme {
   }
 
   .rain-tag, .hail-tag {
-    font-size: 0.58rem;
-    padding: 1px 5px;
+    font-size: 0.55rem;
+    padding: 1px 4px;
   }
 
-  /* Floating map controls */
+  /* Floating map controls - Compact pill at top-right */
   .map-floating-controls {
     top: 8px;
     right: 8px;
-    padding: 3px;
+    padding: 2px;
+    background: rgba(8, 12, 20, 0.78);
   }
 
   .map-control-btn span {
@@ -2490,38 +2532,68 @@ body.dark-theme {
 
   .map-control-btn {
     padding: 6px 7px;
+    min-width: 32px;
+    height: 32px;
   }
 
-  /* Location Risk Card on Mobile */
+  /* Location Risk Card on Mobile - Clean Bottom Sheet */
   .location-risk-card {
-    left: 10px;
-    right: 10px;
+    left: 8px;
+    right: 8px;
     width: auto;
     max-width: none;
-    bottom: 130px;
-    padding: 12px;
-    max-height: min(48vh, 48dvh);
+    bottom: 116px;
+    padding: 12px 14px;
+    max-height: min(45vh, 45dvh);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
   }
 
-  /* Timeline Bar (positioned above mobile nav) */
+  /* Timeline Bar (positioned immediately above mobile nav bar) */
   .timeline-bar {
     position: fixed;
-    bottom: 60px;
+    bottom: 56px;
     left: 0;
     width: 100vw;
     width: 100dvw;
-    height: 60px;
-    padding: 0 10px;
-    gap: 8px;
-    background: rgba(8, 12, 20, 0.94);
+    height: var(--timeline-height);
+    padding: 0 8px;
+    gap: 6px;
+    background: rgba(8, 12, 20, 0.96);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-glass);
+    z-index: 1000;
+  }
+
+  .timeline-play-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+
+  .timeline-step-btn {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+  }
+
+  .btn-go-live {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    height: 30px;
   }
 
   .time-label.future {
     display: none;
   }
 
+  .time-label.past {
+    font-size: 0.62rem;
+  }
+
   .timeline-meta {
-    gap: 6px;
+    gap: 4px;
+    margin-left: auto;
   }
 
   .speed-selector {
@@ -2533,42 +2605,96 @@ body.dark-theme {
   }
 
   .frame-clock {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
+    padding: 2px 6px;
   }
 
-  /* Show Mobile Navigation Bar */
+  /* Bottom Navigation Bar */
   .mobile-nav-bar {
     display: flex;
+    height: 56px;
+    background: rgba(6, 10, 18, 0.98);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 1100;
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    padding: 6px 0;
+    gap: 2px;
+  }
+
+  .mobile-nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mobile-nav-btn span {
+    font-size: 0.65rem;
   }
 
   .map-viewport {
-    height: calc(100vh - var(--header-height) - 120px);
-    height: calc(100dvh - var(--header-height) - 120px);
+    height: calc(100vh - var(--header-height) - 108px);
+    height: calc(100dvh - var(--header-height) - 108px);
+  }
+
+  /* Modals as Modern Native Bottom Sheets on Mobile */
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 22px 22px 0 0 !important;
+    max-height: min(84vh, 84dvh) !important;
+    padding: 18px 16px !important;
+    margin: 0 !important;
+    animation: mobile-sheet-up 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .modal-content::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+    margin: 0 auto 12px auto;
+  }
+}
+
+@keyframes mobile-sheet-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 @media (max-width: 480px) {
-  .search-box-container {
-    width: 140px;
-  }
-
-  .search-input-wrapper {
-    padding: 4px 8px;
-    gap: 4px;
-  }
-
-  .search-input-wrapper input {
-    font-size: 0.75rem;
+  .header-center {
+    max-width: 140px;
   }
 
   .diameter-selector-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
   }
 
-  .modal-content {
-    padding: 14px;
-    max-height: min(90vh, 90dvh);
-    border-radius: 14px;
+  .phenomenon-selector-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .notif-tab-btn {
+    font-size: 0.72rem;
+    padding: 6px 6px;
   }
 }
 
@@ -2576,7 +2702,7 @@ body.dark-theme {
   .modal-content, .welcome-modal-card {
     max-height: 85vh;
     max-height: 85dvh;
-    padding: 12px 16px;
+    padding: 12px 16px !important;
   }
   
   .welcome-features-list {
