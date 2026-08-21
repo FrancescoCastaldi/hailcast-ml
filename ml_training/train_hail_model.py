@@ -12,6 +12,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, RandomForestClassifier
 from sklearn.metrics import classification_report, mean_squared_error, r2_score
+import joblib
+import os
 
 def generate_convective_dataset(n_samples: int = 5000, random_seed: int = 42) -> pd.DataFrame:
     """Genera un dataset meteorologico sintetico con distribuzioni fisiche realistiche."""
@@ -127,6 +129,12 @@ def train_and_evaluate():
     print("\n--- FEATURE IMPORTANCES (TOP METEOROLOGICAL DRIVERS) ---")
     for feat, imp in sorted_imp:
         print(f"  {feat:20s}: {imp * 100:.2f}%")
+        
+    # Salva i modelli
+    os.makedirs('ml_models', exist_ok=True)
+    joblib.dump(clf, 'ml_models/hail_classifier.pkl')
+    joblib.dump(reg, 'ml_models/hail_regressor.pkl')
+    print("\n💾 Modelli salvati in 'ml_models/'")
         
     print("\n✅ Training completato con successo!")
 
