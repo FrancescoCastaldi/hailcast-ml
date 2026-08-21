@@ -20,6 +20,7 @@ export class RadarMapComponent {
   private showVectors: boolean = true;
   private showSpotters: boolean = true;
   private radarSource: 'rainviewer' | 'dpc-vmi' | 'dpc-sri' = 'rainviewer';
+  private radarColorScheme: number = 6; // 6: Rainbow NEXRAD HD
   private dualPolMode: 'reflectivity' | 'zdr' | 'correlation_coefficient' = 'reflectivity';
   private appMode: 'hail' | 'storm' = 'hail';
   private cachedCells: StormCell[] = [];
@@ -41,6 +42,13 @@ export class RadarMapComponent {
     this.dualPolMode = mode;
     if (this.cachedCells.length > 0) {
       this.renderStormCells(this.cachedCells);
+    }
+  }
+
+  public setRadarColorScheme(scheme: number): void {
+    this.radarColorScheme = scheme;
+    if (this.lastRainViewerFrame) {
+      this.updateRadarFrame(this.lastRainViewerFrame, this.lastHost, this.currentOffsetMinutes, this.currentVelocity);
     }
   }
 
@@ -163,7 +171,7 @@ export class RadarMapComponent {
       const tileUrl = ProtezioneCivileService.getTileUrlTemplate(layerName);
       this.radarLayer = L.tileLayer(tileUrl, {
         pane: 'radarPane',
-        opacity: 0.85,
+        opacity: 0.88,
         minZoom: 1,
         maxNativeZoom: 12,
         maxZoom: 19,
@@ -171,10 +179,10 @@ export class RadarMapComponent {
         attribution: '&copy; Dipartimento Protezione Civile (DPC) &mdash; Mosaico Nazionale'
       });
     } else {
-      const tileUrl = RainViewerService.getTileUrlTemplate(frame, host, 6, 1);
+      const tileUrl = RainViewerService.getTileUrlTemplate(frame, host, this.radarColorScheme, 1);
       this.radarLayer = L.tileLayer(tileUrl, {
         pane: 'radarPane',
-        opacity: 0.82,
+        opacity: 0.86,
         minZoom: 1,
         maxNativeZoom: 6,
         maxZoom: 19,
@@ -934,26 +942,27 @@ export class RadarMapComponent {
   }
 
   private getDbzColor(dbz: number): string {
-    if (dbz >= 65) return '#d600d6'; // Viola intenso / Grandine estrema
-    if (dbz >= 60) return '#ff0000'; // Rosso acceso / Grandine severa
-    if (dbz >= 55) return '#ff6600'; // Arancio / Grandine probabile
-    if (dbz >= 50) return '#ffcc00'; // Giallo
-    if (dbz >= 40) return '#00cc00'; // Verde
-    return '#0099ff';                // Blu / Pioggia leggera
+    if (dbz >= 65) return '#ff00d4'; // Fucsia/Magenta Neon Elettrico (>65 dBZ - Grandine Gigante Estrema)
+    if (dbz >= 60) return '#ff0033'; // Rosso Fuoco Acceso (60-65 dBZ - Grandine Severa)
+    if (dbz >= 55) return '#ff6d00'; // Arancio Fiamma Vivo (55-60 dBZ - Grandine Probabile)
+    if (dbz >= 50) return '#ffd600'; // Giallo Elettrico (50-55 dBZ - Rovesci Violenti/Grandine Piccola)
+    if (dbz >= 42) return '#00e676'; // Verde Smeraldo Brillante (42-50 dBZ - Pioggia Forte)
+    if (dbz >= 32) return '#00b0ff'; // Ciano Cielo Fluorescente (32-42 dBZ - Pioggia Moderata)
+    return '#3d5afe';                // Blu Cobalto (<32 dBZ - Pioggia Debole)
   }
 
   private getZdrColor(zdr: number): string {
-    if (zdr <= 0.3) return '#00f0ff'; // Ciano brillante: grandine sferica/tumbling
-    if (zdr <= 1.0) return '#3b82f6'; // Blu: grandine media mista
-    if (zdr <= 2.2) return '#22c55e'; // Verde: pioggia moderata
-    if (zdr <= 3.2) return '#eab308'; // Giallo: pioggia forte
-    return '#ef4444';                 // Rosso: gocce grandi appiattite
+    if (zdr <= 0.2) return '#00f0ff'; // Ciano Glaciale Brillante: grandine sferica/tumbling
+    if (zdr <= 1.0) return '#3b82f6'; // Blu Elettrico: grandine mista a gocce
+    if (zdr <= 2.2) return '#00e676'; // Verde Neon: pioggia moderata
+    if (zdr <= 3.2) return '#ffd600'; // Giallo Elettrico: pioggia forte
+    return '#ff0055';                 // Magenta Acceso: gocce grandi appiattite
   }
 
   private getCcColor(cc: number): string {
-    if (cc < 0.88) return '#d946ef';  // Fucsia/Magenta: fase mista complessa (grandine gigante)
-    if (cc < 0.93) return '#8b5cf6';  // Viola: grandine mista a pioggia
-    if (cc < 0.97) return '#06b6d4';  // Ciano: pioggia eterogenea
-    return '#10b981';                 // Smeraldo: idrometeore uniformi (pioggia pura)
+    if (cc < 0.86) return '#ff00d4';  // Fucsia/Magenta Neon: fase mista complessa (grandine gigante)
+    if (cc < 0.92) return '#a855f7';  // Viola Elettrico: grandine mista a pioggia
+    if (cc < 0.97) return '#00f0ff';  // Ciano: pioggia eterogenea
+    return '#00e676';                 // Smeraldo: idrometeore uniformi (pioggia pura)
   }
 }

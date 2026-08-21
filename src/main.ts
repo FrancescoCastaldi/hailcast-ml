@@ -222,6 +222,22 @@ class HailCastApp {
       this.showToast(`Sorgente Radar: ${label}`, 'info');
     });
 
+    document.getElementById('selectRadarPalette')?.addEventListener('change', (e) => {
+      const select = e.currentTarget as HTMLSelectElement;
+      const scheme = parseInt(select.value, 10) || 6;
+      this.radarMap.setRadarColorScheme(scheme);
+
+      const paletteNames: Record<number, string> = {
+        6: 'Rainbow NEXRAD HD',
+        8: 'Contrasto Estremo / Infrarosso',
+        4: 'Meteored High-Vis',
+        2: 'Universal Blue'
+      };
+
+      const name = paletteNames[scheme] || 'Personalizzata';
+      this.showToast(`🎨 Palette Radar: ${name}`, 'info');
+    });
+
     document.getElementById('btnToggleDpcStations')?.addEventListener('click', (e) => {
       const btn = e.currentTarget as HTMLElement;
       btn.classList.toggle('active');

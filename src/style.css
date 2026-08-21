@@ -1001,9 +1001,20 @@ body.mode-storm .app-header {
   width: 100%;
   height: 9px;
   border-radius: 4px;
-  background: linear-gradient(to right, #00bfff 0%, #00e676 25%, #ffea00 45%, #ff5722 65%, #d500f9 85%, #ffffff 100%);
+  background: linear-gradient(to right, #3d5afe 0%, #00b0ff 18%, #00e676 36%, #ffd600 54%, #ff6d00 72%, #ff0033 88%, #ff00d4 100%);
   position: relative;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3) inset;
+}
+
+/* Radar Tile Layer High-Contrast Enhancement */
+.leaflet-radarPane-pane {
+  filter: contrast(135%) saturate(145%) brightness(106%);
+  transition: opacity 0.2s ease;
+}
+
+.leaflet-radarPane-pane img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .legend-mark {
