@@ -174,3 +174,33 @@ export interface AlertHistoryEntry {
   etaMinutes?: number;
   message: string;
 }
+
+export interface CrossSourceEvidence {
+  sourceName: string;
+  badge: string;
+  indicator: string;
+  value: string;
+  confidenceContributionPct: number;
+}
+
+export interface HailGenesisForecast {
+  id: string;
+  name: string;
+  originCoords: Coordinates;
+  targetCoords: Coordinates;
+  directionDeg: number;
+  directionCardinal: string;
+  speedKmh: number;
+  etaMinutes: number;           // Tempo stimato all'innesco/comparsa (es. 15-25 min)
+  triggerConfidenceScore: number; // 0 - 100%
+  expectedMeshDiameterCm: number;
+  expectedDbz: number;
+  targetCorridor: string;
+  targetTowns: string[];
+  crossSources: CrossSourceEvidence[];
+  maturationStage: 'imminent_trigger' | 'developing' | 'concretized';
+  createdAt: number;
+  maturationThresholdMinutes: number;
+  resultingCellId?: string;
+}
+

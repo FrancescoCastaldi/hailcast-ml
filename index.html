@@ -150,6 +150,17 @@
             </div>
           </div>
 
+          <!-- Directional Hail Genesis Forecasts (Inneschi Imminenti Cross-Referenziati) -->
+          <div class="genesis-forecast-section">
+            <div class="section-title">
+              <span class="genesis-icon-bolt">⚡</span>
+              <span>Previsioni in Direzione (Inneschi)</span>
+            </div>
+            <div class="genesis-forecast-list" id="genesisForecastList">
+              <div class="genesis-empty-msg">Nessun innesco imminente rilevato.</div>
+            </div>
+          </div>
+
           <!-- Live Alert Feed -->
           <div class="alert-feed-container">
             <div class="section-title">
@@ -251,6 +262,10 @@
               <button class="map-control-btn active" id="btnToggleVectors" title="Mostra Vettori di Traiettoria & Coni">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 <span>Traiettorie</span>
+              </button>
+              <button class="map-control-btn active" id="btnToggleGenesis" title="Mostra Previsioni in Direzione e Frecce di Innesco Grandine">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Inneschi ⚡</span>
               </button>
               <button class="map-control-btn active" id="btnToggleSpotters" title="Mostra Segnalazioni Spotter">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>

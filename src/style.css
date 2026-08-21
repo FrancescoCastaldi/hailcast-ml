@@ -3874,3 +3874,285 @@ textarea:focus-visible,
   gap: 3px;
   color: #334155;
 }
+
+/* Genesis Forecast & Directional Trigger Styling */
+.genesis-forecast-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.genesis-icon-bolt {
+  color: #f59e0b;
+  font-size: 1.1rem;
+}
+
+.genesis-forecast-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.genesis-empty-msg {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 6px 4px;
+}
+
+.genesis-card {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.genesis-card:hover {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: #f59e0b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+}
+
+.genesis-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.genesis-tag-trigger {
+  background: #f59e0b;
+  color: #000000;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.genesis-conf-val {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.genesis-card-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.genesis-card-corridor {
+  font-size: 0.74rem;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.genesis-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-top: 6px;
+}
+
+.meta-item-eta b {
+  color: #f59e0b;
+}
+
+.meta-item-hail b {
+  color: #00f0ff;
+}
+
+/* Genesis Map Markers & Animated Arrows */
+.genesis-node-icon {
+  background: none;
+  border: none;
+}
+
+.genesis-pulse-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.genesis-pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.35);
+  animation: genesisPulse 1.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes genesisPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.genesis-core-node {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
+  z-index: 2;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.genesis-core-node:hover {
+  transform: scale(1.2);
+}
+
+.genesis-symbol {
+  font-size: 13px;
+}
+
+.genesis-arrow-icon {
+  background: none;
+  border: none;
+}
+
+.genesis-arrow-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.9));
+  animation: arrowBounce 1.5s infinite ease-in-out;
+}
+
+@keyframes arrowBounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+.genesis-floating-label {
+  background: none;
+  border: none;
+}
+
+.genesis-label-badge {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #f59e0b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 3px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.genesis-label-badge .badge-tag {
+  color: #fbbf24;
+}
+
+.genesis-label-badge .badge-dest {
+  color: var(--accent-cyan);
+}
+
+.genesis-popup-card {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  color: #0f172a;
+  min-width: 250px;
+  padding: 2px;
+}
+
+.genesis-popup-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.genesis-badge {
+  background: #f59e0b;
+  color: #000000;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.genesis-confidence {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #d97706;
+}
+
+.genesis-popup-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  color: #0f172a;
+}
+
+.genesis-popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #334155;
+}
+
+.genesis-cross-sources {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cross-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cross-badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cross-badge-item {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+

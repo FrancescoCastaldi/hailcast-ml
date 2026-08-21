@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { Coordinates, RainViewerFrame, SpotterReport, StormCell } from '../types/meteorology';
+import { Coordinates, RainViewerFrame, SpotterReport, StormCell, HailGenesisForecast } from '../types/meteorology';
 import { RainViewerService } from '../services/rainviewer';
 import { ProtezioneCivileService, DPC_RADAR_NETWORK } from '../services/protezione-civile';
 import { WeatherFXOverlay } from './WeatherFXOverlay';
@@ -14,6 +14,7 @@ export class RadarMapComponent {
   private spottersLayerGroup: L.LayerGroup = L.layerGroup();
   private markerLayerGroup: L.LayerGroup = L.layerGroup();
   private dpcStationsLayerGroup: L.LayerGroup = L.layerGroup();
+  private genesisLayerGroup: L.LayerGroup = L.layerGroup();
 
   private showRadar: boolean = true;
   private showVectors: boolean = true;
@@ -29,6 +30,7 @@ export class RadarMapComponent {
 
   private onMapClickCallback?: (coords: Coordinates) => void;
   private onCellClickCallback?: (cell: StormCell) => void;
+  private onGenesisClickCallback?: (forecast: HailGenesisForecast) => void;
 
   constructor(elementId: string) {
     this.initMap(elementId);
@@ -89,6 +91,7 @@ export class RadarMapComponent {
     // Aggiungi layer groups
     this.stormCellsLayerGroup.addTo(this.map);
     this.trajectoriesLayerGroup.addTo(this.map);
+    this.genesisLayerGroup.addTo(this.map);
     this.spottersLayerGroup.addTo(this.map);
     this.markerLayerGroup.addTo(this.map);
     this.dpcStationsLayerGroup.addTo(this.map);
@@ -112,6 +115,10 @@ export class RadarMapComponent {
 
   public setCellClickHandler(callback: (cell: StormCell) => void): void {
     this.onCellClickCallback = callback;
+  }
+
+  public setGenesisClickHandler(callback: (forecast: HailGenesisForecast) => void): void {
+    this.onGenesisClickCallback = callback;
   }
 
   /**
@@ -606,6 +613,125 @@ export class RadarMapComponent {
       this.spottersLayerGroup.addTo(this.map);
     } else {
       this.map.removeLayer(this.spottersLayerGroup);
+    }
+  }
+
+  public toggleGenesis(show: boolean): void {
+    if (show) {
+      this.genesisLayerGroup.addTo(this.map);
+    } else {
+      this.map.removeLayer(this.genesisLayerGroup);
+    }
+  }
+
+  /**
+   * Renderizza i vettori di innesco con frecce animate SVG "Previsione in Direzione"
+   */
+  public renderGenesisForecasts(forecasts: HailGenesisForecast[]): void {
+    this.genesisLayerGroup.clearLayers();
+
+    // Visualizza solo gli inneschi imminenti o in sviluppo (non ancora concretizzati come cella)
+    const activeForecasts = forecasts.filter(f => f.maturationStage !== 'concretized');
+
+    for (const f of activeForecasts) {
+      // 1. Nodo di innesco pulsante all'origine
+      const genesisIcon = L.divIcon({
+        className: 'genesis-node-icon',
+        html: `
+          <div class="genesis-pulse-wrapper" title="${f.name}: innesco grandine previsto tra ${f.etaMinutes} min">
+            <div class="genesis-pulse-ring"></div>
+            <div class="genesis-core-node">
+              <span class="genesis-symbol">⚡</span>
+            </div>
+          </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+
+      const originMarker = L.marker([f.originCoords.lat, f.originCoords.lng], { icon: genesisIcon });
+
+      // 2. Linea di traiettoria con freccia direzionale animata SVG
+      const pathLine = L.polyline([
+        [f.originCoords.lat, f.originCoords.lng],
+        [f.targetCoords.lat, f.targetCoords.lng]
+      ], {
+        color: '#f59e0b',
+        weight: 3,
+        dashArray: '6, 10',
+        lineCap: 'round',
+        opacity: 0.85
+      });
+
+      // 3. Freccia direzionale orientata verso il bersaglio
+      const arrowHeadingDeg = f.directionDeg;
+      const arrowIcon = L.divIcon({
+        className: 'genesis-arrow-icon',
+        html: `
+          <div class="genesis-arrow-container" style="transform: rotate(${arrowHeadingDeg - 90}deg);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+
+      const arrowMarker = L.marker([f.targetCoords.lat, f.targetCoords.lng], { icon: arrowIcon });
+
+      // 4. Etichetta "Previsione in Direzione"
+      const labelMidLat = (f.originCoords.lat + f.targetCoords.lat) / 2;
+      const labelMidLng = (f.originCoords.lng + f.targetCoords.lng) / 2;
+      
+      const labelIcon = L.divIcon({
+        className: 'genesis-floating-label',
+        html: `
+          <div class="genesis-label-badge">
+            <span class="badge-tag">⚡ Innesco ~${f.etaMinutes}m</span>
+            <span class="badge-dest">&rarr; ${f.directionCardinal} (${f.targetCorridor.split('-')[0]})</span>
+          </div>
+        `,
+        iconSize: [160, 24],
+        iconAnchor: [80, 12]
+      });
+
+      const labelMarker = L.marker([labelMidLat, labelMidLng], { icon: labelIcon });
+
+      const popupContent = `
+        <div class="genesis-popup-card">
+          <div class="genesis-popup-head">
+            <span class="genesis-badge">⚡ PREVISIONE IN DIREZIONE</span>
+            <span class="genesis-confidence">${f.triggerConfidenceScore}% Confidenza</span>
+          </div>
+          <h4 class="genesis-popup-title">${f.name}</h4>
+          <div class="genesis-popup-body">
+            <div class="genesis-row"><strong>⏳ Innesco Stimato:</strong> tra ${f.etaMinutes} minuti</div>
+            <div class="genesis-row"><strong>🧭 Vettore Spostamento:</strong> ${f.directionCardinal} (${f.directionDeg}°) a ${f.speedKmh} km/h</div>
+            <div class="genesis-row"><strong>❄️ Grandine Attesa:</strong> ~${f.expectedMeshDiameterCm} cm (${f.expectedDbz} dBZ)</div>
+            <div class="genesis-row"><strong>🎯 Comuni a Rischio:</strong> ${f.targetTowns.slice(0, 4).join(', ')}</div>
+            <div class="genesis-cross-sources">
+              <span class="cross-title">Fonti Dati Incrociate:</span>
+              <div class="cross-badges-list">
+                ${f.crossSources.map(s => `<span class="cross-badge-item" title="${s.indicator}: ${s.value}">${s.badge}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      originMarker.bindPopup(popupContent);
+      arrowMarker.bindPopup(popupContent);
+      pathLine.bindPopup(popupContent);
+
+      originMarker.on('click', () => {
+        if (this.onGenesisClickCallback) this.onGenesisClickCallback(f);
+      });
+
+      this.genesisLayerGroup.addLayer(pathLine);
+      this.genesisLayerGroup.addLayer(arrowMarker);
+      this.genesisLayerGroup.addLayer(labelMarker);
+      this.genesisLayerGroup.addLayer(originMarker);
     }
   }
 

@@ -1,5 +1,6 @@
-import { Coordinates, StormCell, SpotterReport, ConvectiveSounding } from '../types/meteorology';
+import { Coordinates, StormCell, SpotterReport, ConvectiveSounding, HailGenesisForecast } from '../types/meteorology';
 import { StormTracker, destinationPoint } from '../ml/storm-tracker';
+import { GenesisForecastEngine } from '../ml/genesis-forecast-engine';
 import { OpenMeteoService } from './openmeteo';
 import { SpotterFeedService } from './spotter-feed';
 
@@ -135,7 +136,7 @@ export class MultiSourceStormDetector {
   /**
    * Esegue una scansione multi-sorgente con ciclo di vita reale (genesi, maturità, dissolvimento, scomparsa)
    */
-  public static async scanAndDetectCells(): Promise<StormCell[]> {
+  public static async scanAndDetectCells(offsetMinutes: number = 0): Promise<StormCell[]> {
     const spotters = SpotterFeedService.getReports();
     const detectedCells: StormCell[] = [];
     const now = Date.now();
@@ -287,7 +288,26 @@ export class MultiSourceStormDetector {
       detectedCells.push(cell);
     }
 
+    // 4. Integra le celle derivate dagli inneschi concretizzati (previsioni in direzione giunte a maturazione)
+    const genesisForecasts = this.getGenesisForecasts(offsetMinutes);
+    for (const forecast of genesisForecasts) {
+      if (forecast.maturationStage === 'concretized') {
+        const concretizedCell = GenesisForecastEngine.concretizeForecastIntoStormCell(forecast);
+        // Evita duplicati
+        if (!detectedCells.some(c => c.id === concretizedCell.id)) {
+          detectedCells.push(concretizedCell);
+        }
+      }
+    }
+
     return detectedCells;
+  }
+
+  /**
+   * Restituisce le previsioni di innesco in direzione cross-referenziate
+   */
+  public static getGenesisForecasts(offsetMinutes: number = 0): HailGenesisForecast[] {
+    return GenesisForecastEngine.generateGenesisForecasts(Date.now(), offsetMinutes);
   }
 
   /**

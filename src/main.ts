@@ -5,7 +5,7 @@ import { MultiSourceStormDetector } from './services/multi-source-tracker';
 import { AlertNotificationService } from './services/alert-notification-service';
 import { StormTracker } from './ml/storm-tracker';
 import { HailPredictorML } from './ml/hail-ml-model';
-import { Coordinates, StormCell, RainViewerFrame, SpotterReport } from './types/meteorology';
+import { StormCell, Coordinates, SpotterReport, RainViewerFrame } from './types/meteorology';
 
 import { RadarMapComponent } from './components/RadarMap';
 import { TimelineControllerComponent } from './components/TimelineController';
@@ -130,6 +130,9 @@ class HailCastApp {
           this.alertFeed.renderStormCells(this.currentPerturbations);
         }
 
+        // Aggiorna le previsioni di innesco in direzione e le celle concretizzate
+        this.updateGenesisForecasts(offsetMinutes);
+
         // Se l'utente sta monitorando una località, aggiorna l'ETA e la distanza in tempo reale
         if (this.inspectedLocation) {
           const cellsToAssess = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
@@ -241,6 +244,14 @@ class HailCastApp {
       const active = btn.classList.contains('active');
       this.radarMap.toggleVectors(active);
       this.showToast(active ? 'Traiettorie e Coni Visibili' : 'Traiettorie Nascoste', 'info');
+    });
+
+    document.getElementById('btnToggleGenesis')?.addEventListener('click', (e) => {
+      const btn = e.currentTarget as HTMLElement;
+      btn.classList.toggle('active');
+      const active = btn.classList.contains('active');
+      this.radarMap.toggleGenesis(active);
+      this.showToast(active ? 'Previsioni in Direzione ed Inneschi Visibili' : 'Inneschi Nascosti', 'info');
     });
 
     document.getElementById('btnToggleSpotters')?.addEventListener('click', (e) => {
@@ -554,6 +565,7 @@ class HailCastApp {
     this.currentPerturbations = this.basePerturbations;
 
     this.updateUIForAppMode();
+    this.updateGenesisForecasts(0);
 
     for (const cell of this.currentStormCells) {
       if (cell.severity === 'destructive' || cell.severity === 'severe') {
@@ -563,6 +575,53 @@ class HailCastApp {
         );
       }
     }
+  }
+
+  /**
+   * Aggiorna e renderizza le previsioni di innesco in direzione nella mappa e nella sidebar
+   */
+  private updateGenesisForecasts(offsetMinutes: number = 0): void {
+    const forecasts = MultiSourceStormDetector.getGenesisForecasts(offsetMinutes);
+    this.radarMap.renderGenesisForecasts(forecasts);
+
+    const listContainer = document.getElementById('genesisForecastList');
+    if (!listContainer) return;
+
+    const activeForecasts = forecasts.filter(f => f.maturationStage !== 'concretized');
+
+    if (activeForecasts.length === 0) {
+      listContainer.innerHTML = '<div class="genesis-empty-msg">Nessun innesco imminente rilevato.</div>';
+      return;
+    }
+
+    listContainer.innerHTML = activeForecasts.map(f => `
+      <div class="genesis-card" data-genesis-id="${f.id}">
+        <div class="genesis-card-header">
+          <span class="genesis-tag-trigger">⚡ Innesco Imminente</span>
+          <span class="genesis-conf-val">${f.triggerConfidenceScore}% Confidenza</span>
+        </div>
+        <div class="genesis-card-title">${f.name}</div>
+        <div class="genesis-card-corridor">
+          <span>&rarr; ${f.directionCardinal} (${f.targetCorridor})</span>
+        </div>
+        <div class="genesis-card-meta">
+          <span class="meta-item-eta">ETA: <b>~${f.etaMinutes} min</b></span>
+          <span class="meta-item-hail">Chicco Atteso: <b>~${f.expectedMeshDiameterCm} cm</b></span>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach click listeners to cards to focus the map
+    listContainer.querySelectorAll('.genesis-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).dataset.genesisId;
+        const targetForecast = activeForecasts.find(f => f.id === id);
+        if (targetForecast) {
+          this.radarMap.flyTo(targetForecast.originCoords, 10);
+          this.showToast(`🎯 Inquadrata zona di innesco: ${targetForecast.name}`, 'info');
+        }
+      });
+    });
   }
 
   private switchAppMode(mode: 'hail' | 'storm'): void {
