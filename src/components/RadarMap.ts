@@ -145,14 +145,15 @@ export class RadarMapComponent {
 
     if (this.radarSource === 'dpc-vmi' || this.radarSource === 'dpc-sri') {
       const layerName = this.radarSource === 'dpc-vmi' ? ProtezioneCivileService.LAYERS.VMI : ProtezioneCivileService.LAYERS.SRI;
-      this.radarLayer = L.tileLayer.wms(ProtezioneCivileService.WMS_ENDPOINT, {
-        layers: layerName,
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        attribution: '&copy; Dipartimento Protezione Civile (DPC)',
-        opacity: 0.82,
-        pane: 'radarPane'
+      const tileUrl = ProtezioneCivileService.getTileUrlTemplate(layerName);
+      this.radarLayer = L.tileLayer(tileUrl, {
+        pane: 'radarPane',
+        opacity: 0.85,
+        minZoom: 1,
+        maxNativeZoom: 12,
+        maxZoom: 19,
+        tileSize: 256,
+        attribution: '&copy; Dipartimento Protezione Civile (DPC) &mdash; Mosaico Nazionale'
       });
     } else {
       const tileUrl = RainViewerService.getTileUrlTemplate(frame, host, 6, 1);

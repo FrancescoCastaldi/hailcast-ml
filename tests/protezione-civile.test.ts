@@ -34,11 +34,12 @@ describe('ProtezioneCivileService & Rete Radar Nazionale', () => {
     expect(res.distanceKm).toBeLessThan(15);
   });
 
-  it('dovrebbe restituire le opzioni corrette per il layer Leaflet WMS', () => {
-    const vmiOptions = ProtezioneCivileService.getWmsOptions('radar:vmi');
-    expect(vmiOptions.layers).toBe('radar:vmi');
-    expect(vmiOptions.format).toBe('image/png');
-    expect(vmiOptions.transparent).toBe(true);
-    expect(vmiOptions.attribution).toContain('Protezione Civile');
+  it('dovrebbe generare un template URL WMTS valido per Leaflet', () => {
+    const vmiUrl = ProtezioneCivileService.getTileUrlTemplate('radar:vmi');
+    expect(vmiUrl).toContain('radar:vmi');
+    expect(vmiUrl).toContain('{z}');
+    expect(vmiUrl).toContain('{x}');
+    expect(vmiUrl).toContain('{y}');
+    expect(vmiUrl).toContain('EPSG:900913');
   });
 });

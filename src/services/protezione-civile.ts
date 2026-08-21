@@ -205,6 +205,7 @@ export const DPC_RADAR_NETWORK: DPCRadarStation[] = [
 
 export class ProtezioneCivileService {
   public static WMS_ENDPOINT = 'https://radar-geowebcache.protezionecivile.it/service/wms';
+  public static WMTS_ENDPOINT = 'https://radar-geowebcache.protezionecivile.it/service/wmts';
   
   public static LAYERS = {
     VMI: 'radar:vmi', // Vertical Maximum Intensity (dBZ)
@@ -212,6 +213,14 @@ export class ProtezioneCivileService {
     HRD: 'radar:hrd', // Heavy Rain Detection
     SRT: 'radar:srt'  // Surface Rainfall Total
   };
+
+  /**
+   * Genera il template URL per i tile WMTS di GeoWebCache della Protezione Civile
+   * @param layer Identificativo del layer (es. 'radar:vmi' o 'radar:sri')
+   */
+  public static getTileUrlTemplate(layer: string = 'radar:vmi'): string {
+    return `https://radar-geowebcache.protezionecivile.it/service/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=&TILEMATRIXSET=EPSG:900913&TILEMATRIX=EPSG:900913:{z}&TILEROW={y}&TILECOL={x}&FORMAT=image/png`;
+  }
 
   /**
    * Ritorna tutte le stazioni della rete radar nazionale DPC
@@ -268,7 +277,7 @@ export class ProtezioneCivileService {
       transparent: true,
       version: '1.1.1',
       attribution: 'Mosaico Radar Nazionale &copy; Dipartimento Protezione Civile (DPC)',
-      opacity: 0.75,
+      opacity: 0.85,
       tiled: true,
       pane: 'radarPane'
     };
