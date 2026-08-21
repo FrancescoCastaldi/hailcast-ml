@@ -16,6 +16,8 @@ export class RadarMapComponent {
   private showRadar: boolean = true;
   private showVectors: boolean = true;
   private showSpotters: boolean = true;
+  private dualPolMode: 'reflectivity' | 'zdr' | 'correlation_coefficient' = 'reflectivity';
+  private cachedCells: StormCell[] = [];
 
   private currentOffsetMinutes: number = 0;
   private currentVelocity?: { speedKmh: number; directionDeg: number };
@@ -25,6 +27,13 @@ export class RadarMapComponent {
 
   constructor(elementId: string) {
     this.initMap(elementId);
+  }
+
+  public setDualPolMode(mode: 'reflectivity' | 'zdr' | 'correlation_coefficient'): void {
+    this.dualPolMode = mode;
+    if (this.cachedCells.length > 0) {
+      this.renderStormCells(this.cachedCells);
+    }
   }
 
   private initMap(elementId: string): void {
@@ -164,21 +173,38 @@ export class RadarMapComponent {
    * Disegna le celle temporalesche, i nuclei convettivi e i popup telemetrici
    */
   public renderStormCells(cells: StormCell[]): void {
+    this.cachedCells = cells;
     this.stormCellsLayerGroup.clearLayers();
     this.trajectoriesLayerGroup.clearLayers();
 
     const activeCells = cells.filter(c => !c.isDissipated);
 
     for (const cell of activeCells) {
-      // 1. Poligono nucleo riflettente
+      // 1. Poligono nucleo riflettente o polarimetrico
       const latLngs = cell.polygon.map(c => [c.lat, c.lng] as [number, number]);
-      const color = this.getDbzColor(cell.maxDbz);
+      
+      // Calcolo polarimetrico Dual-Pol se non precalcolato
+      const isGiantHail = cell.meshDiameterCm >= 4.0 || cell.maxDbz >= 62;
+      const isHail = cell.meshDiameterCm >= 2.0;
+      const zdrVal = cell.dualPol?.zdrDb !== undefined ? cell.dualPol.zdrDb : (isGiantHail ? 0.1 : isHail ? 0.6 : (cell.maxDbz > 50 ? 2.8 : 1.2));
+      const ccVal = cell.dualPol?.cc !== undefined ? cell.dualPol.cc : (isGiantHail ? 0.86 : isHail ? 0.91 : 0.98);
+
+      let color = this.getDbzColor(cell.maxDbz);
+      let metricLabel = `${cell.maxDbz} dBZ`;
+
+      if (this.dualPolMode === 'zdr') {
+        color = this.getZdrColor(zdrVal);
+        metricLabel = `ZDR ${zdrVal.toFixed(1)} dB (${zdrVal < 1.0 ? 'Grandine Sferica' : 'Gocce Piatte'})`;
+      } else if (this.dualPolMode === 'correlation_coefficient') {
+        color = this.getCcColor(ccVal);
+        metricLabel = `CC ${ccVal.toFixed(2)} (${ccVal < 0.92 ? 'Fase Mista / Grandine' : 'Pioggia Uniforme'})`;
+      }
       
       const polygon = L.polygon(latLngs, {
         color: color,
         weight: 2.5,
         fillColor: color,
-        fillOpacity: 0.38,
+        fillOpacity: 0.42,
         dashArray: cell.trend === 'intensifying' ? '4, 4' : undefined
       });
 
@@ -192,7 +218,7 @@ export class RadarMapComponent {
           intensity: cell.meshDiameterCm >= 1.0 
             ? `Chicchi MESH: ${cell.meshDiameterCm} cm (${sizeNickname})` 
             : `Riflettività ${cell.maxDbz} dBZ • Pioggia violenta`,
-          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'settore avanzamento'}`,
+          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • Dual-Pol: ZDR ${zdrVal.toFixed(1)} dB, CC ${ccVal.toFixed(2)}`,
           loop: fxType === 'hail'
         });
 
@@ -214,8 +240,10 @@ export class RadarMapComponent {
             <div class="hail-highlight-val"><strong>${cell.meshDiameterCm} cm</strong> <span>(${sizeNickname})</span></div>
           </div>
           <div class="tooltip-info-grid">
-            <div>Probabilità: <b>${cell.pohPercentage}%</b></div>
-            <div>Intensità: <b>${cell.maxDbz} dBZ</b></div>
+            <div>Modalità: <b>${this.dualPolMode.toUpperCase()}</b></div>
+            <div>Dato Polarimetrico: <b>${metricLabel}</b></div>
+            <div>Riflettività: <b>${cell.maxDbz} dBZ</b></div>
+            <div>Probabilità POH: <b>${cell.pohPercentage}%</b></div>
             <div>Avanzamento: <b>${cell.velocity.speedKmh} km/h</b></div>
             <div>Direzione: <b>${Math.round(cell.velocity.directionDeg)}°</b></div>
           </div>
@@ -576,5 +604,20 @@ export class RadarMapComponent {
     if (dbz >= 50) return '#ffcc00'; // Giallo
     if (dbz >= 40) return '#00cc00'; // Verde
     return '#0099ff';                // Blu / Pioggia leggera
+  }
+
+  private getZdrColor(zdr: number): string {
+    if (zdr <= 0.3) return '#00f0ff'; // Ciano brillante: grandine sferica/tumbling
+    if (zdr <= 1.0) return '#3b82f6'; // Blu: grandine media mista
+    if (zdr <= 2.2) return '#22c55e'; // Verde: pioggia moderata
+    if (zdr <= 3.2) return '#eab308'; // Giallo: pioggia forte
+    return '#ef4444';                 // Rosso: gocce grandi appiattite
+  }
+
+  private getCcColor(cc: number): string {
+    if (cc < 0.88) return '#d946ef';  // Fucsia/Magenta: fase mista complessa (grandine gigante)
+    if (cc < 0.93) return '#8b5cf6';  // Viola: grandine mista a pioggia
+    if (cc < 0.97) return '#06b6d4';  // Ciano: pioggia eterogenea
+    return '#10b981';                 // Smeraldo: idrometeore uniformi (pioggia pura)
   }
 }

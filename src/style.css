@@ -3467,4 +3467,287 @@ textarea:focus-visible,
   letter-spacing: 0.2px;
 }
 
+/* ==========================================================================
+   Dual-Pol Polarimetric Mode Selector in Map Controls
+   ========================================================================== */
+.dualpol-mode-group {
+  display: flex;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.dualpol-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dualpol-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dualpol-btn.active {
+  background: var(--accent-cyan);
+  color: #0f172a;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+}
+
+/* ==========================================================================
+   Sounding Profile Skew-T HGZ Modal
+   ========================================================================== */
+.sounding-modal-card {
+  max-width: 840px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sounding-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hgz-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.hgz-stat-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hgz-stat-lbl {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.hgz-stat-val {
+  font-size: 1.05rem;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.hgz-stat-card.highlight-cyan {
+  border-color: rgba(0, 240, 255, 0.4);
+  background: rgba(0, 240, 255, 0.06);
+}
+.hgz-stat-card.highlight-cyan .hgz-stat-val { color: var(--accent-cyan); }
+
+.hgz-stat-card.highlight-orange {
+  border-color: rgba(255, 170, 0, 0.4);
+  background: rgba(255, 170, 0, 0.06);
+}
+.hgz-stat-card.highlight-orange .hgz-stat-val { color: #ffaa00; }
+
+.hgz-stat-card.highlight-pink {
+  border-color: rgba(255, 0, 85, 0.4);
+  background: rgba(255, 0, 85, 0.06);
+}
+.hgz-stat-card.highlight-pink .hgz-stat-val { color: #ff0055; }
+
+.sounding-chart-box {
+  height: 280px;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+}
+
+.sounding-table-container {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.sounding-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.sounding-table th, .sounding-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sounding-table th {
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  font-weight: 700;
+}
+
+.hgz-active-row {
+  background: rgba(0, 240, 255, 0.07);
+}
+
+.hgz-badge {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.hgz-explanation-box {
+  background: rgba(0, 240, 255, 0.04);
+  border-left: 3px solid var(--accent-cyan);
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Damage Calculator Modal
+   ========================================================================== */
+.damage-modal-card {
+  max-width: 760px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.damage-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.damage-slider-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.hail-val-display {
+  color: var(--accent-cyan);
+  font-size: 1.15rem;
+  font-family: var(--font-mono);
+}
+
+.hail-range-slider {
+  width: 100%;
+  accent-color: var(--accent-cyan);
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.damage-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset-hail-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-hail-btn:hover {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: rgba(0, 240, 255, 0.4);
+  color: #ffffff;
+}
+
+.damage-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.damage-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pct-badge {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.damage-progress-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.damage-progress-fill {
+  height: 100%;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.damage-desc-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+
 

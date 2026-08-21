@@ -14,6 +14,9 @@ import { ConvectiveTelemetryComponent } from './components/ConvectiveTelemetry';
 import { LocationSearchComponent } from './components/LocationSearch';
 import { SpotterModalComponent } from './components/SpotterModal';
 import { NotificationModalComponent } from './components/NotificationModal';
+import { SoundingProfileModalComponent } from './components/SoundingProfileModal';
+import { DamageCalculatorModalComponent } from './components/DamageCalculatorModal';
+import { SevereHailBulletinGenerator } from './services/bulletin-generator';
 
 class HailCastApp {
   private static REFRESH_INTERVAL_KEY = 'hailcast_refresh_interval_ms';
@@ -25,12 +28,15 @@ class HailCastApp {
   private locationSearch!: LocationSearchComponent;
   private spotterModal!: SpotterModalComponent;
   private notificationModal!: NotificationModalComponent;
+  private soundingModal!: SoundingProfileModalComponent;
+  private damageModal!: DamageCalculatorModalComponent;
 
   private baseStormCells: StormCell[] = [];
   private currentStormCells: StormCell[] = [];
   private currentSpotterReports: SpotterReport[] = [];
   private rainViewerHost: string = 'https://tilecache.rainviewer.com';
   private inspectedLocation: { coords: Coordinates; name: string } | null = null;
+  private activeSelectedCell: StormCell | null = null;
   private refreshTimer: number | null = null;
 
   constructor() {
@@ -48,6 +54,8 @@ class HailCastApp {
     this.locationSearch = new LocationSearchComponent();
     this.spotterModal = new SpotterModalComponent();
     this.notificationModal = new NotificationModalComponent();
+    this.soundingModal = new SoundingProfileModalComponent();
+    this.damageModal = new DamageCalculatorModalComponent();
 
     // 2. Registra gli eventi
     this.bindEvents();
@@ -133,6 +141,41 @@ class HailCastApp {
         report.hailSizeCm > 3.0 ? 'danger' : 'warning'
       );
       this.showToast(`Segnalazione pubblicata live per ${report.locationName}!`, 'success');
+    });
+
+    // Tasti HUD Dual-Pol Polarimetric Radar Modes
+    const dualPolBtns = document.querySelectorAll('.dualpol-btn');
+    dualPolBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const targetBtn = e.currentTarget as HTMLElement;
+        const mode = targetBtn.dataset.mode as 'reflectivity' | 'zdr' | 'correlation_coefficient';
+        dualPolBtns.forEach(b => b.classList.remove('active'));
+        targetBtn.classList.add('active');
+        this.radarMap.setDualPolMode(mode);
+        this.showToast(`Radar Dual-Pol: ${mode.toUpperCase()}`, 'info');
+      });
+    });
+
+    // Tasti Header & Telemetria: Bollettino, Profilo HGZ, Calcolo Danni
+    document.getElementById('btnOpenBulletin')?.addEventListener('click', () => {
+      const assessment = this.inspectedLocation 
+        ? StormTracker.assessLocationRisk(this.inspectedLocation.name, this.inspectedLocation.coords, this.currentStormCells)
+        : null;
+      SevereHailBulletinGenerator.generateAndOpenBulletin(this.activeSelectedCell, assessment, this.currentStormCells);
+      this.showToast('📄 Bollettino Nowcast Grandine generato con successo!', 'success');
+    });
+
+    document.getElementById('btnOpenSoundingModal')?.addEventListener('click', async () => {
+      const coords = this.activeSelectedCell?.centroid || this.inspectedLocation?.coords || { lat: 45.4, lng: 10.5 };
+      const locName = this.activeSelectedCell?.name || this.inspectedLocation?.name || 'Pianura Padana / Settore Attivo';
+      const profile = OpenMeteoService.getSyntheticVerticalProfile(coords, locName);
+      this.soundingModal.open(profile);
+    });
+
+    document.getElementById('btnOpenDamageModal')?.addEventListener('click', () => {
+      const hailDiam = this.activeSelectedCell?.meshDiameterCm || 3.5;
+      const locName = this.activeSelectedCell?.name || this.inspectedLocation?.name || 'Settore Convettivo';
+      this.damageModal.open(hailDiam, locName);
     });
 
     // Tasti HUD mappa
@@ -522,6 +565,7 @@ class HailCastApp {
   }
 
   private inspectStormCell(cell: StormCell): void {
+    this.activeSelectedCell = cell;
     this.radarMap.flyTo(cell.centroid, 10);
     const pred = HailPredictorML.predict(cell.maxDbz, cell.sounding);
     this.telemetry.updateTelemetry(cell.sounding, pred, cell.maxDbz);

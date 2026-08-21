@@ -32,9 +32,13 @@
 | **Open-Meteo Sounding API** | [`src/services/openmeteo.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/openmeteo.ts) | ✅ Completed | CAPE, Shear, Freezing Level retrieval for any point |
 | **Geographic Search** | [`src/services/geocoding.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/geocoding.ts) | ✅ Completed | Nominatim geocoding + common Italian presets |
 | **Spotter Feed & Modal** | [`src/components/SpotterModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/SpotterModal.ts) | ✅ Completed | Interactive form with TTL expiration and visual hail comparators |
+| **Sounding Profile & HGZ** | [`src/components/SoundingProfileModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/SoundingProfileModal.ts) | ✅ Completed | Multilevel Skew-T chart, Hail Growth Zone (0°C to -20°C) and LPI index |
+| **Dual-Pol Radar Simulator** | [`src/components/RadarMap.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/RadarMap.ts) | ✅ Completed | Polarimetric simulation ($Z_{DR}$, $\rho_{HV}$ CC, and dBZ) with dynamic shaders |
+| **Damage Calculator** | [`src/components/DamageCalculatorModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/DamageCalculatorModal.ts) | ✅ Completed | Vulnerability loss model for vineyards, orchards, crops, cars, and solar panels |
+| **Severe Hail Bulletin** | [`src/services/bulletin-generator.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/bulletin-generator.ts) | ✅ Completed | Official printable/exportable nowcasting bulletin with security prescriptions |
 | **Weather FX Animations** | [`src/components/WeatherFXOverlay.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/WeatherFXOverlay.ts) | ✅ Completed | Immersive particle FX (hail/rain/wind/lightning); hail runs in continuous loop |
 | **Alert Notifications** | [`src/services/alert-notification-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/alert-notification-service.ts) | ✅ Completed | Email alerts via FormSubmit with hail/rain thresholds |
-| **Vitest Test Suite** | [`tests/meteorology.test.ts`](file:///c:/Users/franc/Documents/hailcast-ml/tests/meteorology.test.ts) | ✅ Completed | Tests on MESH, POH, Haversine, Bearing and predictions |
+| **Vitest Test Suite** | [`tests/meteorology.test.ts`](file:///c:/Users/franc/Documents/hailcast-ml/tests/meteorology.test.ts) | ✅ Completed | Tests on MESH, POH, Haversine, Bearing, HGZ profile, and predictions |
 | **Academic Documentation** | [`EXAM_INFO.md`](file:///c:/Users/franc/Documents/hailcast-ml/EXAM_INFO.md) | ✅ Completed | Derivations, roadmap and oral presentation plan (private, gitignored) |
 
 ---

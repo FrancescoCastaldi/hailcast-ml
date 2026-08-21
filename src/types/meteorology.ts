@@ -16,6 +16,35 @@ export interface ConvectiveSounding {
   dewPointDepression: number; // °C (T - Td at 850hPa)
   echoTop: number;        // meters
   vil: number;            // kg/m² (Vertically Integrated Liquid)
+  lightningPotential?: number; // J/kg or index (ICON-D2 LPI)
+  verticalProfile?: VerticalAtmosphericProfile;
+}
+
+export interface VerticalLevelData {
+  pressureHpa: number;
+  altitudeMeters: number;
+  temperatureC: number;
+  dewPointC: number;
+  windSpeedKmh?: number;
+}
+
+export interface VerticalAtmosphericProfile {
+  coords: Coordinates;
+  locationName?: string;
+  levels: VerticalLevelData[];
+  hgzBottomMeters: number; // Quota 0°C (Base Hail Growth Zone)
+  hgzTopMeters: number;    // Quota -20°C (Cima Hail Growth Zone)
+  hgzThicknessMeters: number;
+  cape: number;
+  liftedIndex: number;
+  lightningPotentialIndex?: number;
+}
+
+export interface DualPolRadarData {
+  zdrDb: number;      // Differential Reflectivity in dB (-0.5 to +4.5)
+  cc: number;         // Correlation Coefficient rho_hv (0.80 to 1.00)
+  kdpDegKm: number;   // Specific Differential Phase
+  hydrometeorClass: 'giant_hail' | 'large_hail' | 'hail_rain_mix' | 'heavy_rain' | 'moderate_rain';
 }
 
 export interface RadarPoint {
@@ -50,6 +79,7 @@ export interface StormCell {
   ageMinutes?: number;     // Elapsed active duration
   lifespanMinutes?: number;// Total expected convective lifespan (e.g. 45 - 110 min)
   isDissipated?: boolean;  // True when cell has decayed completely and should be removed
+  dualPol?: DualPolRadarData;
 }
 
 export interface NowcastCone {

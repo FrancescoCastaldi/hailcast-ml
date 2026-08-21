@@ -93,9 +93,23 @@
         </div>
 
         <div class="header-right">
+          <button class="btn btn-secondary btn-sm" id="btnOpenBulletin" title="Esporta Bollettino Ufficiale Nowcast Grandine">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>Bollettino 📄</span>
+          </button>
+
+          <button class="btn btn-secondary btn-sm" id="btnOpenSoundingModal" title="Visualizza Profilo Verticale Atmosferico & Hail Growth Zone (HGZ)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+            <span>Profilo HGZ 📈</span>
+          </button>
+
+          <button class="btn btn-secondary btn-sm" id="btnOpenDamageModal" title="Calcola Danni e Vulnerabilità su Agricoltura, Auto e Fotovoltaico">
+            <span>Danni 🌾</span>
+          </button>
+
           <button class="btn btn-secondary btn-sm" id="btnOpenNotificationModal" title="Configura avvisi email e notifiche per la tua posizione">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span>Allerte Email 🔔</span>
+            <span>Allerte 🔔</span>
           </button>
           
           <button class="btn btn-primary btn-sm" id="btnOpenSpotterModal" title="Invia una segnalazione di grandine da terra">
@@ -202,6 +216,15 @@
 
             <!-- Layer & Map Controls -->
             <div class="map-floating-controls glass-panel">
+              <!-- Dual-Pol Polarimetric Radar Mode Selector -->
+              <div class="dualpol-mode-group" title="Seleziona Prodotto Radar Polarimetrico">
+                <button class="dualpol-btn active" id="btnDualPolDbz" data-mode="reflectivity" title="Riflettività Standard (dBZ)">dBZ</button>
+                <button class="dualpol-btn" id="btnDualPolZdr" data-mode="zdr" title="Differential Reflectivity (ZDR: ~0 dB per grandine sferica)">ZDR</button>
+                <button class="dualpol-btn" id="btnDualPolCc" data-mode="correlation_coefficient" title="Correlation Coefficient (CC: <0.90 per grandine mista)">CC</button>
+              </div>
+
+              <div class="control-divider"></div>
+
               <button class="map-control-btn active" id="btnToggleRadarLayer" title="Attiva/Disattiva Radar Riflettività">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path><path d="M12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6z"></path><circle cx="12" cy="12" r="2"></circle></svg>
                 <span>Radar</span>
@@ -726,6 +749,171 @@
               <button class="btn btn-secondary btn-xs" id="btnClearAlertHistory">🗑️ Svuota Storico</button>
             </div>
             <div class="history-list" id="alertHistoryListContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sounding Profile Skew-T HGZ Modal -->
+      <div class="modal-backdrop" id="soundingProfileModal" style="display: none;">
+        <div class="modal-content glass-panel sounding-modal-card">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+              <div>
+                <h3 class="modal-title">Profilo Termodinamico & Hail Growth Zone (HGZ)</h3>
+                <p class="modal-subtitle" id="soundingModalLocationTitle">Radiosondaggio Atmosferico in Quota</p>
+              </div>
+            </div>
+            <button class="modal-close" id="btnCloseSoundingModal">&times;</button>
+          </div>
+
+          <div class="sounding-modal-body">
+            <!-- HGZ Highlight Cards -->
+            <div class="hgz-stats-grid">
+              <div class="hgz-stat-card">
+                <span class="hgz-stat-lbl">Zero Termico (Base HGZ)</span>
+                <strong class="hgz-stat-val" id="hgzBottomVal">3,600 m (0°C)</strong>
+              </div>
+              <div class="hgz-stat-card">
+                <span class="hgz-stat-lbl">Isoterma -20°C (Cima HGZ)</span>
+                <strong class="hgz-stat-val" id="hgzTopVal">6,800 m (-20°C)</strong>
+              </div>
+              <div class="hgz-stat-card highlight-cyan">
+                <span class="hgz-stat-lbl">Spessore Zona Grandine (HGZ)</span>
+                <strong class="hgz-stat-val" id="hgzThickVal">3,200 m</strong>
+              </div>
+              <div class="hgz-stat-card highlight-orange">
+                <span class="hgz-stat-lbl">SBCAPE Instabilità</span>
+                <strong class="hgz-stat-val" id="soundingCapeVal">2,450 J/kg</strong>
+              </div>
+              <div class="hgz-stat-card highlight-pink">
+                <span class="hgz-stat-lbl">Potenziale Fulmini (LPI)</span>
+                <strong class="hgz-stat-val" id="soundingLpiVal">85%</strong>
+              </div>
+            </div>
+
+            <!-- Interactive Chart Container -->
+            <div class="sounding-chart-box">
+              <canvas id="soundingProfileChart"></canvas>
+            </div>
+
+            <!-- Multilevel isobaric data table -->
+            <div class="sounding-table-container">
+              <table class="sounding-table">
+                <thead>
+                  <tr>
+                    <th>Livello Pressione</th>
+                    <th>Quota Altitudine</th>
+                    <th>Temperatura (T)</th>
+                    <th>Punto di Rugiada (Td)</th>
+                    <th>Fase Idrometeora</th>
+                  </tr>
+                </thead>
+                <tbody id="soundingLevelsTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="hgz-explanation-box">
+              <p><b>❄️ Fisica dell'HGZ (Hail Growth Zone):</b> La grandine si forma principalmente nello strato atmosferico compreso tra <b>0°C</b> e <b>-20°C</b>, dove gocce d'acqua sopraffusa collidono con embrioni di ghiaccio all'interno dell'updraft convettivo. Uno spessore &gt; 3,000 metri abbinato a CAPE &gt; 1,500 J/kg è la condizione tipica per la genesi di grandine severa (&gt; 3 cm).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Damage & Vulnerability Calculator Modal -->
+      <div class="modal-backdrop" id="damageCalculatorModal" style="display: none;">
+        <div class="modal-content glass-panel damage-modal-card">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <span style="font-size: 1.4rem;">🌾</span>
+              <div>
+                <h3 class="modal-title">Simulatore Danni & Vulnerabilità Territoriale</h3>
+                <p class="modal-subtitle" id="damageModalLocationName">Stima Perdite su Agricoltura, Veicoli e Impianti Fotovoltaici</p>
+              </div>
+            </div>
+            <button class="modal-close" id="btnCloseDamageModal">&times;</button>
+          </div>
+
+          <div class="damage-modal-body">
+            <!-- Caliber Slider & Presets -->
+            <div class="damage-slider-box">
+              <div class="slider-header">
+                <span>Diametro Chicco di Grandine Stimato:</span>
+                <strong class="hail-val-display" id="damageHailValDisplay">3.5 cm (Noce)</strong>
+              </div>
+              <input type="range" id="damageHailSlider" min="0.5" max="8.0" step="0.1" value="3.5" class="hail-range-slider" />
+              
+              <div class="damage-preset-chips">
+                <button type="button" class="preset-hail-btn" data-size="1.5">🪙 Moneta (1.5cm)</button>
+                <button type="button" class="preset-hail-btn" data-size="3.0">🌰 Noce (3.0cm)</button>
+                <button type="button" class="preset-hail-btn" data-size="4.5">⛳ Golf (4.5cm)</button>
+                <button type="button" class="preset-hail-btn" data-size="6.0">🥚 Uovo (6.0cm)</button>
+                <button type="button" class="preset-hail-btn" data-size="8.0">🎾 Tennis (8.0cm)</button>
+              </div>
+            </div>
+
+            <!-- Damage Estimation Cards -->
+            <div class="damage-cards-grid">
+              <!-- Vigneti -->
+              <div class="damage-card">
+                <div class="card-head">
+                  <span>🍇 Vigneti & Viticoltura (Valpolicella, Prosecco)</span>
+                  <strong class="pct-badge" id="vineyardDamagePct">75%</strong>
+                </div>
+                <div class="damage-progress-bg">
+                  <div class="damage-progress-fill" id="vineyardDamageBar" style="width: 75%;"></div>
+                </div>
+                <p class="damage-desc-text" id="vineyardDamageDesc">Defogliazione estesa, tranciatura grappoli e necrosi tralci.</p>
+              </div>
+
+              <!-- Frutteti -->
+              <div class="damage-card">
+                <div class="card-head">
+                  <span>🍎 Frutteti (Mele, Pere, Pesche)</span>
+                  <strong class="pct-badge" id="orchardDamagePct">82%</strong>
+                </div>
+                <div class="damage-progress-bg">
+                  <div class="damage-progress-fill" id="orchardDamageBar" style="width: 82%;"></div>
+                </div>
+                <p class="damage-desc-text" id="orchardDamageDesc">Ammaccature profonde, caduta precoce e azzeramento resa.</p>
+              </div>
+
+              <!-- Seminativi -->
+              <div class="damage-card">
+                <div class="card-head">
+                  <span>🌽 Seminativi & Mais</span>
+                  <strong class="pct-badge" id="cropsDamagePct">60%</strong>
+                </div>
+                <div class="damage-progress-bg">
+                  <div class="damage-progress-fill" id="cropsDamageBar" style="width: 60%;"></div>
+                </div>
+                <p class="damage-desc-text" id="cropsDamageDesc">Allettamento fusti e lacerazione lamina fogliare.</p>
+              </div>
+
+              <!-- Auto e Veicoli -->
+              <div class="damage-card">
+                <div class="card-head">
+                  <span>🚗 Veicoli, Carrozzeria & Parabrezza</span>
+                  <strong class="pct-badge" id="vehicleDamagePct">70%</strong>
+                </div>
+                <div class="damage-progress-bg">
+                  <div class="damage-progress-fill" id="vehicleDamageBar" style="width: 70%;"></div>
+                </div>
+                <p class="damage-desc-text" id="vehicleDamageDesc">Parabrezza incrinato/scheggiato, decine di bozzi su tetto e cofano.</p>
+              </div>
+
+              <!-- Fotovoltaico -->
+              <div class="damage-card">
+                <div class="card-head">
+                  <span>☀️ Pannelli Fotovoltaici & Tetti</span>
+                  <strong class="pct-badge" id="solarDamagePct">35%</strong>
+                </div>
+                <div class="damage-progress-bg">
+                  <div class="damage-progress-fill" id="solarDamageBar" style="width: 35%;"></div>
+                </div>
+                <p class="damage-desc-text" id="solarDamageDesc">Micro-cracking delle celle al silicio e calo resa.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

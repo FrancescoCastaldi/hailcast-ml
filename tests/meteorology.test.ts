@@ -20,6 +20,7 @@ import {
 
 import { HailPredictorML } from '../src/ml/hail-ml-model';
 import { ConvectiveSounding } from '../src/types/meteorology';
+import { OpenMeteoService } from '../src/services/openmeteo';
 
 describe('Meteorological & Physical Models (MESH / POH / SHI)', () => {
   const mockSounding: ConvectiveSounding = {
@@ -201,6 +202,16 @@ describe('Storm Tracking & Geodesics (Haversine / Cones / ETA)', () => {
 
     expect(dissipatingCell.formationStage).toBe('dissipating');
     expect(dissipatingCell.trend).toBe('weakening');
+  });
+
+  it('calcola correttamente i livelli isobarici e la Hail Growth Zone (HGZ)', () => {
+    const profile = OpenMeteoService.getSyntheticVerticalProfile({ lat: 45.4, lng: 10.5 });
+    expect(profile.levels.length).toBeGreaterThanOrEqual(6);
+    expect(profile.hgzBottomMeters).toBeGreaterThan(2500);
+    expect(profile.hgzTopMeters).toBeGreaterThan(profile.hgzBottomMeters);
+    expect(profile.hgzThicknessMeters).toBe(profile.hgzTopMeters - profile.hgzBottomMeters);
+    expect(profile.lightningPotentialIndex).toBeGreaterThan(0);
+    expect(profile.lightningPotentialIndex).toBeLessThanOrEqual(100);
   });
 });
 
