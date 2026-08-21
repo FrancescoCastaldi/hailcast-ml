@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import { Coordinates, RainViewerFrame, SpotterReport, StormCell } from '../types/meteorology';
 import { RainViewerService } from '../services/rainviewer';
+import { ProtezioneCivileService, DPC_RADAR_NETWORK } from '../services/protezione-civile';
 import { WeatherFXOverlay } from './WeatherFXOverlay';
 
 export class RadarMapComponent {
@@ -12,12 +13,16 @@ export class RadarMapComponent {
   private trajectoriesLayerGroup: L.LayerGroup = L.layerGroup();
   private spottersLayerGroup: L.LayerGroup = L.layerGroup();
   private markerLayerGroup: L.LayerGroup = L.layerGroup();
+  private dpcStationsLayerGroup: L.LayerGroup = L.layerGroup();
 
   private showRadar: boolean = true;
   private showVectors: boolean = true;
   private showSpotters: boolean = true;
+  private radarSource: 'rainviewer' | 'dpc-vmi' | 'dpc-sri' = 'rainviewer';
   private dualPolMode: 'reflectivity' | 'zdr' | 'correlation_coefficient' = 'reflectivity';
   private cachedCells: StormCell[] = [];
+  private lastRainViewerFrame?: RainViewerFrame;
+  private lastHost?: string;
 
   private currentOffsetMinutes: number = 0;
   private currentVelocity?: { speedKmh: number; directionDeg: number };
@@ -86,6 +91,8 @@ export class RadarMapComponent {
     this.trajectoriesLayerGroup.addTo(this.map);
     this.spottersLayerGroup.addTo(this.map);
     this.markerLayerGroup.addTo(this.map);
+    this.dpcStationsLayerGroup.addTo(this.map);
+    this.initDpcStations();
 
     // Listener click sulla mappa
     this.map.on('click', (e: L.LeafletMouseEvent) => {
@@ -108,6 +115,16 @@ export class RadarMapComponent {
   }
 
   /**
+   * Imposta la sorgente radar (RainViewer o Protezione Civile DPC VMI/SRI)
+   */
+  public setRadarSource(source: 'rainviewer' | 'dpc-vmi' | 'dpc-sri'): void {
+    this.radarSource = source;
+    if (this.lastRainViewerFrame) {
+      this.updateRadarFrame(this.lastRainViewerFrame, this.lastHost, this.currentOffsetMinutes, this.currentVelocity);
+    }
+  }
+
+  /**
    * Aggiorna il layer radar visualizzato in base al frame selezionato e alla propagazione
    */
   public updateRadarFrame(
@@ -116,24 +133,38 @@ export class RadarMapComponent {
     offsetMinutes: number = 0,
     velocity?: { speedKmh: number; directionDeg: number }
   ): void {
+    this.lastRainViewerFrame = frame;
+    this.lastHost = host;
     this.currentOffsetMinutes = offsetMinutes;
     if (velocity) this.currentVelocity = velocity;
     if (!this.showRadar) return;
 
-    const tileUrl = RainViewerService.getTileUrlTemplate(frame, host, 6, 1);
-    
     if (this.radarLayer) {
       this.map.removeLayer(this.radarLayer);
     }
 
-    this.radarLayer = L.tileLayer(tileUrl, {
-      pane: 'radarPane',
-      opacity: 0.82,
-      minZoom: 1,
-      maxNativeZoom: 6,
-      maxZoom: 19,
-      tileSize: 256
-    });
+    if (this.radarSource === 'dpc-vmi' || this.radarSource === 'dpc-sri') {
+      const layerName = this.radarSource === 'dpc-vmi' ? ProtezioneCivileService.LAYERS.VMI : ProtezioneCivileService.LAYERS.SRI;
+      this.radarLayer = L.tileLayer.wms(ProtezioneCivileService.WMS_ENDPOINT, {
+        layers: layerName,
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.1',
+        attribution: '&copy; Dipartimento Protezione Civile (DPC)',
+        opacity: 0.82,
+        pane: 'radarPane'
+      });
+    } else {
+      const tileUrl = RainViewerService.getTileUrlTemplate(frame, host, 6, 1);
+      this.radarLayer = L.tileLayer(tileUrl, {
+        pane: 'radarPane',
+        opacity: 0.82,
+        minZoom: 1,
+        maxNativeZoom: 6,
+        maxZoom: 19,
+        tileSize: 256
+      });
+    }
 
     this.radarLayer.addTo(this.map);
     this.applyRadarDisplacement();
@@ -575,6 +606,70 @@ export class RadarMapComponent {
     } else {
       this.map.removeLayer(this.spottersLayerGroup);
     }
+  }
+
+  public toggleDpcStations(show: boolean): void {
+    if (show) {
+      this.dpcStationsLayerGroup.addTo(this.map);
+    } else {
+      this.map.removeLayer(this.dpcStationsLayerGroup);
+    }
+  }
+
+  /**
+   * Inizializza i marker e i fasci di copertura delle stazioni della Rete Radar Nazionale DPC
+   */
+  private initDpcStations(): void {
+    this.dpcStationsLayerGroup.clearLayers();
+
+    for (const station of DPC_RADAR_NETWORK) {
+      // Icona stilizzata per il radar meteorologico
+      const radarIcon = L.divIcon({
+        className: 'dpc-radar-station-icon',
+        html: `
+          <div class="radar-station-node" title="${station.name} (${station.operator})">
+            <span class="station-dish">📡</span>
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+
+      const marker = L.marker([station.lat, station.lng], { icon: radarIcon });
+
+      // Cerchio raggio operativo (250 km)
+      const rangeCircle = L.circle([station.lat, station.lng], {
+        radius: station.rangeKm * 1000,
+        color: '#06b6d4',
+        weight: 1,
+        opacity: 0.35,
+        fillColor: '#06b6d4',
+        fillOpacity: 0.03,
+        dashArray: '4, 8'
+      });
+
+      marker.bindPopup(`
+        <div class="dpc-radar-popup">
+          <div class="dpc-popup-header">
+            <strong>📡 ${station.name}</strong>
+            <span class="badge badge-accent">${station.band}</span>
+          </div>
+          <div class="dpc-popup-body">
+            <div><strong>Ente/Operatore:</strong> ${station.operator} (${station.region})</div>
+            <div><strong>Altitudine:</strong> ${station.altitudeM} m s.l.m.</div>
+            <div><strong>Polarimetria:</strong> ${station.polarization}</div>
+            <div><strong>Raggio Operativo:</strong> ${station.rangeKm} km</div>
+            <div><strong>Stato:</strong> <span style="color: #22c55e;">● Operativo</span></div>
+          </div>
+        </div>
+      `);
+
+      this.dpcStationsLayerGroup.addLayer(rangeCircle);
+      this.dpcStationsLayerGroup.addLayer(marker);
+    }
+
+    // Disattivo per default per mantenere la mappa pulita
+    this.map.removeLayer(this.dpcStationsLayerGroup);
   }
 
   public cycleBasemap(): string {

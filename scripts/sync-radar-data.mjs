@@ -250,6 +250,20 @@ async function syncRadarData() {
       updatedEpoch: nowEpoch,
       generatedTimestamp: rvData.generated || Math.floor(nowEpoch / 1000),
       host: rvData.host,
+      radarSources: {
+        rainviewer: {
+          status: 'online',
+          framesCount: (rvData.radar?.past?.length || 0) + (rvData.radar?.nowcast?.length || 0),
+          host: rvData.host
+        },
+        protezioneCivileDPC: {
+          status: 'online',
+          wmsEndpoint: 'https://radar-geowebcache.protezionecivile.it/service/wms',
+          layers: ['radar:vmi', 'radar:sri', 'radar:hrd', 'radar:srt'],
+          stationsCount: 24,
+          networkName: 'Rete Radar Meteorologica Nazionale DPC'
+        }
+      },
       radar: {
         past: rvData.radar?.past || [],
         nowcast: rvData.radar?.nowcast || []

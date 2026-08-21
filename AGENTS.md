@@ -29,6 +29,7 @@
 | **Multi-Source Cell Engine** | [`src/services/multi-source-tracker.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/multi-source-tracker.ts) | ✅ Completed | Real-time genesis, maturation, dissipation and automatic cell purging |
 | **GitHub Actions Data Sync** | [`scripts/sync-radar-data.mjs`](file:///c:/Users/franc/Documents/hailcast-ml/scripts/sync-radar-data.mjs) | ✅ Completed | 15-min scheduled data snapshot with live CAPE/radar/cells sync |
 | **RainViewer API** | [`src/services/rainviewer.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/rainviewer.ts) | ✅ Completed | Live and nowcast frame retrieval with fallback |
+| **Protezione Civile Radar (DPC)** | [`src/services/protezione-civile.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/protezione-civile.ts) | ✅ Completed | WMS GeoWebCache (VMI dBZ & SRI mm/h) + 24 Stazioni Rete Nazionale |
 | **Open-Meteo Sounding API** | [`src/services/openmeteo.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/openmeteo.ts) | ✅ Completed | CAPE, Shear, Freezing Level retrieval for any point |
 | **Geographic Search** | [`src/services/geocoding.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/geocoding.ts) | ✅ Completed | Nominatim geocoding + common Italian presets |
 | **Spotter Feed & Modal** | [`src/components/SpotterModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/SpotterModal.ts) | ✅ Completed | Interactive form with TTL expiration and visual hail comparators |

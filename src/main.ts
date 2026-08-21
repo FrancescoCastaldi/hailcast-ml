@@ -199,6 +199,34 @@ class HailCastApp {
     });
 
     // Tasti HUD mappa
+    document.getElementById('selectRadarSource')?.addEventListener('change', (e) => {
+      const select = e.currentTarget as HTMLSelectElement;
+      const source = select.value as 'rainviewer' | 'dpc-vmi' | 'dpc-sri';
+      this.radarMap.setRadarSource(source);
+      
+      const sourceLabels: Record<string, string> = {
+        'rainviewer': 'RainViewer Mosaic',
+        'dpc-vmi': 'Protezione Civile DPC (VMI dBZ)',
+        'dpc-sri': 'Protezione Civile DPC (SRI mm/h)'
+      };
+      
+      const label = sourceLabels[source] || source;
+      const statusText = document.getElementById('radarStatusText');
+      if (statusText) {
+        statusText.textContent = `RADAR: ${label.toUpperCase()} LIVE`;
+      }
+      this.alertFeed.addAlert(`Sorgente radar impostata: ${label}`, 'info');
+      this.showToast(`Sorgente Radar: ${label}`, 'info');
+    });
+
+    document.getElementById('btnToggleDpcStations')?.addEventListener('click', (e) => {
+      const btn = e.currentTarget as HTMLElement;
+      btn.classList.toggle('active');
+      const active = btn.classList.contains('active');
+      this.radarMap.toggleDpcStations(active);
+      this.showToast(active ? 'Rete Radar DPC (24+ stazioni) Visibile' : 'Rete Radar DPC Nascosta', 'info');
+    });
+
     document.getElementById('btnToggleRadarLayer')?.addEventListener('click', (e) => {
       const btn = e.currentTarget as HTMLElement;
       btn.classList.toggle('active');
