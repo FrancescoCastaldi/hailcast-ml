@@ -167,7 +167,9 @@ export class RadarMapComponent {
     this.stormCellsLayerGroup.clearLayers();
     this.trajectoriesLayerGroup.clearLayers();
 
-    for (const cell of cells) {
+    const activeCells = cells.filter(c => !c.isDissipated);
+
+    for (const cell of activeCells) {
       // 1. Poligono nucleo riflettente
       const latLngs = cell.polygon.map(c => [c.lat, c.lng] as [number, number]);
       const color = this.getDbzColor(cell.maxDbz);

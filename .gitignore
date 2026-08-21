@@ -49,4 +49,5 @@ report/Lecture/
 private/
 *.pdf
 
-# Playwright MCP test artifacts.playwright-mcp/
+# Playwright MCP test artifacts
+.playwright-mcp/

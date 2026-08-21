@@ -17,12 +17,15 @@ export class AlertFeedComponent {
   }
 
   public renderStormCells(cells: StormCell[]): void {
-    this.activeCountEl.textContent = `${cells.length} Rilevate`;
+    // Filtra via eventuali celle già dissolte
+    const activeCells = cells.filter(c => !c.isDissipated);
+    this.activeCountEl.textContent = `${activeCells.length} Rilevate`;
 
-    if (cells.length === 0) {
+    if (activeCells.length === 0) {
       this.cellsListEl.innerHTML = `
-        <div class="empty-state">
-          <p>Nessun nucleo convettivo con riflettività > 45 dBZ nell'area.</p>
+        <div class="empty-state" style="padding: 24px; text-align: center; color: var(--text-muted);">
+          <div style="font-size: 2rem; margin-bottom: 8px;">☀️</div>
+          <p>Nessun nucleo convettivo attivo al momento.<br/><small>Le celle precedenti si sono dissolte. Il radar scansiona in tempo reale.</small></p>
         </div>
       `;
       return;
@@ -30,17 +33,30 @@ export class AlertFeedComponent {
 
     this.cellsListEl.innerHTML = '';
 
-    for (const cell of cells) {
+    for (const cell of activeCells) {
       const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
-      const isNew = !!cell.isNew;
+      const isNew = !!cell.isNew || cell.formationStage === 'new_initiation';
+      const stage = cell.formationStage || (isNew ? 'new_initiation' : 'established');
+      const ageMinutes = cell.ageMinutes !== undefined ? cell.ageMinutes : 25;
+      const lifespan = cell.lifespanMinutes || 85;
+
+      let stageBadge = '';
+      if (stage === 'new_initiation') {
+        stageBadge = '<span class="new-trajectory-chip" style="background: #00f0ff; color: #0f172a; font-weight: 700;">⚡ NUOVA CELLA</span>';
+      } else if (stage === 'rapid_intensification') {
+        stageBadge = '<span class="new-trajectory-chip" style="background: linear-gradient(90deg, #ff0055, #ff7700); color: #fff; font-weight: 700;">🔥 PICCO ATTIVITÀ</span>';
+      } else if (stage === 'dissipating') {
+        stageBadge = '<span class="new-trajectory-chip" style="background: #475569; color: #e2e8f0; font-weight: 600;">🌫️ IN DISSOLVIMENTO</span>';
+      }
+
       const card = document.createElement('div');
       card.className = `storm-cell-card severity-${cell.severity} ${isNew ? 'is-new-trajectory' : ''}`;
       card.innerHTML = `
         <div class="cell-card-header">
           <div class="cell-name-group">
             <span class="cell-name">${cell.name}</span>
-            ${isNew ? '<span class="new-trajectory-chip">⚡ NUOVA TRAIETTORIA</span>' : ''}
-            <span class="cell-trend ${cell.trend}">${cell.trend === 'intensifying' ? '▲ In Intensificazione' : '■ Stazionaria'}</span>
+            ${stageBadge}
+            <span class="cell-trend ${cell.trend}">${cell.trend === 'intensifying' ? '▲ In Crescita' : cell.trend === 'weakening' ? '▼ In Calo' : '■ Stazionaria'}</span>
           </div>
           <div class="cell-dbz-pill">${cell.maxDbz} dBZ</div>
         </div>
@@ -66,12 +82,12 @@ export class AlertFeedComponent {
             <span class="stat-val">${cell.velocity.speedKmh} km/h</span>
           </div>
           <div class="stat-col">
-            <span class="stat-lbl">Direzione</span>
-            <span class="stat-val">${Math.round(cell.velocity.directionDeg)}°</span>
-          </div>
-          <div class="stat-col">
             <span class="stat-lbl">Severità</span>
             <span class="stat-val severity-tag">${this.getSeverityLabel(cell.severity)}</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-lbl">Età Cella</span>
+            <span class="stat-val" style="font-size: 0.82rem; color: var(--text-highlight);">${ageMinutes}m / ${lifespan}m</span>
           </div>
         </div>
 

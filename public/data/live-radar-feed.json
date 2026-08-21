@@ -1,13 +1,10 @@
 {
-  "updatedAt": "2026-08-21T09:51:45.201Z",
-  "generatedTimestamp": 1787305824,
+  "updatedAt": "2026-08-21T10:08:02.576Z",
+  "updatedEpoch": 1787306882576,
+  "generatedTimestamp": 1787306729,
   "host": "https://tilecache.rainviewer.com",
   "radar": {
     "past": [
-      {
-        "time": 1787298600,
-        "path": "/v2/radar/1ce0e651d166"
-      },
       {
         "time": 1787299200,
         "path": "/v2/radar/5e31a898d6a7"
@@ -55,46 +52,910 @@
       {
         "time": 1787305800,
         "path": "/v2/radar/e222ac103791"
+      },
+      {
+        "time": 1787306400,
+        "path": "/v2/radar/a1b589f7a8ba"
       }
     ],
     "nowcast": []
   },
+  "detectedStormCells": [
+    {
+      "id": "cell-sync-ne_garda-6",
+      "name": "Supercella Gardesana / Valpolicella",
+      "centroid": {
+        "lat": 45.433573712507524,
+        "lng": 11.080491208278431
+      },
+      "maxDbz": 52,
+      "polygon": [
+        {
+          "lat": 45.52001374038287,
+          "lng": 11.080491208278431
+        },
+        {
+          "lat": 45.51210714375537,
+          "lng": 11.145209405104879
+        },
+        {
+          "lat": 45.48618154788023,
+          "lng": 11.210643590497284
+        },
+        {
+          "lat": 45.433431957070816,
+          "lng": 11.260745526670803
+        },
+        {
+          "lat": 45.37820309100173,
+          "lng": 11.216825145601206
+        },
+        {
+          "lat": 45.35239482661276,
+          "lng": 11.1471689805212
+        },
+        {
+          "lat": 45.34713368463218,
+          "lng": 11.080491208278431
+        },
+        {
+          "lat": 45.35500383595728,
+          "lng": 11.015952922705083
+        },
+        {
+          "lat": 45.380818343365895,
+          "lng": 10.95058159107657
+        },
+        {
+          "lat": 45.433431957070816,
+          "lng": 10.90023688988606
+        },
+        {
+          "lat": 45.488781832668195,
+          "lng": 10.94388987704508
+        },
+        {
+          "lat": 45.51471369308024,
+          "lng": 11.013621380970221
+        },
+        {
+          "lat": 45.52001374038287,
+          "lng": 11.080491208278431
+        }
+      ],
+      "velocity": {
+        "speedKmh": 28,
+        "directionDeg": 94,
+        "vx": 28,
+        "vy": -2
+      },
+      "sounding": {
+        "cape": 180,
+        "cin": 25,
+        "liftedIndex": 0.3,
+        "freezingLevel": 3600,
+        "minus20Level": 6700,
+        "deepShear06km": 13,
+        "srh03km": 220,
+        "dewPointDepression": 3.2,
+        "echoTop": 13200,
+        "vil": 22
+      },
+      "meshDiameterCm": 1.9,
+      "pohPercentage": 45,
+      "poshPercentage": 30,
+      "severity": "moderate",
+      "trend": "intensifying",
+      "nowcastCones": [
+        {
+          "minutesAhead": 15,
+          "projectedCentroid": {
+            "lat": 45.42914743041375,
+            "lng": 11.169975398454312
+          },
+          "uncertaintyRadiusKm": 5.3,
+          "polygon": [
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            },
+            {
+              "lat": 45.476336419386,
+              "lng": 11.1746812800003
+            },
+            {
+              "lat": 45.427160460039396,
+              "lng": 11.210318558007543
+            },
+            {
+              "lat": 45.38195824853163,
+              "lng": 11.165277378909082
+            },
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            }
+          ]
+        },
+        {
+          "minutesAhead": 30,
+          "projectedCentroid": {
+            "lat": 45.42465128925077,
+            "lng": 11.259445444442576
+          },
+          "uncertaintyRadiusKm": 6.5,
+          "polygon": [
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            },
+            {
+              "lat": 45.483144075791095,
+              "lng": 11.265279294855532
+            },
+            {
+              "lat": 45.42218624596272,
+              "lng": 11.309448149799096
+            },
+            {
+              "lat": 45.36615820635682,
+              "lng": 11.2536236708969
+            },
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            }
+          ]
+        },
+        {
+          "minutesAhead": 45,
+          "projectedCentroid": {
+            "lat": 45.42008531110892,
+            "lng": 11.348901129334081
+          },
+          "uncertaintyRadiusKm": 7.8,
+          "polygon": [
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            },
+            {
+              "lat": 45.48988188412257,
+              "lng": 11.35586321247024
+            },
+            {
+              "lat": 45.41714138157308,
+              "lng": 11.408561604976512
+            },
+            {
+              "lat": 45.350288316199325,
+              "lng": 11.341956237717682
+            },
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            }
+          ]
+        },
+        {
+          "minutesAhead": 60,
+          "projectedCentroid": {
+            "lat": 45.41544951841273,
+            "lng": 11.43834223649992
+          },
+          "uncertaintyRadiusKm": 9,
+          "polygon": [
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            },
+            {
+              "lat": 45.496549866801885,
+              "lng": 11.4464328121162
+            },
+            {
+              "lat": 45.41202588974537,
+              "lng": 11.507658671546778
+            },
+            {
+              "lat": 45.33434860049814,
+              "lng": 11.430274866140394
+            },
+            {
+              "lat": 45.433573712507524,
+              "lng": 11.080491208278431
+            }
+          ]
+        }
+      ],
+      "isNew": false,
+      "formationStage": "rapid_intensification",
+      "createdAt": 1787305982576,
+      "ageMinutes": 15,
+      "lifespanMinutes": 75,
+      "expiresAt": 1787310482576
+    },
+    {
+      "id": "cell-sync-no_lomb_piem-6",
+      "name": "Mesociclone Sebino-Bresciano",
+      "centroid": {
+        "lat": 45.35838973113501,
+        "lng": 9.783021413255824
+      },
+      "maxDbz": 40,
+      "polygon": [
+        {
+          "lat": 45.45330829029827,
+          "lng": 9.783021413255824
+        },
+        {
+          "lat": 45.44093736815508,
+          "lng": 9.8509625577841
+        },
+        {
+          "lat": 45.41221693769826,
+          "lng": 9.91601985895295
+        },
+        {
+          "lat": 45.35824272694168,
+          "lng": 9.966579189525532
+        },
+        {
+          "lat": 45.29458028435017,
+          "lng": 9.939867432674305
+        },
+        {
+          "lat": 45.26599919856645,
+          "lng": 9.858790047873754
+        },
+        {
+          "lat": 45.26347117197176,
+          "lng": 9.783021413255824
+        },
+        {
+          "lat": 45.27580193244681,
+          "lng": 9.71527826210695
+        },
+        {
+          "lat": 45.304408468275334,
+          "lng": 9.650276128239398
+        },
+        {
+          "lat": 45.35824272694168,
+          "lng": 9.599463636986115
+        },
+        {
+          "lat": 45.421984029181594,
+          "lng": 9.625821840338745
+        },
+        {
+          "lat": 45.45073000511324,
+          "lng": 9.70700500839223
+        },
+        {
+          "lat": 45.45330829029827,
+          "lng": 9.783021413255824
+        }
+      ],
+      "velocity": {
+        "speedKmh": 35,
+        "directionDeg": 104,
+        "vx": 34,
+        "vy": -8
+      },
+      "sounding": {
+        "cape": 10,
+        "cin": 25,
+        "liftedIndex": 0.1,
+        "freezingLevel": 3600,
+        "minus20Level": 6700,
+        "deepShear06km": 16,
+        "srh03km": 220,
+        "dewPointDepression": 3.2,
+        "echoTop": 13200,
+        "vil": 20
+      },
+      "meshDiameterCm": 0,
+      "pohPercentage": 10,
+      "poshPercentage": 0,
+      "severity": "none",
+      "trend": "weakening",
+      "nowcastCones": [
+        {
+          "minutesAhead": 15,
+          "projectedCentroid": {
+            "lat": 45.33930125004834,
+            "lng": 9.89164633337009
+          },
+          "uncertaintyRadiusKm": 5.6,
+          "polygon": [
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            },
+            {
+              "lat": 45.38794784043649,
+              "lng": 9.908917060383601
+            },
+            {
+              "lat": 45.332016158891896,
+              "lng": 9.93316673661559
+            },
+            {
+              "lat": 45.290652061344716,
+              "lng": 9.874405258285151
+            },
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            }
+          ]
+        },
+        {
+          "minutesAhead": 30,
+          "projectedCentroid": {
+            "lat": 45.320109876750095,
+            "lng": 10.000197840322926
+          },
+          "uncertaintyRadiusKm": 7.2,
+          "polygon": [
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            },
+            {
+              "lat": 45.382499203781514,
+              "lng": 10.022345604934458
+            },
+            {
+              "lat": 45.31076394906186,
+              "lng": 10.053428253601282
+            },
+            {
+              "lat": 45.257716278777394,
+              "lng": 9.978098799101872
+            },
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            }
+          ]
+        },
+        {
+          "minutesAhead": 45,
+          "projectedCentroid": {
+            "lat": 45.300815749805146,
+            "lng": 10.10867563912268
+          },
+          "uncertaintyRadiusKm": 8.7,
+          "polygon": [
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            },
+            {
+              "lat": 45.376947606605654,
+              "lng": 10.135699451176947
+            },
+            {
+              "lat": 45.28940779358808,
+              "lng": 10.173607173374535
+            },
+            {
+              "lat": 45.22467753749625,
+              "lng": 10.081724306760748
+            },
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            }
+          ]
+        },
+        {
+          "minutesAhead": 60,
+          "projectedCentroid": {
+            "lat": 45.281419008284644,
+            "lng": 10.217079436736526
+          },
+          "uncertaintyRadiusKm": 10.3,
+          "polygon": [
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            },
+            {
+              "lat": 45.37129318821046,
+              "lng": 10.248978279701987
+            },
+            {
+              "lat": 45.267947834193265,
+              "lng": 10.293703154038326
+            },
+            {
+              "lat": 45.19153597719637,
+              "lng": 10.185281499961548
+            },
+            {
+              "lat": 45.35838973113501,
+              "lng": 9.783021413255824
+            }
+          ]
+        }
+      ],
+      "isNew": false,
+      "formationStage": "dissipating",
+      "createdAt": 1787301962576,
+      "ageMinutes": 82,
+      "lifespanMinutes": 90,
+      "expiresAt": 1787307362576
+    },
+    {
+      "id": "cell-sync-emilia_rom-6",
+      "name": "V-Shaped Modenese-Reggiano",
+      "centroid": {
+        "lat": 44.38116969849266,
+        "lng": 11.65069535866121
+      },
+      "maxDbz": 47,
+      "polygon": [
+        {
+          "lat": 44.48738284886685,
+          "lng": 11.65069535866121
+        },
+        {
+          "lat": 44.46843729699124,
+          "lng": 11.721314658138908
+        },
+        {
+          "lat": 44.43551816224258,
+          "lng": 11.78271329998688
+        },
+        {
+          "lat": 44.381029290838384,
+          "lng": 11.830101384692284
+        },
+        {
+          "lat": 44.3068036441158,
+          "lng": 11.830348832561754
+        },
+        {
+          "lat": 44.27404710362968,
+          "lng": 11.737046829942074
+        },
+        {
+          "lat": 44.27495654811848,
+          "lng": 11.65069535866121
+        },
+        {
+          "lat": 44.293858719154564,
+          "lng": 11.580286322202824
+        },
+        {
+          "lat": 44.32666945811564,
+          "lng": 11.51892263275397
+        },
+        {
+          "lat": 44.381029290838384,
+          "lng": 11.471289332630136
+        },
+        {
+          "lat": 44.45525344749188,
+          "lng": 11.470585783735146
+        },
+        {
+          "lat": 44.48822699917955,
+          "lng": 11.56402741251327
+        },
+        {
+          "lat": 44.48738284886685,
+          "lng": 11.65069535866121
+        }
+      ],
+      "velocity": {
+        "speedKmh": 28,
+        "directionDeg": 117,
+        "vx": 25,
+        "vy": -13
+      },
+      "sounding": {
+        "cape": 1320,
+        "cin": 25,
+        "liftedIndex": -2.8,
+        "freezingLevel": 3600,
+        "minus20Level": 6700,
+        "deepShear06km": 13,
+        "srh03km": 220,
+        "dewPointDepression": 3.2,
+        "echoTop": 13200,
+        "vil": 37
+      },
+      "meshDiameterCm": 1.3,
+      "pohPercentage": 46,
+      "poshPercentage": 31,
+      "severity": "minor",
+      "trend": "weakening",
+      "nowcastCones": [
+        {
+          "minutesAhead": 15,
+          "projectedCentroid": {
+            "lat": 44.35256300449313,
+            "lng": 11.729138784318593
+          },
+          "uncertaintyRadiusKm": 5.3,
+          "polygon": [
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            },
+            {
+              "lat": 44.39470752043528,
+              "lng": 11.759194190327207
+            },
+            {
+              "lat": 44.339672123657174,
+              "lng": 11.764497783273669
+            },
+            {
+              "lat": 44.31041061887246,
+              "lng": 11.69912657829525
+            },
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            }
+          ]
+        },
+        {
+          "minutesAhead": 30,
+          "projectedCentroid": {
+            "lat": 44.323902678330654,
+            "lng": 11.807505595566454
+          },
+          "uncertaintyRadiusKm": 6.5,
+          "polygon": [
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            },
+            {
+              "lat": 44.37614148382712,
+              "lng": 11.844748770231945
+            },
+            {
+              "lat": 44.30792225721293,
+              "lng": 11.851310907043853
+            },
+            {
+              "lat": 44.271651793408445,
+              "lng": 11.770328697556465
+            },
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            }
+          ]
+        },
+        {
+          "minutesAhead": 45,
+          "projectedCentroid": {
+            "lat": 44.29518882600015,
+            "lng": 11.885795800742244
+          },
+          "uncertaintyRadiusKm": 7.8,
+          "polygon": [
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            },
+            {
+              "lat": 44.35752147299611,
+              "lng": 11.930222149750307
+            },
+            {
+              "lat": 44.276118246226524,
+              "lng": 11.938038257899734
+            },
+            {
+              "lat": 44.232838996949184,
+              "lng": 11.841463679067033
+            },
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            }
+          ]
+        },
+        {
+          "minutesAhead": 60,
+          "projectedCentroid": {
+            "lat": 44.26642155343327,
+            "lng": 11.96400940894182
+          },
+          "uncertaintyRadiusKm": 9,
+          "polygon": [
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            },
+            {
+              "lat": 44.33884759492929,
+              "lng": 12.015614324749208
+            },
+            {
+              "lat": 44.24426019864925,
+              "lng": 12.02467984455052
+            },
+            {
+              "lat": 44.19397233709399,
+              "lng": 11.912531523020448
+            },
+            {
+              "lat": 44.38116969849266,
+              "lng": 11.65069535866121
+            }
+          ]
+        }
+      ],
+      "isNew": false,
+      "formationStage": "dissipating",
+      "createdAt": 1787303342576,
+      "ageMinutes": 59,
+      "lifespanMinutes": 75,
+      "expiresAt": 1787307842576
+    },
+    {
+      "id": "cell-sync-veneto_friuli-6",
+      "name": "Cella Pedemontana Vicentina",
+      "centroid": {
+        "lat": 45.87863070732468,
+        "lng": 12.563034271821834
+      },
+      "maxDbz": 53,
+      "polygon": [
+        {
+          "lat": 45.987540684288156,
+          "lng": 12.563034271821834
+        },
+        {
+          "lat": 45.9835202984249,
+          "lng": 12.650212504610977
+        },
+        {
+          "lat": 45.95064514922829,
+          "lng": 12.742784877637519
+        },
+        {
+          "lat": 45.87842394885762,
+          "lng": 12.780767425310728
+        },
+        {
+          "lat": 45.81528420747683,
+          "lng": 12.720188943952166
+        },
+        {
+          "lat": 45.78259695664987,
+          "lng": 12.642515967085046
+        },
+        {
+          "lat": 45.769720730361215,
+          "lng": 12.563034271821834
+        },
+        {
+          "lat": 45.773675074374886,
+          "lng": 12.476184654071972
+        },
+        {
+          "lat": 45.806335168152394,
+          "lng": 12.38374989783938
+        },
+        {
+          "lat": 45.87842394885762,
+          "lng": 12.34530111833294
+        },
+        {
+          "lat": 45.94176129019729,
+          "lng": 12.405521476384251
+        },
+        {
+          "lat": 45.974609163970406,
+          "lng": 12.483277441123846
+        },
+        {
+          "lat": 45.987540684288156,
+          "lng": 12.563034271821834
+        }
+      ],
+      "velocity": {
+        "speedKmh": 28,
+        "directionDeg": 79,
+        "vx": 27,
+        "vy": 5
+      },
+      "sounding": {
+        "cape": 390,
+        "cin": 25,
+        "liftedIndex": -2.2,
+        "freezingLevel": 3600,
+        "minus20Level": 6700,
+        "deepShear06km": 13,
+        "srh03km": 220,
+        "dewPointDepression": 3.2,
+        "echoTop": 13200,
+        "vil": 25
+      },
+      "meshDiameterCm": 2.2,
+      "pohPercentage": 52,
+      "poshPercentage": 37,
+      "severity": "moderate",
+      "trend": "intensifying",
+      "nowcastCones": [
+        {
+          "minutesAhead": 15,
+          "projectedCentroid": {
+            "lat": 45.8906082404278,
+            "lng": 12.651817607767157
+          },
+          "uncertaintyRadiusKm": 5.3,
+          "polygon": [
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            },
+            {
+              "lat": 45.93704270914876,
+              "lng": 12.638838803671888
+            },
+            {
+              "lat": 45.89601690507189,
+              "lng": 12.691850101152681
+            },
+            {
+              "lat": 45.8441723048739,
+              "lng": 12.664774728326847
+            },
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            }
+          ]
+        },
+        {
+          "minutesAhead": 30,
+          "projectedCentroid": {
+            "lat": 45.902516989544026,
+            "lng": 12.74063913410987
+          },
+          "uncertaintyRadiusKm": 6.5,
+          "polygon": [
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            },
+            {
+              "lat": 45.96007432515268,
+              "lng": 12.724544653753924
+            },
+            {
+              "lat": 45.909219185920435,
+              "lng": 12.790272962738413
+            },
+            {
+              "lat": 45.844957399253666,
+              "lng": 12.756700277365894
+            },
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            }
+          ]
+        },
+        {
+          "minutesAhead": 45,
+          "projectedCentroid": {
+            "lat": 45.914356896539566,
+            "lng": 12.829498662898573
+          },
+          "uncertaintyRadiusKm": 7.8,
+          "polygon": [
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            },
+            {
+              "lat": 45.98303701412771,
+              "lng": 12.81028593685744
+            },
+            {
+              "lat": 45.922351818562625,
+              "lng": 12.888738324270662
+            },
+            {
+              "lat": 45.845673567294526,
+              "lng": 12.848663892139939
+            },
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            }
+          ]
+        },
+        {
+          "minutesAhead": 60,
+          "projectedCentroid": {
+            "lat": 45.926127903555454,
+            "lng": 12.91839600547371
+          },
+          "uncertaintyRadiusKm": 9,
+          "polygon": [
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            },
+            {
+              "lat": 46.00593071804606,
+              "lng": 12.896062471433424
+            },
+            {
+              "lat": 45.93541474410012,
+              "lng": 12.987245965633974
+            },
+            {
+              "lat": 45.84632075110304,
+              "lng": 12.94066537231879
+            },
+            {
+              "lat": 45.87863070732468,
+              "lng": 12.563034271821834
+            }
+          ]
+        }
+      ],
+      "isNew": false,
+      "formationStage": "rapid_intensification",
+      "createdAt": 1787304722576,
+      "ageMinutes": 36,
+      "lifespanMinutes": 90,
+      "expiresAt": 1787310122576
+    }
+  ],
   "regionalObservatories": [
     {
       "code": "NE_GARDA",
       "region": "Nord-Est & Garda (Veneto / Trentino / FVG)",
+      "corridor": "Garda-Valpolicella",
       "coords": {
         "lat": 45.438,
         "lng": 10.991
       },
       "current": {
-        "temperature": 22.2,
-        "humidity": 89,
-        "pressure": 1000.9,
-        "windSpeedKmh": 9.4,
-        "windGustsKmh": 20.2,
-        "windDirectionDeg": 88,
-        "precipitationMm": 0,
+        "temperature": 22.6,
+        "humidity": 87,
+        "pressure": 1000.5,
+        "windSpeedKmh": 10.8,
+        "windGustsKmh": 22.3,
+        "windDirectionDeg": 94,
+        "precipitationMm": 0.1,
         "weatherCode": 61,
-        "cape": 200,
+        "cape": 180,
         "liftedIndex": 0.3
       }
     },
     {
       "code": "NO_LOMB_PIEM",
       "region": "Nord-Ovest & Prealpi (Lombardia / Piemonte)",
+      "corridor": "Prealpi-Orobiche",
       "coords": {
         "lat": 45.464,
         "lng": 9.189
       },
       "current": {
-        "temperature": 19.8,
-        "humidity": 91,
-        "pressure": 991.9,
-        "windSpeedKmh": 16.7,
-        "windGustsKmh": 33.8,
+        "temperature": 20.1,
+        "humidity": 90,
+        "pressure": 991.6,
+        "windSpeedKmh": 16,
+        "windGustsKmh": 34.6,
         "windDirectionDeg": 104,
-        "precipitationMm": 0.4,
+        "precipitationMm": 0.2,
         "weatherCode": 61,
         "cape": 10,
         "liftedIndex": 0.1
@@ -103,74 +964,98 @@
     {
       "code": "EMILIA_ROM",
       "region": "Pianura Emiliana & Appennino",
+      "corridor": "Modenese-Romagna",
       "coords": {
         "lat": 44.494,
         "lng": 11.342
       },
       "current": {
-        "temperature": 26.3,
+        "temperature": 26.5,
         "humidity": 72,
-        "pressure": 1000.9,
-        "windSpeedKmh": 1.1,
-        "windGustsKmh": 9,
-        "windDirectionDeg": 72,
+        "pressure": 1000.8,
+        "windSpeedKmh": 2.4,
+        "windGustsKmh": 10.8,
+        "windDirectionDeg": 117,
         "precipitationMm": 0,
         "weatherCode": 3,
-        "cape": 1150,
-        "liftedIndex": -3.1
+        "cape": 1320,
+        "liftedIndex": -2.8
+      }
+    },
+    {
+      "code": "VENETO_FRIULI",
+      "region": "Pedemontana Veneta & Bassa Friulana",
+      "corridor": "Piave-Tagliamento",
+      "coords": {
+        "lat": 45.85,
+        "lng": 12.35
+      },
+      "current": {
+        "temperature": 22.2,
+        "humidity": 95,
+        "pressure": 1005.9,
+        "windSpeedKmh": 9.2,
+        "windGustsKmh": 24.5,
+        "windDirectionDeg": 79,
+        "precipitationMm": 6.1,
+        "weatherCode": 96,
+        "cape": 390,
+        "liftedIndex": -2.2
       }
     },
     {
       "code": "CENTRO_TIRR",
       "region": "Centro Italia & Tirreno (Toscana / Umbria / Lazio)",
+      "corridor": "Valdarno-Chiana",
       "coords": {
         "lat": 43.769,
         "lng": 11.255
       },
       "current": {
-        "temperature": 25.4,
-        "humidity": 86,
-        "pressure": 1003.1,
-        "windSpeedKmh": 6.5,
-        "windGustsKmh": 24.5,
-        "windDirectionDeg": 273,
+        "temperature": 25.2,
+        "humidity": 88,
+        "pressure": 1003.3,
+        "windSpeedKmh": 8.7,
+        "windGustsKmh": 28.1,
+        "windDirectionDeg": 275,
         "precipitationMm": 0.2,
         "weatherCode": 80,
-        "cape": 1550,
-        "liftedIndex": -5.2
+        "cape": 1540,
+        "liftedIndex": -5.1
       }
     },
     {
       "code": "SUD_ADR",
       "region": "Sud Italia & Basso Adriatico (Puglia / Campania)",
+      "corridor": "Murge-Ofanto",
       "coords": {
         "lat": 41.117,
         "lng": 16.871
       },
       "current": {
-        "temperature": 33.5,
-        "humidity": 39,
+        "temperature": 33.3,
+        "humidity": 42,
         "pressure": 1011.3,
-        "windSpeedKmh": 8.9,
-        "windGustsKmh": 21.6,
-        "windDirectionDeg": 32,
+        "windSpeedKmh": 10.7,
+        "windGustsKmh": 25.2,
+        "windDirectionDeg": 33,
         "precipitationMm": 0,
         "weatherCode": 0,
-        "cape": 0,
-        "liftedIndex": 0.7
+        "cape": 10,
+        "liftedIndex": 0.5
       }
     }
   ],
   "convectiveIndices": {
-    "temperature": 22.2,
-    "humidity": 89,
-    "pressure": 1000.9,
-    "windSpeedKmh": 9.4,
-    "windGustsKmh": 20.2,
-    "windDirectionDeg": 88,
-    "precipitationMm": 0,
+    "temperature": 22.6,
+    "humidity": 87,
+    "pressure": 1000.5,
+    "windSpeedKmh": 10.8,
+    "windGustsKmh": 22.3,
+    "windDirectionDeg": 94,
+    "precipitationMm": 0.1,
     "weatherCode": 61,
-    "cape": 200,
+    "cape": 180,
     "liftedIndex": 0.3
   }
 }

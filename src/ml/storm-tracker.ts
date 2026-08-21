@@ -213,7 +213,8 @@ export class StormTracker {
     sounding: ConvectiveSounding,
     radiusKm: number = 12,
     isNew: boolean = false,
-    formationStage: 'new_initiation' | 'rapid_intensification' | 'established' | 'dissipating' = 'established'
+    formationStage: 'new_initiation' | 'rapid_intensification' | 'established' | 'dissipating' = 'established',
+    lifecycleMeta?: { createdAt?: number; ageMinutes?: number; lifespanMinutes?: number; isDissipated?: boolean }
   ): StormCell {
     // Calcola componenti vettoriali
     const rad = directionDeg * (Math.PI / 180);
@@ -253,11 +254,15 @@ export class StormTracker {
       pohPercentage: prediction.probability,
       poshPercentage: prediction.posh,
       severity: prediction.severityClass,
-      trend: isNew ? 'intensifying' : maxDbz > 58 ? 'intensifying' : 'steady',
+      trend: isNew || formationStage === 'rapid_intensification' ? 'intensifying' : formationStage === 'dissipating' ? 'weakening' : maxDbz > 58 ? 'intensifying' : 'steady',
       nowcastCones,
       impactedTowns,
       isNew,
-      formationStage
+      formationStage,
+      createdAt: lifecycleMeta?.createdAt,
+      ageMinutes: lifecycleMeta?.ageMinutes,
+      lifespanMinutes: lifecycleMeta?.lifespanMinutes,
+      isDissipated: lifecycleMeta?.isDissipated
     };
   }
 

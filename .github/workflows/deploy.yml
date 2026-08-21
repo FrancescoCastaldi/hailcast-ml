@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Fetch Live Radar & Convective Sounding Snapshot
+        run: node scripts/sync-radar-data.mjs
+
       - name: Run unit tests
         run: npm run test
 

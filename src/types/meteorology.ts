@@ -46,6 +46,10 @@ export interface StormCell {
   impactedTowns?: string[];
   isNew?: boolean;
   formationStage?: 'new_initiation' | 'rapid_intensification' | 'established' | 'dissipating';
+  createdAt?: number;      // Epoch ms when cell initiated
+  ageMinutes?: number;     // Elapsed active duration
+  lifespanMinutes?: number;// Total expected convective lifespan (e.g. 45 - 110 min)
+  isDissipated?: boolean;  // True when cell has decayed completely and should be removed
 }
 
 export interface NowcastCone {
@@ -72,6 +76,8 @@ export interface SpotterReport {
   locationName: string;
   coords: Coordinates;
   timestamp: string;
+  timestampMs?: number;      // Epoch ms for precise TTL expiration
+  expiresAt?: number;        // Epoch ms when report expires from active view
   hailSizeCm: number;
   phenomenon?: StormPhenomenon;
   windSpeedKmh?: number;

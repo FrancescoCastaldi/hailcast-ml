@@ -151,4 +151,56 @@ describe('Storm Tracking & Geodesics (Haversine / Cones / ETA)', () => {
     expect(assessment.locationName).toBe('Verona Test');
     expect(assessment.nearestStormDistanceKm).toBeLessThan(50);
   });
+
+  it('gestisce correttamente gli stadi del ciclo di vita della cella (genesi, maturità, dissolvimento)', () => {
+    const sounding: ConvectiveSounding = {
+      cape: 2200,
+      cin: 15,
+      liftedIndex: -5.5,
+      freezingLevel: 3500,
+      minus20Level: 6600,
+      deepShear06km: 20,
+      srh03km: 200,
+      dewPointDepression: 3.5,
+      echoTop: 12500,
+      vil: 55
+    };
+
+    const newCell = StormTracker.createStormCell(
+      'new-c1',
+      'Cella Nuova',
+      { lat: 45.4, lng: 10.5 },
+      52,
+      40,
+      80,
+      sounding,
+      12,
+      true,
+      'new_initiation',
+      { createdAt: Date.now() - 5 * 60000, ageMinutes: 5, lifespanMinutes: 80, isDissipated: false }
+    );
+
+    expect(newCell.isNew).toBe(true);
+    expect(newCell.formationStage).toBe('new_initiation');
+    expect(newCell.trend).toBe('intensifying');
+    expect(newCell.ageMinutes).toBe(5);
+
+    const dissipatingCell = StormTracker.createStormCell(
+      'old-c2',
+      'Cella in Dissolvimento',
+      { lat: 45.6, lng: 11.2 },
+      40,
+      35,
+      85,
+      sounding,
+      10,
+      false,
+      'dissipating',
+      { createdAt: Date.now() - 75 * 60000, ageMinutes: 75, lifespanMinutes: 80, isDissipated: false }
+    );
+
+    expect(dissipatingCell.formationStage).toBe('dissipating');
+    expect(dissipatingCell.trend).toBe('weakening');
+  });
 });
+

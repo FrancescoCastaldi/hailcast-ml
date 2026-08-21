@@ -470,19 +470,26 @@ class HailCastApp {
       const previousIds = new Set(this.baseStormCells.map(c => c.id));
       const freshCells = await MultiSourceStormDetector.scanAndDetectCells();
       
-      if (freshCells.length > 0) {
-        this.baseStormCells = freshCells;
-        this.currentStormCells = freshCells;
-        this.radarMap.renderStormCells(this.currentStormCells);
-        this.alertFeed.renderStormCells(this.currentStormCells);
+      const freshIds = new Set(freshCells.map(c => c.id));
+      this.baseStormCells = freshCells;
+      this.currentStormCells = freshCells;
+      this.radarMap.renderStormCells(this.currentStormCells);
+      this.alertFeed.renderStormCells(this.currentStormCells);
 
-        // Notifica eventuali nuove celle convettive rilevate
-        for (const cell of freshCells) {
-          if (!previousIds.has(cell.id) && (cell.severity === 'destructive' || cell.severity === 'severe')) {
-            this.showToast(`Nuova cella rilevata da multi-feed: ${cell.name} (${cell.meshDiameterCm} cm)`, 'warning');
-            this.alertFeed.addAlert(`Nuovo nucleo convettivo rilevato da Radar & Open-Meteo: ${cell.name} (${cell.maxDbz} dBZ)`, 'danger');
-          }
+      // Notifica celle dissolte
+      for (const oldId of previousIds) {
+        if (!freshIds.has(oldId)) {
+          console.log(`ℹ️ Cella temporalesca ${oldId} dissolta e rimossa dal radar.`);
         }
+      }
+
+      // Notifica eventuali nuove celle convettive rilevate
+      for (const cell of freshCells) {
+        if (!previousIds.has(cell.id) && (cell.severity === 'destructive' || cell.severity === 'severe')) {
+          this.showToast(`Nuova cella rilevata da multi-feed: ${cell.name} (${cell.meshDiameterCm} cm)`, 'warning');
+          this.alertFeed.addAlert(`Nuovo nucleo convettivo rilevato da Radar & Open-Meteo: ${cell.name} (${cell.maxDbz} dBZ)`, 'danger');
+        }
+      }
 
         // Se l'utente sta monitorando una località, aggiorna i dati in tempo reale
         if (this.inspectedLocation) {
@@ -509,7 +516,6 @@ class HailCastApp {
             this.alertFeed.addAlert(`[EMAIL & PUSH INVIATA] ${alertCheck.alert.title}: ${alertCheck.alert.message}`, 'danger');
           }
         }
-      }
     } catch (err) {
       console.warn('Errore refresh celle multi-fonte:', err);
     }
