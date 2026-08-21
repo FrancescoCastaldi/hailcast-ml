@@ -40,9 +40,13 @@
 | **Damage Calculator** | [`src/components/DamageCalculatorModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/DamageCalculatorModal.ts) | ✅ Completed | Vulnerability loss model for vineyards, orchards, crops, cars, and solar panels |
 | **Severe Hail Bulletin** | [`src/services/bulletin-generator.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/bulletin-generator.ts) | ✅ Completed | Official printable/exportable nowcasting bulletin with security prescriptions |
 | **Weather FX Animations** | [`src/components/WeatherFXOverlay.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/WeatherFXOverlay.ts) | ✅ Completed | Immersive particle FX (hail/rain/wind/lightning); hail runs in continuous loop |
-| **Alert Notifications** | [`src/services/alert-notification-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/alert-notification-service.ts) | ✅ Completed | Email alerts via FormSubmit with hail/rain thresholds |
-| **Vitest Test Suite** | [`tests/`](file:///c:/Users/franc/Documents/hailcast-ml/tests/) | ✅ Completed | 27 tests: Genesis forecast, DPC radars, alerts, MESH, POH, kinematics |
-| **Academic Documentation** | [`EXAM_INFO.md`](file:///c:/Users/franc/Documents/hailcast-ml/EXAM_INFO.md) | ✅ Completed | Derivations, roadmap and oral presentation plan (private, gitignored) |
+| **Alert Notifications & Push** | [`src/services/alert-notification-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/alert-notification-service.ts) | ✅ Completed | Email alerts via FormSubmit, Web Push browser API e 4 suoni dinamici differenziati |
+| **Storm History & Replay** | [`src/services/storm-history-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/storm-history-service.ts) | ✅ Completed | Ring buffer 3h, slider temporale, trail tracking su mappa e replay animato |
+| **Forecast Verification (WMO)** | [`src/services/forecast-verification-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/forecast-verification-service.ts) | ✅ Completed | Metriche scientifiche POD, FAR, CSI, Bias e composite Quality Score (0-100) |
+| **Data Export (CSV & GeoJSON)** | [`src/services/data-export-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/data-export-service.ts) | ✅ Completed | Export tabellare e geografico conforme RFC 7946 per GIS e analisi |
+| **Dark/Light Field Theme** | [`src/style.css`](file:///c:/Users/franc/Documents/hailcast-ml/src/style.css) | ✅ Completed | Tema ad alto contrasto per uso diurno in campo con persistenza |
+| **Vitest Test Suite** | [`tests/`](file:///c:/Users/franc/Documents/hailcast-ml/tests/) | ✅ Completed | 33 test: Genesis forecast, DPC radars, alerts, MESH, POH, kinematics, history, verification, export |
+| **Academic Documentation** | [`EXAM_INFO.md`](file:///c:/Users/franc/Documents/hailcast-ml/EXAM_INFO.md) | ✅ Completed | Derivazioni, roadmap and oral presentation plan (private, gitignored) |
 
 ---
 
@@ -54,5 +58,5 @@
 ---
 
 ## 🔄 Resume for Next Session
-- **Current State:** Complete, fully tested (27/27 Vitest passing) and documented codebase with directional genesis forecasts, DPC WMTS integration, and local ML persistence.
+- **Current State:** Complete, fully tested (33/33 Vitest passing) and documented codebase with storm history replay, WMO verification metrics, browser push, dynamic acoustic alerts, light theme, and CSV/GeoJSON export.
 - **Handoff:** The application is running seamlessly with `npm run dev` and static production build in `dist/`. All source files, tests and markdown specifications are synced on `origin/main`.

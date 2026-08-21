@@ -208,3 +208,17 @@ export interface HailGenesisForecast {
   resultingCellId?: string;
 }
 
+export interface VerificationMetrics {
+  pod: number;
+  far: number;
+  csi: number;
+  bias: number;
+  hits: number;
+  misses: number;
+  falseAlarms: number;
+  totalForecasts: number;
+  totalObserved: number;
+  scoreLabel: string;
+  qualityScore: number;
+}
+

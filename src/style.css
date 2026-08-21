@@ -4391,4 +4391,385 @@ body.mode-hail #btnModeHail {
   box-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
 }
 
+/* ==========================================================================
+   LIGHT THEME — Tema Chiaro per Uso Diurno in Campo
+   ========================================================================== */
 
+body.light-theme {
+  --bg-dark: #f0f4f8;
+  --bg-surface: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: rgba(240, 245, 252, 0.96);
+  --border-glass: rgba(0, 0, 0, 0.1);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-active: rgba(0, 120, 200, 0.6);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-cyan: #0891b2;
+}
+
+body.light-theme {
+  background: #eef2f7;
+  color: var(--text-primary);
+}
+
+body.light-theme .glass-panel {
+  background: var(--bg-card) !important;
+  border-color: var(--border-glass) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .app-header {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme .sidebar {
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
+body.light-theme .storm-card,
+body.light-theme .genesis-card,
+body.light-theme .alert-item,
+body.light-theme .telemetry-card,
+body.light-theme .verification-card {
+  background: rgba(248, 250, 252, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-theme .storm-card:hover,
+body.light-theme .genesis-card:hover {
+  background: rgba(241, 245, 249, 0.98) !important;
+  border-color: rgba(0, 120, 200, 0.3) !important;
+}
+
+body.light-theme .section-title {
+  color: var(--text-secondary) !important;
+}
+
+body.light-theme .btn-secondary {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+body.light-theme .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme .badge {
+  background: rgba(0, 120, 200, 0.12) !important;
+  color: #0369a1 !important;
+}
+
+body.light-theme .map-floating-controls {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+body.light-theme .map-control-btn {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-theme .map-control-btn.active {
+  background: rgba(0, 120, 200, 0.1) !important;
+  color: #0369a1 !important;
+  border-color: rgba(0, 120, 200, 0.3) !important;
+}
+
+body.light-theme .radar-source-select {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+body.light-theme .location-risk-card {
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+body.light-theme .toast-item {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.light-theme .radar-legend-bar {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+body.light-theme .timeline-footer {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+body.light-theme .mobile-bottom-nav {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme #btnToggleTheme svg {
+  color: #f59e0b;
+}
+
+/* ==========================================================================
+   VERIFICATION CARD — Metriche di Verifica Previsioni (POD/FAR/CSI)
+   ========================================================================== */
+
+.verification-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.verification-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 6px;
+}
+
+.verification-score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.verification-quality-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-cyan);
+}
+
+.verification-quality-score {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+}
+
+.verification-metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.verification-metric {
+  display: grid;
+  grid-template-columns: 100px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+}
+
+.vm-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.vm-label small {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.vm-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vm-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vm-pod { background: linear-gradient(90deg, #10b981, #34d399); }
+.vm-far { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+.vm-csi { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+
+.vm-value {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.verification-counts {
+  margin-top: 8px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ==========================================================================
+   HISTORY SECTION — Storico Celle & Replay Temporale
+   ========================================================================== */
+
+.history-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.history-count-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--accent-cyan);
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: auto;
+}
+
+.history-controls {
+  margin-top: 6px;
+}
+
+.history-slider {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.4));
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.history-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  transition: transform 0.15s ease;
+}
+
+.history-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.history-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  border: none;
+  cursor: pointer;
+}
+
+.history-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  gap: 6px;
+}
+
+.history-time-label {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 90px;
+}
+
+.history-replay-btn,
+.history-trails-btn {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-replay-btn:hover,
+.history-trails-btn:hover {
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--accent-cyan);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+.history-replay-btn.active,
+.history-trails-btn.active {
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+/* History Trail Line Animation */
+.history-trail-line {
+  animation: trailPulse 2s ease-in-out infinite;
+}
+
+@keyframes trailPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+/* ==========================================================================
+   EXPORT DROPDOWN — Menu Esportazione Dati
+   ========================================================================== */
+
+.export-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.export-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 200px;
+  z-index: 1000;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.export-dropdown-menu.show {
+  display: flex;
+  flex-direction: column;
+}
+
+.export-option {
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.export-option:hover {
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--accent-cyan);
+}

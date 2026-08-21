@@ -15,6 +15,7 @@ export class RadarMapComponent {
   private markerLayerGroup: L.LayerGroup = L.layerGroup();
   private dpcStationsLayerGroup: L.LayerGroup = L.layerGroup();
   private genesisLayerGroup: L.LayerGroup = L.layerGroup();
+  private historyTrailsLayerGroup: L.LayerGroup = L.layerGroup();
 
   private showRadar: boolean = true;
   private showVectors: boolean = true;
@@ -455,6 +456,72 @@ export class RadarMapComponent {
     } catch (e) {
       console.warn('fitToActiveCells error:', e);
     }
+  }
+
+  /**
+   * Renderizza i trail storici delle celle sulla mappa come polyline animate
+   */
+  public renderHistoryTrails(trails: Map<string, { coords: Coordinates[]; name: string; severity: string }>): void {
+    this.historyTrailsLayerGroup.clearLayers();
+
+    const severityColors: Record<string, string> = {
+      destructive: '#ff00d4',
+      severe: '#ff0033',
+      moderate: '#ff6d00',
+      minor: '#00b0ff',
+      none: '#3d5afe'
+    };
+
+    trails.forEach((trail, _cellId) => {
+      if (trail.coords.length < 2) return;
+
+      const latLngs: [number, number][] = trail.coords.map(c => [c.lat, c.lng]);
+      const color = severityColors[trail.severity] || '#00e676';
+
+      // Trail line (linea tratteggiata sottile)
+      const trailLine = L.polyline(latLngs, {
+        color: color,
+        weight: 2.5,
+        opacity: 0.6,
+        dashArray: '6, 4',
+        className: 'history-trail-line'
+      });
+
+      // Dot al punto iniziale (storico più vecchio)
+      const startDot = L.circleMarker(latLngs[0], {
+        radius: 3,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.5,
+        weight: 1
+      });
+
+      // Dot al punto finale (posizione attuale)
+      const endDot = L.circleMarker(latLngs[latLngs.length - 1], {
+        radius: 5,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.9,
+        weight: 2
+      });
+
+      trailLine.bindTooltip(`📍 Trail: ${trail.name}`, { sticky: true, className: 'trail-tooltip' });
+
+      this.historyTrailsLayerGroup.addLayer(trailLine);
+      this.historyTrailsLayerGroup.addLayer(startDot);
+      this.historyTrailsLayerGroup.addLayer(endDot);
+    });
+
+    if (!this.map.hasLayer(this.historyTrailsLayerGroup)) {
+      this.historyTrailsLayerGroup.addTo(this.map);
+    }
+  }
+
+  /**
+   * Rimuove tutti i trail storici dalla mappa
+   */
+  public clearHistoryTrails(): void {
+    this.historyTrailsLayerGroup.clearLayers();
   }
 
   private getSizeNickname(diamCm: number): string {

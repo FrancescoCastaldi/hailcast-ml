@@ -141,20 +141,25 @@ export class AlertNotificationService {
   }
 
   /**
-   * Riproduce un allarme sonoro d'emergenza via Web Audio API (senza file esterni)
+   * Riproduce un allarme sonoro d'emergenza differenziato per severità via Web Audio API
+   * 
+   * - info: tono singolo morbido 440 Hz
+   * - warning: doppio tono 660-880 Hz
+   * - severe: triplo tono 880-1200-880 Hz crescendo
+   * - destructive: sirena oscillante 800-1400 Hz × 3 cicli con volume crescente
    */
-  public static playAlertChime(): void {
+  public static playAlertChime(severity: 'info' | 'warning' | 'severe' | 'destructive' = 'severe'): void {
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       
-      const playTone = (freq: number, start: number, duration: number) => {
+      const playTone = (freq: number, start: number, duration: number, volume: number = 0.3, type: OscillatorType = 'triangle') => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'triangle';
+        osc.type = type;
         osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime + start);
+        gain.gain.setValueAtTime(Math.min(volume, 0.5), ctx.currentTime + start);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + start + duration);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -162,14 +167,63 @@ export class AlertNotificationService {
         osc.stop(ctx.currentTime + start + duration);
       };
 
-      // Sequenza acustica d'allerta meteo (bitonale: 880Hz -> 1200Hz -> 880Hz)
-      playTone(880, 0, 0.25);
-      playTone(1200, 0.28, 0.25);
-      playTone(880, 0.56, 0.35);
+      switch (severity) {
+        case 'info':
+          // Tono singolo morbido
+          playTone(440, 0, 0.3, 0.15, 'sine');
+          break;
+
+        case 'warning':
+          // Doppio tono medio
+          playTone(660, 0, 0.2, 0.25, 'triangle');
+          playTone(880, 0.25, 0.25, 0.25, 'triangle');
+          break;
+
+        case 'severe':
+          // Triplo tono crescendo (originale)
+          playTone(880, 0, 0.25, 0.3);
+          playTone(1200, 0.28, 0.25, 0.35);
+          playTone(880, 0.56, 0.35, 0.3);
+          break;
+
+        case 'destructive':
+          // Sirena oscillante × 3 cicli con volume crescente
+          for (let i = 0; i < 3; i++) {
+            const offset = i * 0.6;
+            const vol = 0.2 + i * 0.1;
+            playTone(800, offset, 0.28, vol, 'sawtooth');
+            playTone(1400, offset + 0.3, 0.28, vol, 'sawtooth');
+          }
+          break;
+      }
     } catch (e) {
       console.warn('Impossibile riprodurre segnale acustico:', e);
     }
   }
+
+  /**
+   * Richiede il permesso push se necessario e invia la notifica browser
+   */
+  public static async requestAndSendPush(
+    title: string,
+    body: string,
+    severity: 'info' | 'warning' | 'severe' | 'destructive' = 'warning'
+  ): Promise<void> {
+    const granted = await this.requestBrowserPermission();
+    if (granted) {
+      const severityIcons: Record<string, string> = {
+        info: 'ℹ️',
+        warning: '⚠️',
+        severe: '🚨',
+        destructive: '☠️'
+      };
+      this.sendBrowserNotification(
+        `${severityIcons[severity] || '⚠️'} ${title}`,
+        body
+      );
+    }
+  }
+
 
   /**
    * Richiede il permesso per le notifiche native del browser (Web Notifications API)

@@ -3,6 +3,9 @@ import { OpenMeteoService } from './services/openmeteo';
 import { SpotterFeedService } from './services/spotter-feed';
 import { MultiSourceStormDetector } from './services/multi-source-tracker';
 import { AlertNotificationService } from './services/alert-notification-service';
+import { StormHistoryService } from './services/storm-history-service';
+import { ForecastVerificationService } from './services/forecast-verification-service';
+import { DataExportService } from './services/data-export-service';
 import { StormTracker } from './ml/storm-tracker';
 import { HailPredictorML } from './ml/hail-ml-model';
 import { StormCell, Coordinates, SpotterReport, RainViewerFrame } from './types/meteorology';
@@ -42,6 +45,8 @@ class HailCastApp {
   private inspectedLocation: { coords: Coordinates; name: string } | null = null;
   private activeSelectedCell: StormCell | null = null;
   private refreshTimer: number | null = null;
+  private historyReplayTimer: number | null = null;
+  private showHistoryTrails: boolean = false;
 
   public appMode: 'hail' | 'storm' = 'hail';
 
@@ -91,6 +96,14 @@ class HailCastApp {
       const pred = HailPredictorML.predict(firstCell.maxDbz, firstCell.sounding);
       this.telemetry.updateTelemetry(firstCell.sounding, pred, firstCell.maxDbz);
     }
+
+    // 7. Registra primo snapshot nello storico e calcola verifica iniziale
+    StormHistoryService.recordSnapshot(this.currentStormCells);
+    this.updateHistoryUI();
+    this.updateVerificationUI();
+
+    // 8. Carica preferenza tema salvata
+    this.loadThemePreference();
   }
 
   private bindEvents(): void {
@@ -156,7 +169,8 @@ class HailCastApp {
       this.radarMap.renderSpotterReports(this.currentSpotterReports);
       this.radarMap.flyTo(report.coords, 11);
 
-      AlertNotificationService.playAlertChime();
+      const chSev = report.hailSizeCm > 4 ? 'destructive' : (report.hailSizeCm > 2 ? 'severe' : 'warning');
+      AlertNotificationService.playAlertChime(chSev);
 
       const phenomEmoji = report.phenomenon === 'downburst' ? '💨' : (report.phenomenon === 'lightning' ? '⚡' : (report.phenomenon === 'torrential_rain' ? '🌧️' : '❄️'));
       this.alertFeed.addAlert(
@@ -428,6 +442,110 @@ class HailCastApp {
         closeAllMobileDrawers();
         const riskCard = document.getElementById('locationRiskCard');
         if (riskCard) riskCard.style.display = 'none';
+        // Chiudi dropdown export se aperto
+        document.getElementById('exportDropdownMenu')?.classList.remove('show');
+      }
+    });
+
+    // ===== THEME TOGGLE =====
+    document.getElementById('btnToggleTheme')?.addEventListener('click', () => {
+      const isLight = document.body.classList.contains('light-theme');
+      if (isLight) {
+        document.body.classList.remove('light-theme');
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('hailcast_theme', 'dark');
+        this.showToast('🌙 Tema Scuro attivato', 'info');
+      } else {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        localStorage.setItem('hailcast_theme', 'light');
+        this.showToast('☀️ Tema Chiaro attivato', 'info');
+      }
+    });
+
+    // ===== EXPORT DROPDOWN =====
+    document.getElementById('btnExportMenu')?.addEventListener('click', () => {
+      document.getElementById('exportDropdownMenu')?.classList.toggle('show');
+    });
+
+    // Chiudi dropdown al click esterno
+    document.addEventListener('click', (e) => {
+      const container = document.querySelector('.export-dropdown-container');
+      if (container && !container.contains(e.target as Node)) {
+        document.getElementById('exportDropdownMenu')?.classList.remove('show');
+      }
+    });
+
+    document.getElementById('btnExportCellsCSV')?.addEventListener('click', () => {
+      const cells = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+      const csv = DataExportService.exportCellsCSV(cells);
+      const filename = DataExportService.getTimestampedFilename('hailcast_celle', 'csv');
+      DataExportService.downloadFile(csv, filename, 'text/csv;charset=utf-8');
+      this.showToast(`📊 Esportate ${cells.length} celle in CSV`, 'success');
+      document.getElementById('exportDropdownMenu')?.classList.remove('show');
+    });
+
+    document.getElementById('btnExportCellsGeoJSON')?.addEventListener('click', () => {
+      const cells = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+      const geojson = DataExportService.exportCellsGeoJSON(cells);
+      const filename = DataExportService.getTimestampedFilename('hailcast_celle', 'geojson');
+      DataExportService.downloadFile(geojson, filename, 'application/geo+json');
+      this.showToast(`🗺️ Esportate ${cells.length} celle in GeoJSON`, 'success');
+      document.getElementById('exportDropdownMenu')?.classList.remove('show');
+    });
+
+    document.getElementById('btnExportForecastsCSV')?.addEventListener('click', () => {
+      const forecasts = MultiSourceStormDetector.getGenesisForecasts(0);
+      const csv = DataExportService.exportForecastsCSV(forecasts);
+      const filename = DataExportService.getTimestampedFilename('hailcast_previsioni', 'csv');
+      DataExportService.downloadFile(csv, filename, 'text/csv;charset=utf-8');
+      this.showToast(`📈 Esportate ${forecasts.length} previsioni in CSV`, 'success');
+      document.getElementById('exportDropdownMenu')?.classList.remove('show');
+    });
+
+    // ===== HISTORY SLIDER & REPLAY =====
+    document.getElementById('historySlider')?.addEventListener('input', (e) => {
+      const slider = e.currentTarget as HTMLInputElement;
+      const val = parseInt(slider.value, 10);
+      const range = StormHistoryService.getTimeRange();
+      if (!range) return;
+
+      if (val >= 100) {
+        // Live mode
+        const label = document.getElementById('historyTimeLabel');
+        if (label) label.textContent = 'Ora (Live)';
+        const cellsToRender = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+        this.radarMap.renderStormCells(cellsToRender);
+        this.alertFeed.renderStormCells(cellsToRender);
+        return;
+      }
+
+      const ts = range.oldest + (range.newest - range.oldest) * (val / 100);
+      const snap = StormHistoryService.getSnapshotAtTime(ts);
+      if (snap) {
+        const time = new Date(snap.timestamp).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const label = document.getElementById('historyTimeLabel');
+        if (label) label.textContent = time;
+        this.radarMap.renderStormCells(snap.cells);
+        this.alertFeed.renderStormCells(snap.cells);
+      }
+    });
+
+    document.getElementById('btnReplayHistory')?.addEventListener('click', () => {
+      this.startHistoryReplay();
+    });
+
+    document.getElementById('btnToggleTrails')?.addEventListener('click', (e) => {
+      const btn = e.currentTarget as HTMLElement;
+      this.showHistoryTrails = !this.showHistoryTrails;
+      btn.classList.toggle('active', this.showHistoryTrails);
+      if (this.showHistoryTrails) {
+        const trails = StormHistoryService.getAllTrails();
+        this.radarMap.renderHistoryTrails(trails);
+        this.showToast(`🛤️ Trail storici visibili (${trails.size} celle tracciate)`, 'info');
+      } else {
+        this.radarMap.clearHistoryTrails();
+        this.showToast('Trail storici nascosti', 'info');
       }
     });
   }
@@ -738,6 +856,19 @@ class HailCastApp {
 
       this.updateUIForAppMode();
 
+      // Registra snapshot nello storico
+      StormHistoryService.recordSnapshot(freshCells);
+      this.updateHistoryUI();
+
+      // Aggiorna verifica previsioni
+      this.updateVerificationUI();
+
+      // Aggiorna trail se attivi
+      if (this.showHistoryTrails) {
+        const trails = StormHistoryService.getAllTrails();
+        this.radarMap.renderHistoryTrails(trails);
+      }
+
       // Notifica celle dissolte
       for (const oldId of previousIds) {
         if (!freshIds.has(oldId)) {
@@ -748,6 +879,8 @@ class HailCastApp {
       // Notifica eventuali nuove celle convettive rilevate
       for (const cell of freshCells) {
         if (!previousIds.has(cell.id) && (cell.severity === 'destructive' || cell.severity === 'severe')) {
+          const chSev = cell.severity === 'destructive' ? 'destructive' : 'severe';
+          AlertNotificationService.playAlertChime(chSev);
           this.showToast(`Nuova cella rilevata da multi-feed: ${cell.name} (${cell.meshDiameterCm} cm)`, 'warning');
           this.alertFeed.addAlert(`Nuovo nucleo convettivo rilevato da Radar & Open-Meteo: ${cell.name} (${cell.maxDbz} dBZ)`, 'danger');
         }
@@ -768,6 +901,10 @@ class HailCastApp {
         const alertCells = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
         const alertCheck = AlertNotificationService.checkStormCellAlerts(alertCells);
         if (alertCheck.triggered && alertCheck.alert) {
+          const alertSeverity = alertCheck.alert.cell.severity === 'destructive' ? 'destructive' : 
+                               alertCheck.alert.cell.severity === 'severe' ? 'severe' : 'warning';
+          AlertNotificationService.playAlertChime(alertSeverity);
+
           const sub = AlertNotificationService.getSubscription();
           if (sub) {
             await AlertNotificationService.sendEmailAlert(sub, alertCheck.alert.type, {
@@ -778,6 +915,15 @@ class HailCastApp {
             });
             this.showToast(`📧 Allerta Inviata a ${sub.email}: ${alertCheck.alert.title}`, 'danger');
             this.alertFeed.addAlert(`[EMAIL & PUSH INVIATA] ${alertCheck.alert.title}: ${alertCheck.alert.message}`, 'danger');
+
+            // Invia anche push notification browser se abilitata
+            if (sub.enableBrowserPush) {
+              await AlertNotificationService.requestAndSendPush(
+                alertCheck.alert.title,
+                alertCheck.alert.message,
+                alertSeverity
+              );
+            }
           }
         }
     } catch (err) {
@@ -814,6 +960,109 @@ class HailCastApp {
         `⚠️ ATTENZIONE: Cella temporalesca in arrivo su ${name} in ~${assessment.estimatedArrivalMinutes} min!`,
         'danger'
       );
+    }
+  }
+
+  // ===== HISTORY UI UPDATE =====
+  private updateHistoryUI(): void {
+    const count = StormHistoryService.getCount();
+    const badge = document.getElementById('historyCountBadge');
+    if (badge) badge.textContent = `${count}`;
+
+    const slider = document.getElementById('historySlider') as HTMLInputElement;
+    if (slider) slider.max = '100';
+  }
+
+  // ===== HISTORY REPLAY =====
+  private startHistoryReplay(): void {
+    const snapshots = StormHistoryService.getSnapshots();
+    if (snapshots.length < 2) {
+      this.showToast('Storico insufficiente per il replay (min. 2 snapshot)', 'warning');
+      return;
+    }
+
+    // Ferma replay precedente
+    if (this.historyReplayTimer) {
+      clearInterval(this.historyReplayTimer);
+      this.historyReplayTimer = null;
+    }
+
+    const slider = document.getElementById('historySlider') as HTMLInputElement;
+    const btn = document.getElementById('btnReplayHistory');
+    if (!slider) return;
+
+    btn?.classList.add('active');
+    let currentIdx = 0;
+    slider.value = '0';
+
+    this.showToast('▶ Replay storico avviato...', 'info');
+
+    this.historyReplayTimer = window.setInterval(() => {
+      if (currentIdx >= snapshots.length) {
+        // Fine replay
+        clearInterval(this.historyReplayTimer!);
+        this.historyReplayTimer = null;
+        btn?.classList.remove('active');
+        slider.value = '100';
+        const label = document.getElementById('historyTimeLabel');
+        if (label) label.textContent = 'Ora (Live)';
+
+        // Ripristina celle live
+        const cellsToRender = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+        this.radarMap.renderStormCells(cellsToRender);
+        this.alertFeed.renderStormCells(cellsToRender);
+        this.showToast('⏹ Replay completato, ritorno al live', 'success');
+        return;
+      }
+
+      const snap = snapshots[currentIdx];
+      const pct = Math.round((currentIdx / (snapshots.length - 1)) * 100);
+      slider.value = pct.toString();
+
+      const time = new Date(snap.timestamp).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const label = document.getElementById('historyTimeLabel');
+      if (label) label.textContent = time;
+
+      this.radarMap.renderStormCells(snap.cells);
+      this.alertFeed.renderStormCells(snap.cells);
+
+      currentIdx++;
+    }, 800); // 800ms per frame di replay
+  }
+
+  // ===== VERIFICATION UI UPDATE =====
+  private updateVerificationUI(): void {
+    const forecasts = MultiSourceStormDetector.getGenesisForecasts(0);
+    const cells = this.currentStormCells;
+    const metrics = ForecastVerificationService.evaluate(forecasts, cells);
+
+    const qualityLabel = document.getElementById('verificationQualityLabel');
+    const qualityScore = document.getElementById('verificationQualityScore');
+    const barPod = document.getElementById('vmBarPod');
+    const barFar = document.getElementById('vmBarFar');
+    const barCsi = document.getElementById('vmBarCsi');
+    const valPod = document.getElementById('vmValPod');
+    const valFar = document.getElementById('vmValFar');
+    const valCsi = document.getElementById('vmValCsi');
+    const counts = document.getElementById('verificationCounts');
+
+    if (qualityLabel) qualityLabel.textContent = metrics.scoreLabel;
+    if (qualityScore) qualityScore.textContent = `${metrics.qualityScore}/100`;
+    if (barPod) barPod.style.width = `${metrics.pod * 100}%`;
+    if (barFar) barFar.style.width = `${metrics.far * 100}%`;
+    if (barCsi) barCsi.style.width = `${metrics.csi * 100}%`;
+    if (valPod) valPod.textContent = `${(metrics.pod * 100).toFixed(0)}%`;
+    if (valFar) valFar.textContent = `${(metrics.far * 100).toFixed(0)}%`;
+    if (valCsi) valCsi.textContent = `${(metrics.csi * 100).toFixed(0)}%`;
+    if (counts) counts.textContent = `✅ ${metrics.hits} Hit   ❌ ${metrics.misses} Miss   ⚠️ ${metrics.falseAlarms} FA`;
+  }
+
+  // ===== THEME PREFERENCE =====
+  private loadThemePreference(): void {
+    const saved = localStorage.getItem('hailcast_theme');
+    if (saved === 'light') {
+      document.body.classList.remove('dark-theme');
+      document.body.classList.add('light-theme');
     }
   }
 }

@@ -121,6 +121,21 @@
             <span>Segnala ❄️</span>
           </button>
 
+          <button class="btn btn-icon" id="btnToggleTheme" title="Cambia Tema Chiaro/Scuro">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+
+          <div class="export-dropdown-container">
+            <button class="btn btn-secondary btn-sm" id="btnExportMenu" title="Esporta Dati Meteorologici">
+              <span>⬇ Esporta</span>
+            </button>
+            <div class="export-dropdown-menu" id="exportDropdownMenu">
+              <button class="export-option" id="btnExportCellsCSV">📊 Celle Attive (CSV)</button>
+              <button class="export-option" id="btnExportCellsGeoJSON">🗺️ Celle Attive (GeoJSON)</button>
+              <button class="export-option" id="btnExportForecastsCSV">📈 Previsioni Genesis (CSV)</button>
+            </div>
+          </div>
+
           <button class="btn btn-icon" id="btnToggleTelemetry" title="Pannello Dati & Telemetria AI">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
           </button>
@@ -151,13 +166,64 @@
           </div>
 
           <!-- Directional Hail Genesis Forecasts (Inneschi Imminenti Cross-Referenziati) -->
-          <div class="genesis-forecast-section">
+          <div class="genesis-forecast-section" id="genesisForecastSection">
             <div class="section-title">
               <span class="genesis-icon-bolt">⚡</span>
               <span>Previsioni in Direzione (Inneschi)</span>
             </div>
             <div class="genesis-forecast-list" id="genesisForecastList">
               <div class="genesis-empty-msg">Nessun innesco imminente rilevato.</div>
+            </div>
+          </div>
+
+          <!-- Forecast Verification Metrics -->
+          <div class="verification-section" id="verificationSection">
+            <div class="section-title">
+              <span>📊</span>
+              <span>Verifica Previsioni</span>
+            </div>
+            <div class="verification-card" id="verificationCard">
+              <div class="verification-score-header">
+                <span class="verification-quality-label" id="verificationQualityLabel">In Calibrazione</span>
+                <span class="verification-quality-score" id="verificationQualityScore">--</span>
+              </div>
+              <div class="verification-metrics-grid">
+                <div class="verification-metric">
+                  <span class="vm-label">POD <small>(Detection)</small></span>
+                  <div class="vm-bar"><div class="vm-bar-fill vm-pod" id="vmBarPod" style="width: 0%"></div></div>
+                  <span class="vm-value" id="vmValPod">--</span>
+                </div>
+                <div class="verification-metric">
+                  <span class="vm-label">FAR <small>(False Alarm)</small></span>
+                  <div class="vm-bar"><div class="vm-bar-fill vm-far" id="vmBarFar" style="width: 0%"></div></div>
+                  <span class="vm-value" id="vmValFar">--</span>
+                </div>
+                <div class="verification-metric">
+                  <span class="vm-label">CSI <small>(Critical Success)</small></span>
+                  <div class="vm-bar"><div class="vm-bar-fill vm-csi" id="vmBarCsi" style="width: 0%"></div></div>
+                  <span class="vm-value" id="vmValCsi">--</span>
+                </div>
+              </div>
+              <div class="verification-counts" id="verificationCounts">
+                ✅ 0 Hit &nbsp; ❌ 0 Miss &nbsp; ⚠️ 0 FA
+              </div>
+            </div>
+          </div>
+
+          <!-- Storm History & Replay -->
+          <div class="history-section" id="historySection">
+            <div class="section-title">
+              <span>📜</span>
+              <span>Storico Celle</span>
+              <span class="history-count-badge" id="historyCountBadge">0</span>
+            </div>
+            <div class="history-controls">
+              <input type="range" id="historySlider" class="history-slider" min="0" max="100" value="100" step="1" />
+              <div class="history-time-row">
+                <span class="history-time-label" id="historyTimeLabel">Ora (Live)</span>
+                <button class="history-replay-btn" id="btnReplayHistory" title="Riproduci storico">▶ Replay</button>
+                <button class="history-trails-btn" id="btnToggleTrails" title="Mostra/Nascondi trail storici">🛤️ Trail</button>
+              </div>
             </div>
           </div>
 
