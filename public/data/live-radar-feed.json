@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-21T10:08:02.576Z",
-  "updatedEpoch": 1787306882576,
+  "updatedAt": "2026-08-21T10:08:42.034Z",
+  "updatedEpoch": 1787306922034,
   "generatedTimestamp": 1787306729,
   "host": "https://tilecache.rainviewer.com",
   "radar": {
@@ -270,10 +270,10 @@
       ],
       "isNew": false,
       "formationStage": "rapid_intensification",
-      "createdAt": 1787305982576,
+      "createdAt": 1787306022034,
       "ageMinutes": 15,
       "lifespanMinutes": 75,
-      "expiresAt": 1787310482576
+      "expiresAt": 1787310522034
     },
     {
       "id": "cell-sync-no_lomb_piem-6",
@@ -484,10 +484,10 @@
       ],
       "isNew": false,
       "formationStage": "dissipating",
-      "createdAt": 1787301962576,
+      "createdAt": 1787302002034,
       "ageMinutes": 82,
       "lifespanMinutes": 90,
-      "expiresAt": 1787307362576
+      "expiresAt": 1787307402034
     },
     {
       "id": "cell-sync-emilia_rom-6",
@@ -698,10 +698,10 @@
       ],
       "isNew": false,
       "formationStage": "dissipating",
-      "createdAt": 1787303342576,
+      "createdAt": 1787303382034,
       "ageMinutes": 59,
       "lifespanMinutes": 75,
-      "expiresAt": 1787307842576
+      "expiresAt": 1787307882034
     },
     {
       "id": "cell-sync-veneto_friuli-6",
@@ -912,10 +912,10 @@
       ],
       "isNew": false,
       "formationStage": "rapid_intensification",
-      "createdAt": 1787304722576,
+      "createdAt": 1787304762034,
       "ageMinutes": 36,
       "lifespanMinutes": 90,
-      "expiresAt": 1787310122576
+      "expiresAt": 1787310162034
     }
   ],
   "regionalObservatories": [
