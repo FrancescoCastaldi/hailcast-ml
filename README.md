@@ -19,29 +19,38 @@
 
 ## 🌟 Key Features
 
-- 🛰️ **Interactive Open-Source Radar Map**:
+- 🛰️ **Interactive Multi-Source Radar Map**:
   - High-contrast basemaps (CartoDB Dark Matter, Satellite, Topographic, OpenStreetMap).
-  - Real-time Doppler radar overlay with standard color reflectivity scale (dBZ 10–75+).
+  - Real-time Doppler radar overlay (**RainViewer Global Mosaic** + **Protezione Civile DPC National Radar** with 24 stations).
+  - Native WMTS tile ingestion for `radar:vmi` (dBZ) and `radar:sri` (mm/h).
   - Smooth animation of past radar frames and future nowcasting projections.
+- ⚡ **Directional Hail Genesis Forecasts & Vector Cones**:
+  - Multi-source cross-referencing (DPC + RainViewer + Open-Meteo Soundings + Spotters).
+  - Real-time directional arrow vectors with target town corridors and ETA countdown.
+  - **Dynamic Storm Cell Maturation**: automatic concretization of trigger nodes into standard tracked convective cells.
+- ❄️ **Quantitative Real Hail Conversion Probability**:
+  - Thermodynamic & radar-informed probability estimation of triggers evolving into severe ground hail (0-100%).
+  - Multi-tiered risk classification (`low`, `moderate`, `high`, `very_high`, `extreme`) with color-coded meters and progress bars.
+- 🔄 **Bivalent Operational Mode**:
+  - Instant toggle between **Grandine (Hail Nowcasting)** and **Perturbazioni (Precipitation Tracking)**.
 - ⚡ **Hybrid Physics & Machine Learning (Physics-Informed ML)**:
   - **Severe Hail Index ($SHI$)** and **Maximum Estimated Size of Hail ($MESH$)** computed per Witt et al. (1998).
   - **Probability of Hail ($POH$)** estimation per Waldvogel et al. (1979).
-  - In-browser classifier and hailstone diameter estimator (cm) based on Gradient Boosted Trees.
+  - In-browser and locally trained Python Gradient Boosted Trees model (saved in `ml_models/`).
 - 🎯 **Storm Cell Tracking & ETA Calculation**:
   - Automatic convective centroid detection and motion vector computation $(\text{km/h}, \text{azimuth})$.
   - Fan-shaped **uncertainty cones** projected at 15, 30, 45 and 60 minutes.
-  - Automatic ETA (estimated time of arrival) and distance calculation for any town or map-clicked point.
+  - Automatic ETA and distance calculation for any town or map-clicked point.
 - 🔍 **Town Search & Instant Risk Assessment**:
   - Instant search with Nominatim geocoding and autocomplete.
-  - Risk card with hail probability, expected diameter and protection recommendations (cars, windows, crops).
+  - Risk card with hail probability, expected diameter and protection recommendations.
 - 📱 **Spotter Reporting Network (Crowdsourcing)**:
   - Interactive modal to submit ground hail reports with visual comparators (Coin 2cm, Walnut 3cm, Golf 4.5cm, Egg 6cm, Tennis 7.5cm).
 - 🎬 **Immersive Weather FX Animations**:
   - Canvas particle animations (bouncing hail, torrential rain, wind downburst, lightning) triggered by cell, trajectory and spotter clicks.
-  - Hail animation runs in a **continuous loop** until dismissed.
 - 📊 **Convective Telemetry & Vertical Profile**:
   - Instability indicators: $CAPE$, Lifted Index, 0-6km Bulk Wind Shear, Freezing Level ($H_0$), $-20^\circ\text{C}$ isotherm, $VIL$.
-  - Dynamic chart of the vertical radar reflectivity profile (dBZ vs height).
+  - Dynamic Chart.js vertical dBZ profile chart and Hail Growth Zone (HGZ).
 - 🌪️ **Extreme Supercell Simulation Mode**:
   - One-click dynamic simulation of a Po Valley supercell (65 dBZ, giant hail >5 cm) for testing and demonstrations.
 

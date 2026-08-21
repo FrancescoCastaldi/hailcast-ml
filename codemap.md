@@ -30,10 +30,17 @@
   - Haversine geodesic and angular bearing computation.
   - Conical uncertainty polygon generation (Nowcast +15m, +30m, +45m, +60m).
   - Impact ETA calculation for searched or clicked coordinates.
+- [`src/ml/genesis-forecast-engine.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/ml/genesis-forecast-engine.ts):
+  - Multi-source cross-referencing (DPC + RainViewer + Open-Meteo + Spotters).
+  - Directional vector arrows and target town corridors.
+  - Quantitative hail conversion probability and dynamic storm cell maturation.
 
 ### 2. Data Services & External APIs (`src/services/`)
 - [`src/services/rainviewer.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/rainviewer.ts):
   - RainViewer API connection (`weather-maps.json`) for global Doppler radar and time frames.
+- [`src/services/protezione-civile.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/protezione-civile.ts):
+  - DPC GeoWebCache WMTS tile service (`radar:vmi` dBZ and `radar:sri` mm/h).
+  - National Radar Network (24 radar stations with coverage rings and metadata).
 - [`src/services/openmeteo.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/openmeteo.ts):
   - Open-Meteo API connection for soundings ($CAPE$, $CIN$, Lifted Index, Freezing Level, Wind Shear).
 - [`src/services/geocoding.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/geocoding.ts):
@@ -43,11 +50,11 @@
 - [`src/services/alert-notification-service.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/alert-notification-service.ts):
   - Email alert subscriptions via FormSubmit with hail/rain thresholds and lead-time configuration.
 - [`src/services/multi-source-tracker.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/services/multi-source-tracker.ts):
-  - Aggregation and reconciliation of storm data from multiple sources.
+  - Multi-source cell lifecycle management (genesis, intensification, established, dissipation, and bivalent hail/storm mode).
 
 ### 3. Interactive UI Components (`src/components/`)
 - [`src/components/RadarMap.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/RadarMap.ts):
-  - Leaflet map management, dark/satellite/topo tile layers, animated radar overlay, cell polygons and vectors.
+  - Leaflet map management, dark/satellite/topo tile layers, animated radar overlay, DPC station networks, directional genesis vectors and cones.
 - [`src/components/TimelineController.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/TimelineController.ts):
   - Temporal player with scrubber, 1x/2x/4x speed and past/nowcast frame transitions.
 - [`src/components/AlertFeed.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/AlertFeed.ts):
@@ -61,7 +68,7 @@
 - [`src/components/NotificationModal.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/NotificationModal.ts):
   - Modal for managing email alert subscriptions (thresholds, lead time, history).
 - [`src/components/WeatherFXOverlay.ts`](file:///c:/Users/franc/Documents/hailcast-ml/src/components/WeatherFXOverlay.ts):
-  - Immersive canvas particle animations (bouncing hail, torrential rain, wind downburst, lightning) triggered by cell, trajectory and spotter clicks; hail runs in continuous loop.
+  - Immersive canvas particle animations (bouncing hail, torrential rain, wind downburst, lightning).
 
 ---
 
@@ -77,12 +84,17 @@ graph TD
     App --> Notification[components/NotificationModal.ts]
 
     RadarMap --> RainViewer[services/rainviewer.ts]
+    RadarMap --> DPC[services/protezione-civile.ts]
     RadarMap --> StormTracker[ml/storm-tracker.ts]
     RadarMap --> WeatherFX[components/WeatherFXOverlay.ts]
     
     StormTracker --> HailML[ml/hail-ml-model.ts]
     HailML --> MeshPoh[ml/mesh-poh.ts]
     
+    App --> Genesis[ml/genesis-forecast-engine.ts]
+    Genesis --> StormTracker
+    Genesis --> MeshPoh
+
     LocSearch --> Geocoding[services/geocoding.ts]
     LocSearch --> OpenMeteo[services/openmeteo.ts]
 
