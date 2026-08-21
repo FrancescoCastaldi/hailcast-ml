@@ -1,0 +1,49 @@
+name: Automated Perturbations Sync
+
+on:
+  schedule:
+    # Esegue automaticamente ogni 30 minuti
+    - cron: '*/30 * * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  sync-perturbations:
+    name: Sync Perturbations & Rain Forecast
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch Perturbations Forecast Snapshot
+        run: node scripts/sync-perturbations.mjs
+
+      - name: Commit Updated Perturbations Data (if changed)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/live-perturbations-feed.json
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(data): auto-update perturbations snapshot [skip ci]"
+            git pull --rebase origin main || true
+            git push origin main || echo "Push non necessario o già aggiornato"
+          else
+            echo "Nessuna variazione nei dati perturbazioni"
+          fi

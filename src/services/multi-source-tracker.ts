@@ -99,10 +99,37 @@ export class MultiSourceStormDetector {
           return data;
         }
       }
-    } catch {
-      // Ignora e procedi con scansione dinamica
+    } catch (e) {
+      console.warn('Network / JSON Error in fetchSyncedData:', e);
     }
     return null;
+  }
+
+  public static async fetchSyncedPerturbations(): Promise<any | null> {
+    try {
+      const now = Date.now();
+      const res = await fetch(`./data/live-perturbations-feed.json?_t=${now}`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        const ageSec = (now - (data.updatedEpoch || new Date(data.updatedAt).getTime())) / 1000;
+        // Valido se recente (< 2 ore)
+        if (ageSec < 7200 && Array.isArray(data.detectedPerturbations) && data.detectedPerturbations.length > 0) {
+          return data;
+        }
+      }
+    } catch (e) {
+      console.warn('Network / JSON Error in fetchSyncedPerturbations:', e);
+    }
+    return null;
+  }
+
+  public static async scanAndDetectPerturbations(): Promise<StormCell[]> {
+    const syncedData = await this.fetchSyncedPerturbations();
+    if (syncedData && syncedData.detectedPerturbations) {
+      console.log('✅ Utilizzando feed perturbazioni live sincronizzato da GitHub Actions');
+      return syncedData.detectedPerturbations;
+    }
+    return [];
   }
 
   /**

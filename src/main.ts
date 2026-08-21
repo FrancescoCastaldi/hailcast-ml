@@ -33,11 +33,17 @@ class HailCastApp {
 
   private baseStormCells: StormCell[] = [];
   private currentStormCells: StormCell[] = [];
+  
+  private basePerturbations: StormCell[] = []; // Reusing StormCell type for perturbations (they share polygons, velocity, etc)
+  private currentPerturbations: StormCell[] = [];
+
   private currentSpotterReports: SpotterReport[] = [];
   private rainViewerHost: string = 'https://tilecache.rainviewer.com';
   private inspectedLocation: { coords: Coordinates; name: string } | null = null;
   private activeSelectedCell: StormCell | null = null;
   private refreshTimer: number | null = null;
+
+  public appMode: 'hail' | 'storm' = 'hail';
 
   constructor() {
     this.init();
@@ -113,18 +119,32 @@ class HailCastApp {
       const prevailingVelocity = this.baseStormCells[0]?.velocity;
       this.radarMap.updateRadarFrame(frame, this.rainViewerHost, offsetMinutes, prevailingVelocity);
 
-      // Spostamento e animazione continua dei temporali e della grandine nel tempo
-      if (this.baseStormCells.length > 0) {
-        this.currentStormCells = StormTracker.projectStormCellsForOffset(this.baseStormCells, offsetMinutes);
-        this.radarMap.renderStormCells(this.currentStormCells);
-        this.alertFeed.renderStormCells(this.currentStormCells);
+        // Spostamento e animazione continua dei temporali e della grandine nel tempo
+        if (this.appMode === 'hail' && this.baseStormCells.length > 0) {
+          this.currentStormCells = StormTracker.projectStormCellsForOffset(this.baseStormCells, offsetMinutes);
+          this.radarMap.renderStormCells(this.currentStormCells);
+          this.alertFeed.renderStormCells(this.currentStormCells);
+        } else if (this.appMode === 'storm' && this.basePerturbations.length > 0) {
+          this.currentPerturbations = StormTracker.projectStormCellsForOffset(this.basePerturbations, offsetMinutes);
+          this.radarMap.renderStormCells(this.currentPerturbations); // Reuse rendering logic
+          this.alertFeed.renderStormCells(this.currentPerturbations);
+        }
 
         // Se l'utente sta monitorando una località, aggiorna l'ETA e la distanza in tempo reale
         if (this.inspectedLocation) {
-          const assessment = StormTracker.assessLocationRisk(this.inspectedLocation.name, this.inspectedLocation.coords, this.currentStormCells);
+          const cellsToAssess = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+          const assessment = StormTracker.assessLocationRisk(this.inspectedLocation.name, this.inspectedLocation.coords, cellsToAssess);
           this.locationSearch.showRiskCard(assessment);
         }
-      }
+    });
+
+    // Toggle Mode
+    document.getElementById('btnModeHail')?.addEventListener('click', () => {
+      this.switchAppMode('hail');
+    });
+
+    document.getElementById('btnModeStorm')?.addEventListener('click', () => {
+      this.switchAppMode('storm');
     });
 
     // Invio nuova segnalazione spotter da terra
@@ -494,9 +514,18 @@ class HailCastApp {
       this.baseStormCells = SpotterFeedService.getSimulatedSupercells();
     }
 
+    try {
+      const detectedPerturbs = await MultiSourceStormDetector.scanAndDetectPerturbations();
+      this.basePerturbations = detectedPerturbs;
+    } catch (err) {
+      console.warn('Fallback a perturbazioni vuote:', err);
+      this.basePerturbations = [];
+    }
+
     this.currentStormCells = this.baseStormCells;
-    this.radarMap.renderStormCells(this.currentStormCells);
-    this.alertFeed.renderStormCells(this.currentStormCells);
+    this.currentPerturbations = this.basePerturbations;
+
+    this.updateUIForAppMode();
 
     for (const cell of this.currentStormCells) {
       if (cell.severity === 'destructive' || cell.severity === 'severe') {
@@ -508,6 +537,52 @@ class HailCastApp {
     }
   }
 
+  private switchAppMode(mode: 'hail' | 'storm'): void {
+    if (this.appMode === mode) return;
+    this.appMode = mode;
+    
+    // Update active button
+    document.getElementById('btnModeHail')?.classList.remove('active');
+    document.getElementById('btnModeStorm')?.classList.remove('active');
+    
+    if (mode === 'hail') {
+      document.getElementById('btnModeHail')?.classList.add('active');
+      document.body.classList.remove('mode-storm');
+      document.body.classList.add('mode-hail');
+      const sidebarTitle = document.getElementById('sidebarMainTitle');
+      if (sidebarTitle) sidebarTitle.textContent = 'Temporali Attivi';
+    } else {
+      document.getElementById('btnModeStorm')?.classList.add('active');
+      document.body.classList.remove('mode-hail');
+      document.body.classList.add('mode-storm');
+      const sidebarTitle = document.getElementById('sidebarMainTitle');
+      if (sidebarTitle) sidebarTitle.textContent = 'Perturbazioni Attive';
+    }
+
+    this.updateUIForAppMode();
+    this.showToast(`Modalità ${mode === 'hail' ? 'Grandine' : 'Perturbazioni'} Attivata`, 'info');
+  }
+
+  private updateUIForAppMode(): void {
+    if (this.appMode === 'hail') {
+      this.radarMap.renderStormCells(this.currentStormCells);
+      this.alertFeed.renderStormCells(this.currentStormCells);
+    } else {
+      this.radarMap.renderStormCells(this.currentPerturbations);
+      this.alertFeed.renderStormCells(this.currentPerturbations);
+    }
+    
+    if (this.inspectedLocation) {
+      const cellsToAssess = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+      const assessment = StormTracker.assessLocationRisk(
+        this.inspectedLocation.name,
+        this.inspectedLocation.coords,
+        cellsToAssess
+      );
+      this.locationSearch.showRiskCard(assessment);
+    }
+  }
+
   private async refreshMultiSourceStorms(): Promise<void> {
     try {
       const previousIds = new Set(this.baseStormCells.map(c => c.id));
@@ -516,8 +591,12 @@ class HailCastApp {
       const freshIds = new Set(freshCells.map(c => c.id));
       this.baseStormCells = freshCells;
       this.currentStormCells = freshCells;
-      this.radarMap.renderStormCells(this.currentStormCells);
-      this.alertFeed.renderStormCells(this.currentStormCells);
+      
+      const freshPerturbs = await MultiSourceStormDetector.scanAndDetectPerturbations();
+      this.basePerturbations = freshPerturbs;
+      this.currentPerturbations = freshPerturbs;
+
+      this.updateUIForAppMode();
 
       // Notifica celle dissolte
       for (const oldId of previousIds) {
@@ -536,16 +615,18 @@ class HailCastApp {
 
         // Se l'utente sta monitorando una località, aggiorna i dati in tempo reale
         if (this.inspectedLocation) {
+          const cellsToAssess = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
           const assessment = StormTracker.assessLocationRisk(
             this.inspectedLocation.name,
             this.inspectedLocation.coords,
-            this.currentStormCells
+            cellsToAssess
           );
           this.locationSearch.showRiskCard(assessment);
         }
 
         // Verifica le allerte per l'eventuale sottoscrizione email/push configurata dall'utente
-        const alertCheck = AlertNotificationService.checkStormCellAlerts(this.currentStormCells);
+        const alertCells = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+        const alertCheck = AlertNotificationService.checkStormCellAlerts(alertCells);
         if (alertCheck.triggered && alertCheck.alert) {
           const sub = AlertNotificationService.getSubscription();
           if (sub) {
