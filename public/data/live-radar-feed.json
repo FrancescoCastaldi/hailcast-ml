@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-21T12:35:53.107Z",
-  "updatedEpoch": 1787315753107,
+  "updatedAt": "2026-08-21T12:39:25.237Z",
+  "updatedEpoch": 1787315965237,
   "generatedTimestamp": 1787315734,
   "host": "https://tilecache.rainviewer.com",
   "radarSources": {
@@ -151,7 +151,7 @@
       "sounding": {
         "cape": 90,
         "cin": 25,
-        "liftedIndex": -1.8,
+        "liftedIndex": -1.5,
         "freezingLevel": 3600,
         "minus20Level": 6700,
         "deepShear06km": 13,
@@ -289,10 +289,10 @@
       ],
       "isNew": false,
       "formationStage": "rapid_intensification",
-      "createdAt": 1787314853107,
+      "createdAt": 1787315065237,
       "ageMinutes": 15,
       "lifespanMinutes": 75,
-      "expiresAt": 1787319353107
+      "expiresAt": 1787319565237
     },
     {
       "id": "cell-sync-no_lomb_piem-6",
@@ -365,7 +365,7 @@
       "sounding": {
         "cape": 40,
         "cin": 25,
-        "liftedIndex": -0.4,
+        "liftedIndex": 0.3,
         "freezingLevel": 3600,
         "minus20Level": 6700,
         "deepShear06km": 13,
@@ -503,10 +503,10 @@
       ],
       "isNew": false,
       "formationStage": "established",
-      "createdAt": 1787312633107,
+      "createdAt": 1787312845237,
       "ageMinutes": 52,
       "lifespanMinutes": 90,
-      "expiresAt": 1787318033107
+      "expiresAt": 1787318245237
     },
     {
       "id": "cell-sync-emilia_rom-6",
@@ -579,7 +579,7 @@
       "sounding": {
         "cape": 300,
         "cin": 25,
-        "liftedIndex": -2,
+        "liftedIndex": -2.2,
         "freezingLevel": 3600,
         "minus20Level": 6700,
         "deepShear06km": 21,
@@ -717,10 +717,10 @@
       ],
       "isNew": false,
       "formationStage": "dissipating",
-      "createdAt": 1787312213107,
+      "createdAt": 1787312425237,
       "ageMinutes": 59,
       "lifespanMinutes": 75,
-      "expiresAt": 1787316713107
+      "expiresAt": 1787316925237
     },
     {
       "id": "cell-sync-veneto_friuli-6",
@@ -793,7 +793,7 @@
       "sounding": {
         "cape": 260,
         "cin": 25,
-        "liftedIndex": -2.3,
+        "liftedIndex": -3.5,
         "freezingLevel": 3600,
         "minus20Level": 6700,
         "deepShear06km": 13,
@@ -931,10 +931,10 @@
       ],
       "isNew": true,
       "formationStage": "new_initiation",
-      "createdAt": 1787315393107,
+      "createdAt": 1787315605237,
       "ageMinutes": 6,
       "lifespanMinutes": 90,
-      "expiresAt": 1787320793107
+      "expiresAt": 1787321005237
     }
   ],
   "regionalObservatories": [
@@ -956,7 +956,7 @@
         "precipitationMm": 2.1,
         "weatherCode": 95,
         "cape": 90,
-        "liftedIndex": -1.8
+        "liftedIndex": -1.5
       }
     },
     {
@@ -977,7 +977,7 @@
         "precipitationMm": 0,
         "weatherCode": 80,
         "cape": 40,
-        "liftedIndex": -0.4
+        "liftedIndex": 0.3
       }
     },
     {
@@ -998,7 +998,7 @@
         "precipitationMm": 0,
         "weatherCode": 3,
         "cape": 300,
-        "liftedIndex": -2
+        "liftedIndex": -2.2
       }
     },
     {
@@ -1019,7 +1019,7 @@
         "precipitationMm": 0.5,
         "weatherCode": 96,
         "cape": 260,
-        "liftedIndex": -2.3
+        "liftedIndex": -3.5
       }
     },
     {
@@ -1040,7 +1040,7 @@
         "precipitationMm": 0,
         "weatherCode": 61,
         "cape": 1170,
-        "liftedIndex": -3.4
+        "liftedIndex": -1.8
       }
     },
     {
@@ -1061,7 +1061,7 @@
         "precipitationMm": 0,
         "weatherCode": 0,
         "cape": 680,
-        "liftedIndex": -0.7
+        "liftedIndex": -1.2
       }
     }
   ],
@@ -1075,6 +1075,6 @@
     "precipitationMm": 2.1,
     "weatherCode": 95,
     "cape": 90,
-    "liftedIndex": -1.8
+    "liftedIndex": -1.5
   }
 }
