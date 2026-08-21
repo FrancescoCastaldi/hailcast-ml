@@ -97,6 +97,19 @@ export class GenesisForecastEngine {
       // Stima diametro chicco atteso
       const expectedMesh = Math.round((1.8 + (cand.baseCape / 2200) * 1.5 + (cand.dpcEchoDbz - 40) * 0.15) * 10) / 10;
 
+      // Calcolo della probabilità specifica che l'innesco si concretizzi in GRANDINE VERA al suolo (%)
+      const thermoProb = Math.min(45, (cand.baseCape / 2400) * 35 + (cand.baseShear / 25) * 10);
+      const radarProb = Math.min(35, (Math.max(0, cand.dpcEchoDbz - 35) / 20) * 35);
+      const maturityBonus = effectiveAgeMinutes >= 10 ? 15 : (idx % 2 === 0 ? 12 : 8);
+      const hailConversionProbability = Math.min(99, Math.max(25, Math.round(thermoProb + radarProb + maturityBonus)));
+
+      let hailRiskLevel: 'low' | 'moderate' | 'high' | 'very_high' | 'extreme' = 'moderate';
+      if (hailConversionProbability >= 85) hailRiskLevel = 'extreme';
+      else if (hailConversionProbability >= 70) hailRiskLevel = 'very_high';
+      else if (hailConversionProbability >= 50) hailRiskLevel = 'high';
+      else if (hailConversionProbability >= 35) hailRiskLevel = 'moderate';
+      else hailRiskLevel = 'low';
+
       let maturationStage: 'imminent_trigger' | 'developing' | 'concretized' = 'imminent_trigger';
       if (effectiveAgeMinutes >= 20) {
         maturationStage = 'concretized';
@@ -114,6 +127,8 @@ export class GenesisForecastEngine {
         speedKmh: cand.speedKmh,
         etaMinutes,
         triggerConfidenceScore: Math.min(98, totalConfidence),
+        hailConversionProbability,
+        hailRiskLevel,
         expectedMeshDiameterCm: expectedMesh,
         expectedDbz: cand.dpcEchoDbz + 12,
         targetCorridor: cand.corridor,

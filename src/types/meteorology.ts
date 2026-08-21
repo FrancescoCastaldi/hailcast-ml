@@ -192,7 +192,9 @@ export interface HailGenesisForecast {
   directionCardinal: string;
   speedKmh: number;
   etaMinutes: number;           // Tempo stimato all'innesco/comparsa (es. 15-25 min)
-  triggerConfidenceScore: number; // 0 - 100%
+  triggerConfidenceScore: number; // 0 - 100% (probabilità di innesco dinamico)
+  hailConversionProbability: number; // 0 - 100% (probabilità effettiva che l'innesco si trasformi in grandine vera)
+  hailRiskLevel: 'low' | 'moderate' | 'high' | 'very_high' | 'extreme';
   expectedMeshDiameterCm: number;
   expectedDbz: number;
   targetCorridor: string;

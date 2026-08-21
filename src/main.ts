@@ -598,15 +598,26 @@ class HailCastApp {
       <div class="genesis-card" data-genesis-id="${f.id}">
         <div class="genesis-card-header">
           <span class="genesis-tag-trigger">⚡ Innesco Imminente</span>
-          <span class="genesis-conf-val">${f.triggerConfidenceScore}% Confidenza</span>
+          <span class="genesis-conf-val">${f.triggerConfidenceScore}% Conf. Innesco</span>
         </div>
         <div class="genesis-card-title">${f.name}</div>
         <div class="genesis-card-corridor">
           <span>&rarr; ${f.directionCardinal} (${f.targetCorridor})</span>
         </div>
+
+        <div class="genesis-card-hail-prob">
+          <div class="card-prob-label">
+            <span>❄️ Probabilità Grandine Vera:</span>
+            <span class="card-prob-badge risk-${f.hailRiskLevel}">${f.hailConversionProbability}%</span>
+          </div>
+          <div class="card-prob-bar">
+            <div class="card-prob-bar-fill risk-${f.hailRiskLevel}" style="width: ${f.hailConversionProbability}%"></div>
+          </div>
+        </div>
+
         <div class="genesis-card-meta">
           <span class="meta-item-eta">ETA: <b>~${f.etaMinutes} min</b></span>
-          <span class="meta-item-hail">Chicco Atteso: <b>~${f.expectedMeshDiameterCm} cm</b></span>
+          <span class="meta-item-hail">Chicco: <b>~${f.expectedMeshDiameterCm} cm</b></span>
         </div>
       </div>
     `).join('');

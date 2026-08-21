@@ -688,12 +688,13 @@ export class RadarMapComponent {
         className: 'genesis-floating-label',
         html: `
           <div class="genesis-label-badge">
-            <span class="badge-tag">⚡ Innesco ~${f.etaMinutes}m</span>
-            <span class="badge-dest">&rarr; ${f.directionCardinal} (${f.targetCorridor.split('-')[0]})</span>
+            <span class="badge-tag">⚡ ~${f.etaMinutes}m</span>
+            <span class="badge-hail-prob risk-${f.hailRiskLevel}">❄️ ${f.hailConversionProbability}% Grandine</span>
+            <span class="badge-dest">&rarr; ${f.directionCardinal}</span>
           </div>
         `,
-        iconSize: [160, 24],
-        iconAnchor: [80, 12]
+        iconSize: [210, 24],
+        iconAnchor: [105, 12]
       });
 
       const labelMarker = L.marker([labelMidLat, labelMidLng], { icon: labelIcon });
@@ -705,10 +706,21 @@ export class RadarMapComponent {
             <span class="genesis-confidence">${f.triggerConfidenceScore}% Confidenza</span>
           </div>
           <h4 class="genesis-popup-title">${f.name}</h4>
+
+          <div class="genesis-hail-prob-box">
+            <div class="hail-prob-header">
+              <span>❄️ Probabilità Grandine Vera:</span>
+              <span class="hail-prob-badge risk-${f.hailRiskLevel}">${f.hailConversionProbability}% (${f.hailRiskLevel.toUpperCase()})</span>
+            </div>
+            <div class="hail-prob-bar-track">
+              <div class="hail-prob-bar-fill risk-${f.hailRiskLevel}" style="width: ${f.hailConversionProbability}%"></div>
+            </div>
+          </div>
+
           <div class="genesis-popup-body">
             <div class="genesis-row"><strong>⏳ Innesco Stimato:</strong> tra ${f.etaMinutes} minuti</div>
             <div class="genesis-row"><strong>🧭 Vettore Spostamento:</strong> ${f.directionCardinal} (${f.directionDeg}°) a ${f.speedKmh} km/h</div>
-            <div class="genesis-row"><strong>❄️ Grandine Attesa:</strong> ~${f.expectedMeshDiameterCm} cm (${f.expectedDbz} dBZ)</div>
+            <div class="genesis-row"><strong>❄️ Diametro Chicco Atteso:</strong> ~${f.expectedMeshDiameterCm} cm (${f.expectedDbz} dBZ)</div>
             <div class="genesis-row"><strong>🎯 Comuni a Rischio:</strong> ${f.targetTowns.slice(0, 4).join(', ')}</div>
             <div class="genesis-cross-sources">
               <span class="cross-title">Fonti Dati Incrociate:</span>

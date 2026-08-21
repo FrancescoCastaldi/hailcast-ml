@@ -14,6 +14,9 @@ describe('GenesisForecastEngine & Previsioni in Direzione', () => {
       expect(f.targetCoords.lat).toBeGreaterThan(40);
       expect(f.speedKmh).toBeGreaterThan(20);
       expect(f.triggerConfidenceScore).toBeGreaterThanOrEqual(40);
+      expect(f.hailConversionProbability).toBeGreaterThanOrEqual(25);
+      expect(f.hailConversionProbability).toBeLessThanOrEqual(100);
+      expect(['low', 'moderate', 'high', 'very_high', 'extreme']).toContain(f.hailRiskLevel);
       expect(f.crossSources.length).toBeGreaterThanOrEqual(3);
       
       // Verifica presenza delle fonti incrociate chiave
