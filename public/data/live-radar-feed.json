@@ -1,14 +1,10 @@
 {
-  "updatedAt": "2026-08-21T10:15:09.815Z",
-  "updatedEpoch": 1787307309815,
-  "generatedTimestamp": 1787307025,
+  "updatedAt": "2026-08-21T10:23:45.203Z",
+  "updatedEpoch": 1787307825203,
+  "generatedTimestamp": 1787307624,
   "host": "https://tilecache.rainviewer.com",
   "radar": {
     "past": [
-      {
-        "time": 1787299800,
-        "path": "/v2/radar/14750b6d40b8"
-      },
       {
         "time": 1787300400,
         "path": "/v2/radar/0d6858ac6263"
@@ -56,6 +52,10 @@
       {
         "time": 1787307000,
         "path": "/v2/radar/052c5ccabd76"
+      },
+      {
+        "time": 1787307600,
+        "path": "/v2/radar/c69e1545d708"
       }
     ],
     "nowcast": []
@@ -270,10 +270,10 @@
       ],
       "isNew": false,
       "formationStage": "rapid_intensification",
-      "createdAt": 1787305509815,
+      "createdAt": 1787306025203,
       "ageMinutes": 30,
       "lifespanMinutes": 75,
-      "expiresAt": 1787310009815
+      "expiresAt": 1787310525203
     },
     {
       "id": "cell-sync-no_lomb_piem-7",
@@ -484,10 +484,10 @@
       ],
       "isNew": true,
       "formationStage": "new_initiation",
-      "createdAt": 1787306889815,
+      "createdAt": 1787307405203,
       "ageMinutes": 7,
       "lifespanMinutes": 90,
-      "expiresAt": 1787312289815
+      "expiresAt": 1787312805203
     },
     {
       "id": "cell-sync-emilia_rom-7",
@@ -698,10 +698,10 @@
       ],
       "isNew": false,
       "formationStage": "dissipating",
-      "createdAt": 1787302869815,
+      "createdAt": 1787303385203,
       "ageMinutes": 74,
       "lifespanMinutes": 75,
-      "expiresAt": 1787307369815
+      "expiresAt": 1787307885203
     },
     {
       "id": "cell-sync-veneto_friuli-7",
@@ -912,10 +912,10 @@
       ],
       "isNew": false,
       "formationStage": "established",
-      "createdAt": 1787304249815,
+      "createdAt": 1787304765203,
       "ageMinutes": 51,
       "lifespanMinutes": 90,
-      "expiresAt": 1787309649815
+      "expiresAt": 1787310165203
     }
   ],
   "regionalObservatories": [
