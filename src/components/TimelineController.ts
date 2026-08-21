@@ -15,6 +15,10 @@ export class TimelineControllerComponent {
   private btnPlayPause: HTMLElement;
   private iconPlay: HTMLElement;
   private iconPause: HTMLElement;
+  
+  private btnMobilePlayPause: HTMLElement | null;
+  private iconMobilePlay: HTMLElement | null;
+  private iconMobilePause: HTMLElement | null;
 
   private lblMinus60: HTMLElement | null;
   private lblMinus30: HTMLElement | null;
@@ -32,6 +36,10 @@ export class TimelineControllerComponent {
     this.btnPlayPause = document.getElementById('btnPlayPause') as HTMLElement;
     this.iconPlay = document.getElementById('iconPlay') as HTMLElement;
     this.iconPause = document.getElementById('iconPause') as HTMLElement;
+
+    this.btnMobilePlayPause = document.getElementById('btnMobilePlayPause');
+    this.iconMobilePlay = document.getElementById('iconMobilePlay');
+    this.iconMobilePause = document.getElementById('iconMobilePause');
 
     this.lblMinus60 = document.getElementById('lblTimeMinus60');
     this.lblMinus30 = document.getElementById('lblTimeMinus30');
@@ -96,6 +104,10 @@ export class TimelineControllerComponent {
     });
 
     this.btnPlayPause?.addEventListener('click', () => {
+      this.togglePlay();
+    });
+
+    this.btnMobilePlayPause?.addEventListener('click', () => {
       this.togglePlay();
     });
 
@@ -209,6 +221,10 @@ export class TimelineControllerComponent {
     this.isPlaying = true;
     if (this.iconPlay) this.iconPlay.style.display = 'none';
     if (this.iconPause) this.iconPause.style.display = 'block';
+    
+    if (this.iconMobilePlay) this.iconMobilePlay.style.display = 'none';
+    if (this.iconMobilePause) this.iconMobilePause.style.display = 'block';
+    
     this.startPlayLoop();
   }
 
@@ -216,6 +232,10 @@ export class TimelineControllerComponent {
     this.isPlaying = false;
     if (this.iconPlay) this.iconPlay.style.display = 'block';
     if (this.iconPause) this.iconPause.style.display = 'none';
+    
+    if (this.iconMobilePlay) this.iconMobilePlay.style.display = 'block';
+    if (this.iconMobilePause) this.iconMobilePause.style.display = 'none';
+    
     this.stopPlayLoop();
   }
 
