@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-08-21T12:19:06.033Z",
-  "updatedEpoch": 1787314746033,
-  "generatedTimestamp": 1787314526,
+  "updatedAt": "2026-08-21T12:25:44.793Z",
+  "updatedEpoch": 1787315144793,
+  "generatedTimestamp": 1787315133,
   "host": "https://tilecache.rainviewer.com",
   "radarSources": {
     "rainviewer": {
@@ -24,10 +24,6 @@
   },
   "radar": {
     "past": [
-      {
-        "time": 1787307000,
-        "path": "/v2/radar/052c5ccabd76"
-      },
       {
         "time": 1787307600,
         "path": "/v2/radar/c69e1545d708"
@@ -75,6 +71,10 @@
       {
         "time": 1787314200,
         "path": "/v2/radar/346de1b47c4e"
+      },
+      {
+        "time": 1787314800,
+        "path": "/v2/radar/87be7dca260c"
       }
     ],
     "nowcast": []
@@ -289,10 +289,10 @@
       ],
       "isNew": true,
       "formationStage": "new_initiation",
-      "createdAt": 1787314746033,
+      "createdAt": 1787315144793,
       "ageMinutes": 0,
       "lifespanMinutes": 75,
-      "expiresAt": 1787319246033
+      "expiresAt": 1787319644793
     },
     {
       "id": "cell-sync-no_lomb_piem-5",
@@ -503,10 +503,10 @@
       ],
       "isNew": false,
       "formationStage": "rapid_intensification",
-      "createdAt": 1787312526033,
+      "createdAt": 1787312924793,
       "ageMinutes": 37,
       "lifespanMinutes": 90,
-      "expiresAt": 1787317926033
+      "expiresAt": 1787318324793
     },
     {
       "id": "cell-sync-emilia_rom-5",
@@ -717,10 +717,10 @@
       ],
       "isNew": false,
       "formationStage": "established",
-      "createdAt": 1787312106033,
+      "createdAt": 1787312504793,
       "ageMinutes": 44,
       "lifespanMinutes": 75,
-      "expiresAt": 1787316606033
+      "expiresAt": 1787317004793
     },
     {
       "id": "cell-sync-veneto_friuli-5",
@@ -931,10 +931,10 @@
       ],
       "isNew": false,
       "formationStage": "dissipating",
-      "createdAt": 1787309886033,
+      "createdAt": 1787310284793,
       "ageMinutes": 81,
       "lifespanMinutes": 90,
-      "expiresAt": 1787315286033
+      "expiresAt": 1787315684793
     }
   ],
   "regionalObservatories": [
