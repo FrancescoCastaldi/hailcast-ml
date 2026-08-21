@@ -1,25 +1,9 @@
 {
-  "updatedAt": "2026-08-21T06:52:38.008Z",
-  "generatedTimestamp": 1787295026,
+  "updatedAt": "2026-08-21T07:39:51.643Z",
+  "generatedTimestamp": 1787297734,
   "host": "https://tilecache.rainviewer.com",
   "radar": {
     "past": [
-      {
-        "time": 1787287800,
-        "path": "/v2/radar/05a0aaeaaa1e"
-      },
-      {
-        "time": 1787288400,
-        "path": "/v2/radar/0a469de2c537"
-      },
-      {
-        "time": 1787289000,
-        "path": "/v2/radar/3c1d52b9f59b"
-      },
-      {
-        "time": 1787289600,
-        "path": "/v2/radar/35a628a53ef6"
-      },
       {
         "time": 1787290200,
         "path": "/v2/radar/8632a4decbc9"
@@ -55,6 +39,22 @@
       {
         "time": 1787295000,
         "path": "/v2/radar/fa884e99a02d"
+      },
+      {
+        "time": 1787295600,
+        "path": "/v2/radar/bae0086d05ce"
+      },
+      {
+        "time": 1787296200,
+        "path": "/v2/radar/374269f9931e"
+      },
+      {
+        "time": 1787296800,
+        "path": "/v2/radar/7577f06dea3c"
+      },
+      {
+        "time": 1787297400,
+        "path": "/v2/radar/cb076dd193e4"
       }
     ],
     "nowcast": []
@@ -68,16 +68,16 @@
         "lng": 10.991
       },
       "current": {
-        "temperature": 20.2,
-        "humidity": 89,
-        "pressure": 1002.5,
-        "windSpeedKmh": 1.9,
-        "windGustsKmh": 11.9,
-        "windDirectionDeg": 68,
+        "temperature": 21.7,
+        "humidity": 87,
+        "pressure": 1001.8,
+        "windSpeedKmh": 4,
+        "windGustsKmh": 11.5,
+        "windDirectionDeg": 207,
         "precipitationMm": 0,
         "weatherCode": 95,
-        "cape": 40,
-        "liftedIndex": 0.3
+        "cape": 170,
+        "liftedIndex": 0.1
       }
     },
     {
@@ -88,16 +88,16 @@
         "lng": 9.189
       },
       "current": {
-        "temperature": 19.1,
-        "humidity": 94,
-        "pressure": 993.4,
-        "windSpeedKmh": 9.4,
-        "windGustsKmh": 18.7,
-        "windDirectionDeg": 94,
-        "precipitationMm": 6.5,
-        "weatherCode": 96,
+        "temperature": 18.1,
+        "humidity": 89,
+        "pressure": 993.1,
+        "windSpeedKmh": 7.2,
+        "windGustsKmh": 31.3,
+        "windDirectionDeg": 90,
+        "precipitationMm": 0.2,
+        "weatherCode": 95,
         "cape": 0,
-        "liftedIndex": -0.8
+        "liftedIndex": -1
       }
     },
     {
@@ -108,16 +108,16 @@
         "lng": 11.342
       },
       "current": {
-        "temperature": 22.2,
-        "humidity": 82,
-        "pressure": 1001.8,
-        "windSpeedKmh": 6.4,
-        "windGustsKmh": 16.9,
-        "windDirectionDeg": 106,
+        "temperature": 22.7,
+        "humidity": 80,
+        "pressure": 1001,
+        "windSpeedKmh": 5.7,
+        "windGustsKmh": 22.7,
+        "windDirectionDeg": 108,
         "precipitationMm": 0,
         "weatherCode": 3,
-        "cape": 80,
-        "liftedIndex": -2.9
+        "cape": 190,
+        "liftedIndex": -3.5
       }
     },
     {
@@ -128,16 +128,16 @@
         "lng": 11.255
       },
       "current": {
-        "temperature": 24.6,
-        "humidity": 87,
-        "pressure": 1003.1,
-        "windSpeedKmh": 2.1,
-        "windGustsKmh": 5.4,
-        "windDirectionDeg": 59,
+        "temperature": 26.1,
+        "humidity": 79,
+        "pressure": 1002.3,
+        "windSpeedKmh": 4.9,
+        "windGustsKmh": 10.1,
+        "windDirectionDeg": 107,
         "precipitationMm": 0,
         "weatherCode": 3,
-        "cape": 1080,
-        "liftedIndex": -5.5
+        "cape": 1330,
+        "liftedIndex": -4.8
       }
     },
     {
@@ -148,29 +148,29 @@
         "lng": 16.871
       },
       "current": {
-        "temperature": 29.2,
-        "humidity": 51,
-        "pressure": 1011.8,
-        "windSpeedKmh": 5.4,
-        "windGustsKmh": 13.7,
+        "temperature": 31.1,
+        "humidity": 42,
+        "pressure": 1011.5,
+        "windSpeedKmh": 5.1,
+        "windGustsKmh": 14.4,
         "windDirectionDeg": 176,
         "precipitationMm": 0,
         "weatherCode": 0,
         "cape": 0,
-        "liftedIndex": -0.7
+        "liftedIndex": -0.1
       }
     }
   ],
   "convectiveIndices": {
-    "temperature": 20.2,
-    "humidity": 89,
-    "pressure": 1002.5,
-    "windSpeedKmh": 1.9,
-    "windGustsKmh": 11.9,
-    "windDirectionDeg": 68,
+    "temperature": 21.7,
+    "humidity": 87,
+    "pressure": 1001.8,
+    "windSpeedKmh": 4,
+    "windGustsKmh": 11.5,
+    "windDirectionDeg": 207,
     "precipitationMm": 0,
     "weatherCode": 95,
-    "cape": 40,
-    "liftedIndex": 0.3
+    "cape": 170,
+    "liftedIndex": 0.1
   }
 }
