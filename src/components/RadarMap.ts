@@ -21,6 +21,7 @@ export class RadarMapComponent {
   private showSpotters: boolean = true;
   private radarSource: 'rainviewer' | 'dpc-vmi' | 'dpc-sri' = 'rainviewer';
   private dualPolMode: 'reflectivity' | 'zdr' | 'correlation_coefficient' = 'reflectivity';
+  private appMode: 'hail' | 'storm' = 'hail';
   private cachedCells: StormCell[] = [];
   private lastRainViewerFrame?: RainViewerFrame;
   private lastHost?: string;
@@ -38,6 +39,13 @@ export class RadarMapComponent {
 
   public setDualPolMode(mode: 'reflectivity' | 'zdr' | 'correlation_coefficient'): void {
     this.dualPolMode = mode;
+    if (this.cachedCells.length > 0) {
+      this.renderStormCells(this.cachedCells);
+    }
+  }
+
+  public setAppMode(mode: 'hail' | 'storm'): void {
+    this.appMode = mode;
     if (this.cachedCells.length > 0) {
       this.renderStormCells(this.cachedCells);
     }
@@ -231,33 +239,42 @@ export class RadarMapComponent {
       let color = this.getDbzColor(cell.maxDbz);
       let metricLabel = `${cell.maxDbz} dBZ`;
 
-      if (this.dualPolMode === 'zdr') {
-        color = this.getZdrColor(zdrVal);
-        metricLabel = `ZDR ${zdrVal.toFixed(1)} dB (${zdrVal < 1.0 ? 'Grandine Sferica' : 'Gocce Piatte'})`;
-      } else if (this.dualPolMode === 'correlation_coefficient') {
-        color = this.getCcColor(ccVal);
-        metricLabel = `CC ${ccVal.toFixed(2)} (${ccVal < 0.92 ? 'Fase Mista / Grandine' : 'Pioggia Uniforme'})`;
+      if (this.appMode === 'storm') {
+        // Modalità Perturbazioni: palette ciano/blu/smeraldo idrometeore
+        color = cell.maxDbz >= 48 ? '#2563eb' : (cell.maxDbz >= 42 ? '#0284c7' : '#06b6d4');
+      } else {
+        if (this.dualPolMode === 'zdr') {
+          color = this.getZdrColor(zdrVal);
+          metricLabel = `ZDR ${zdrVal.toFixed(1)} dB (${zdrVal < 1.0 ? 'Grandine Sferica' : 'Gocce Piatte'})`;
+        } else if (this.dualPolMode === 'correlation_coefficient') {
+          color = this.getCcColor(ccVal);
+          metricLabel = `CC ${ccVal.toFixed(2)} (${ccVal < 0.92 ? 'Fase Mista / Grandine' : 'Pioggia Uniforme'})`;
+        }
       }
       
       const polygon = L.polygon(latLngs, {
-        color: color,
-        weight: 2.5,
+        color: this.appMode === 'storm' ? '#38bdf8' : color,
+        weight: this.appMode === 'storm' ? 3 : 2.5,
         fillColor: color,
-        fillOpacity: 0.42,
+        fillOpacity: this.appMode === 'storm' ? 0.35 : 0.42,
         dashArray: cell.trend === 'intensifying' ? '4, 4' : undefined
       });
 
+      const rainMmH = cell.rainIntensityMmH || Math.round(18 + (cell.maxDbz - 38) * 3);
+      const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
+
       polygon.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
-        const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
-        const fxType = cell.meshDiameterCm >= 1.0 ? 'hail' : (cell.maxDbz >= 48 ? 'rain' : 'wind');
+        const fxType = this.appMode === 'storm' ? 'rain' : (cell.meshDiameterCm >= 1.0 ? 'hail' : (cell.maxDbz >= 48 ? 'rain' : 'wind'));
         WeatherFXOverlay.getInstance().show({
           type: fxType,
           title: cell.name,
-          intensity: cell.meshDiameterCm >= 1.0 
-            ? `Chicchi MESH: ${cell.meshDiameterCm} cm (${sizeNickname})` 
-            : `Riflettività ${cell.maxDbz} dBZ • Pioggia violenta`,
-          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • Dual-Pol: ZDR ${zdrVal.toFixed(1)} dB, CC ${ccVal.toFixed(2)}`,
+          intensity: this.appMode === 'storm' 
+            ? `Intensità: ${rainMmH} mm/h • Vento ${Math.round(cell.velocity.speedKmh * 1.3)} km/h`
+            : (cell.meshDiameterCm >= 1.0 
+                ? `Chicchi MESH: ${cell.meshDiameterCm} cm (${sizeNickname})` 
+                : `Riflettività ${cell.maxDbz} dBZ • Pioggia violenta`),
+          detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'aree limitrofe'}`,
           loop: fxType === 'hail'
         });
 
@@ -266,38 +283,63 @@ export class RadarMapComponent {
         }
       });
 
-      const sizeNickname = this.getSizeNickname(cell.meshDiameterCm);
-
-      polygon.bindTooltip(`
-        <div class="cell-tooltip">
-          <div class="tooltip-title-row">
-            <span class="tooltip-icon">❄️</span>
-            <strong>${cell.name}</strong>
-          </div>
-          <div class="tooltip-hail-highlight severity-${cell.severity}">
-            <div class="hail-highlight-label">STIMA GRANDINE:</div>
-            <div class="hail-highlight-val"><strong>${cell.meshDiameterCm} cm</strong> <span>(${sizeNickname})</span></div>
-          </div>
-          <div class="tooltip-info-grid">
-            <div>Modalità: <b>${this.dualPolMode.toUpperCase()}</b></div>
-            <div>Dato Polarimetrico: <b>${metricLabel}</b></div>
-            <div>Riflettività: <b>${cell.maxDbz} dBZ</b></div>
-            <div>Probabilità POH: <b>${cell.pohPercentage}%</b></div>
-            <div>Avanzamento: <b>${cell.velocity.speedKmh} km/h</b></div>
-            <div>Direzione: <b>${Math.round(cell.velocity.directionDeg)}°</b></div>
-          </div>
-          ${cell.impactedTowns && cell.impactedTowns.length > 0 ? `
-            <div class="tooltip-towns-row">
-              <span class="towns-icon">📍</span>
-              <span><b>In rotta:</b> ${cell.impactedTowns.join(', ')}</span>
+      if (this.appMode === 'storm') {
+        polygon.bindTooltip(`
+          <div class="cell-tooltip">
+            <div class="tooltip-title-row">
+              <span class="tooltip-icon">🌧️</span>
+              <strong>${cell.name}</strong>
             </div>
-          ` : ''}
-        </div>
-      `, { sticky: true, className: 'custom-map-tooltip' });
+            <div class="tooltip-hail-highlight severity-moderate" style="background: rgba(2, 132, 199, 0.2); border-left-color: #0284c7;">
+              <div class="hail-highlight-label">PRECIPITAZIONE ATTESA:</div>
+              <div class="hail-highlight-val"><strong style="color: #38bdf8;">${rainMmH} mm/h</strong> <span>(${cell.maxDbz >= 46 ? 'Forte / Nubifragio' : 'Moderata'})</span></div>
+            </div>
+            <div class="tooltip-info-grid">
+              <div>Riflettività: <b>${cell.maxDbz} dBZ</b></div>
+              <div>Raffica Vento: <b>~${Math.round(cell.velocity.speedKmh * 1.35)} km/h</b></div>
+              <div>Avanzamento: <b>${cell.velocity.speedKmh} km/h</b></div>
+              <div>Direzione: <b>${Math.round(cell.velocity.directionDeg)}°</b></div>
+            </div>
+            ${cell.impactedTowns && cell.impactedTowns.length > 0 ? `
+              <div class="tooltip-towns-row">
+                <span class="towns-icon">📍</span>
+                <span><b>Comuni in rotta:</b> ${cell.impactedTowns.join(', ')}</span>
+              </div>
+            ` : ''}
+          </div>
+        `, { sticky: true, className: 'custom-map-tooltip' });
+      } else {
+        polygon.bindTooltip(`
+          <div class="cell-tooltip">
+            <div class="tooltip-title-row">
+              <span class="tooltip-icon">❄️</span>
+              <strong>${cell.name}</strong>
+            </div>
+            <div class="tooltip-hail-highlight severity-${cell.severity}">
+              <div class="hail-highlight-label">STIMA GRANDINE:</div>
+              <div class="hail-highlight-val"><strong>${cell.meshDiameterCm} cm</strong> <span>(${sizeNickname})</span></div>
+            </div>
+            <div class="tooltip-info-grid">
+              <div>Modalità: <b>${this.dualPolMode.toUpperCase()}</b></div>
+              <div>Dato Polarimetrico: <b>${metricLabel}</b></div>
+              <div>Riflettività: <b>${cell.maxDbz} dBZ</b></div>
+              <div>Probabilità POH: <b>${cell.pohPercentage}%</b></div>
+              <div>Avanzamento: <b>${cell.velocity.speedKmh} km/h</b></div>
+              <div>Direzione: <b>${Math.round(cell.velocity.directionDeg)}°</b></div>
+            </div>
+            ${cell.impactedTowns && cell.impactedTowns.length > 0 ? `
+              <div class="tooltip-towns-row">
+                <span class="towns-icon">📍</span>
+                <span><b>In rotta:</b> ${cell.impactedTowns.join(', ')}</span>
+              </div>
+            ` : ''}
+          </div>
+        `, { sticky: true, className: 'custom-map-tooltip' });
+      }
 
       this.stormCellsLayerGroup.addLayer(polygon);
 
-      // 2. Marker centrale con indicatore dinamico di GRANDINE e stadio evolutivo
+      // 2. Marker centrale con indicatore dinamico
       const stage = cell.formationStage || (cell.isNew ? 'new_initiation' : 'established');
       const isNew = stage === 'new_initiation';
       let stageBadgeHtml = '';
@@ -309,35 +351,59 @@ export class RadarMapComponent {
         stageBadgeHtml = '<div class="new-genesis-tag" style="background: #475569; color: #cbd5e1;">🌫️ DISSOLVIMENTO</div>';
       }
 
-      const centerIcon = L.divIcon({
-        className: `storm-center-icon ${isNew ? 'new-trajectory-marker' : ''}`,
-        html: `
-          <div class="hail-map-badge severity-${cell.severity} ${isNew ? 'pulse-new-genesis' : ''}" title="Grandine: ${cell.meshDiameterCm} cm (${sizeNickname})">
-            ${stageBadgeHtml}
-            <div class="badge-top-row">
-              <span class="badge-hail-icon">${isNew ? '⚡' : '❄️'}</span>
-              <span class="badge-hail-size">${cell.meshDiameterCm > 0 ? cell.meshDiameterCm + ' cm' : 'Pioggia'}</span>
+      let centerIcon: L.DivIcon;
+
+      if (this.appMode === 'storm') {
+        centerIcon = L.divIcon({
+          className: 'storm-center-icon mode-perturbation-marker',
+          html: `
+            <div class="perturbation-map-badge" title="Pioggia: ${rainMmH} mm/h (${cell.maxDbz} dBZ)">
+              <div class="badge-top-row">
+                <span class="badge-rain-icon">🌧️</span>
+                <span class="badge-rain-val">${rainMmH} mm/h</span>
+              </div>
+              <div class="badge-bottom-row">
+                <span class="badge-rain-status">${cell.maxDbz >= 46 ? 'Nubifragio' : 'Pioggia'}</span>
+                <span class="badge-dbz-pill">${cell.maxDbz} dBZ</span>
+              </div>
             </div>
-            <div class="badge-bottom-row">
-              <span class="badge-obj-name">${sizeNickname}</span>
-              <span class="badge-dbz-pill">${cell.maxDbz} dBZ</span>
+          `,
+          iconSize: [116, 44],
+          iconAnchor: [58, 22]
+        });
+      } else {
+        centerIcon = L.divIcon({
+          className: `storm-center-icon ${isNew ? 'new-trajectory-marker' : ''}`,
+          html: `
+            <div class="hail-map-badge severity-${cell.severity} ${isNew ? 'pulse-new-genesis' : ''}" title="Grandine: ${cell.meshDiameterCm} cm (${sizeNickname})">
+              ${stageBadgeHtml}
+              <div class="badge-top-row">
+                <span class="badge-hail-icon">${isNew ? '⚡' : '❄️'}</span>
+                <span class="badge-hail-size">${cell.meshDiameterCm > 0 ? cell.meshDiameterCm + ' cm' : 'Pioggia'}</span>
+              </div>
+              <div class="badge-bottom-row">
+                <span class="badge-obj-name">${sizeNickname}</span>
+                <span class="badge-dbz-pill">${cell.maxDbz} dBZ</span>
+              </div>
             </div>
-          </div>
-        `,
-        iconSize: [stage !== 'established' ? 124 : 110, stage !== 'established' ? 56 : 44],
-        iconAnchor: [stage !== 'established' ? 62 : 55, stage !== 'established' ? 28 : 22]
-      });
+          `,
+          iconSize: [stage !== 'established' ? 124 : 110, stage !== 'established' ? 56 : 44],
+          iconAnchor: [stage !== 'established' ? 62 : 55, stage !== 'established' ? 28 : 22]
+        });
+      }
 
       const centerMarker = L.marker([cell.centroid.lat, cell.centroid.lng], { icon: centerIcon });
       centerMarker.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
-        const fxType = cell.meshDiameterCm >= 1.0 ? 'hail' : (cell.maxDbz >= 48 ? 'rain' : 'wind');
+        const fxType = this.appMode === 'storm' ? 'rain' : (cell.meshDiameterCm >= 1.0 ? 'hail' : (cell.maxDbz >= 48 ? 'rain' : 'wind'));
         WeatherFXOverlay.getInstance().show({
           type: fxType,
           title: cell.name,
-          intensity: cell.meshDiameterCm >= 1.0 
-            ? `Grandine stimata: ${cell.meshDiameterCm} cm (${sizeNickname})` 
-            : `Nubifragio radar ${cell.maxDbz} dBZ`,
+          intensity: this.appMode === 'storm'
+            ? `Precipitazione: ${rainMmH} mm/h (${cell.maxDbz} dBZ)`
+            : (cell.meshDiameterCm >= 1.0 
+                ? `Grandine stimata: ${cell.meshDiameterCm} cm (${sizeNickname})` 
+                : `Nubifragio radar ${cell.maxDbz} dBZ`),
           detail: `Avanzamento a ${cell.velocity.speedKmh} km/h verso ${Math.round(cell.velocity.directionDeg)}° • In rotta: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'aree limitrofe'}`,
           loop: fxType === 'hail'
         });
@@ -352,6 +418,34 @@ export class RadarMapComponent {
       if (this.showVectors) {
         this.renderTrajectoryAndCones(cell);
       }
+    }
+  }
+
+  /**
+   * Centra e adatta dinamicamente la visuale della mappa sulle celle o perturbazioni attive
+   */
+  public fitToActiveCells(cells: StormCell[]): void {
+    if (!this.map || !cells || cells.length === 0) return;
+    try {
+      const latLngs: [number, number][] = [];
+      for (const cell of cells) {
+        latLngs.push([cell.centroid.lat, cell.centroid.lng]);
+        if (cell.polygon && cell.polygon.length > 0) {
+          for (const p of cell.polygon) {
+            latLngs.push([p.lat, p.lng]);
+          }
+        }
+      }
+      if (latLngs.length > 0) {
+        const bounds = L.latLngBounds(latLngs);
+        this.map.flyToBounds(bounds, {
+          padding: [60, 60],
+          maxZoom: 8.5,
+          duration: 1.2
+        });
+      }
+    } catch (e) {
+      console.warn('fitToActiveCells error:', e);
     }
   }
 
@@ -375,22 +469,25 @@ export class RadarMapComponent {
     for (const cone of cell.nowcastCones) {
       const coneLatLngs = cone.polygon.map(c => [c.lat, c.lng] as [number, number]);
       const opacity = Math.max(0.08, 0.28 - (cone.minutesAhead * 0.003));
+      const coneColor = this.appMode === 'storm' ? '#0284c7' : '#ff3366';
 
       const conePoly = L.polygon(coneLatLngs, {
-        color: '#ff3366',
+        color: coneColor,
         weight: 1.5,
-        fillColor: '#ff3366',
+        fillColor: coneColor,
         fillOpacity: opacity,
         dashArray: '4, 6',
-        className: 'nowcast-cone-poly'
+        className: this.appMode === 'storm' ? 'nowcast-cone-poly-storm' : 'nowcast-cone-poly'
       });
 
       conePoly.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
         WeatherFXOverlay.getInstance().show({
-          type: 'wind',
+          type: this.appMode === 'storm' ? 'rain' : 'wind',
           title: `Previsione Traiettoria +${cone.minutesAhead} min`,
-          intensity: `Raffiche di Vento/Downburst fino a ${Math.round(cell.velocity.speedKmh * 1.5)} km/h`,
+          intensity: this.appMode === 'storm'
+            ? `Avanzamento fronte piovoso verso i settori sottovento`
+            : `Raffiche di Vento/Downburst fino a ${Math.round(cell.velocity.speedKmh * 1.5)} km/h`,
           detail: `Arrivo previsto verso i comuni: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'settore in rotta'}`
         });
       });
@@ -401,7 +498,7 @@ export class RadarMapComponent {
       const timeIcon = L.divIcon({
         className: 'nowcast-time-icon',
         html: `
-          <div class="nowcast-time-badge">
+          <div class="nowcast-time-badge ${this.appMode === 'storm' ? 'time-badge-storm' : ''}">
             <span class="time-pill">+${cone.minutesAhead}m</span>
           </div>
         `,
@@ -413,9 +510,11 @@ export class RadarMapComponent {
       timeMarker.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
         WeatherFXOverlay.getInstance().show({
-          type: 'wind',
+          type: this.appMode === 'storm' ? 'rain' : 'wind',
           title: `Impatto Previsto +${cone.minutesAhead}m`,
-          intensity: `Rischio Vento & Grandine ${cell.meshDiameterCm} cm`,
+          intensity: this.appMode === 'storm'
+            ? `Pioggia stimata: ${cell.rainIntensityMmH || 35} mm/h`
+            : `Rischio Vento & Grandine ${cell.meshDiameterCm} cm`,
           detail: `Comuni interessati dal fronte: ${cell.impactedTowns?.slice(0, 3).join(', ') || 'in rotta'}`
         });
       });
@@ -428,6 +527,8 @@ export class RadarMapComponent {
       ...cell.nowcastCones.map(c => c.projectedCentroid)
     ];
 
+    const arrowFill = this.appMode === 'storm' ? '#00f0ff' : '#ffbb00';
+
     for (let i = 0; i < waypoints.length - 1; i++) {
       const p1 = waypoints[i];
       const p2 = waypoints[i + 1];
@@ -437,10 +538,10 @@ export class RadarMapComponent {
       const arrowIcon = L.divIcon({
         className: 'dynamic-motion-arrow-icon',
         html: `
-          <div class="motion-arrow-wrapper" style="transform: rotate(${heading}deg);">
+          <div class="motion-arrow-wrapper ${this.appMode === 'storm' ? 'motion-arrow-storm' : ''}" style="transform: rotate(${heading}deg);">
             <div class="motion-arrow-pulse"></div>
             <svg class="motion-arrow-svg" viewBox="0 0 24 24" width="24" height="24">
-              <path d="M12 2L20 15L12 11.5L4 15L12 2Z" fill="#ffbb00" stroke="#ffffff" stroke-width="1.5" />
+              <path d="M12 2L20 15L12 11.5L4 15L12 2Z" fill="${arrowFill}" stroke="#ffffff" stroke-width="1.5" />
             </svg>
           </div>
         `,
@@ -465,17 +566,18 @@ export class RadarMapComponent {
     const end60 = cell.nowcastCones[cell.nowcastCones.length - 1]?.projectedCentroid;
     if (end60) {
       const isNew = !!cell.isNew;
+      const lineColor = this.appMode === 'storm' ? '#00f0ff' : (isNew ? '#00f0ff' : '#ffaa00');
       const vectorLine = L.polyline([startPoint, [end60.lat, end60.lng]], {
-        color: isNew ? '#00f0ff' : '#ffaa00',
-        weight: isNew ? 4 : 3,
-        dashArray: isNew ? '6, 6' : '8, 8',
-        className: isNew ? 'animated-new-trajectory-line' : 'animated-trajectory-line'
+        color: lineColor,
+        weight: isNew || this.appMode === 'storm' ? 4 : 3,
+        dashArray: isNew || this.appMode === 'storm' ? '6, 6' : '8, 8',
+        className: this.appMode === 'storm' ? 'animated-storm-trajectory-line' : (isNew ? 'animated-new-trajectory-line' : 'animated-trajectory-line')
       });
       vectorLine.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
         WeatherFXOverlay.getInstance().show({
-          type: 'wind',
-          title: 'Traiettoria Principale 60 Min',
+          type: this.appMode === 'storm' ? 'rain' : 'wind',
+          title: `Traiettoria Fronte 60 Min`,
           intensity: `Avanzamento a ${cell.velocity.speedKmh} km/h`,
           detail: `Comuni lungo la rotta: ${cell.impactedTowns?.join(', ') || 'territorio in avanzamento'}`
         });

@@ -80,6 +80,8 @@ export interface StormCell {
   lifespanMinutes?: number;// Total expected convective lifespan (e.g. 45 - 110 min)
   isDissipated?: boolean;  // True when cell has decayed completely and should be removed
   dualPol?: DualPolRadarData;
+  phenomenon?: 'hail' | 'torrential_rain' | 'downburst' | 'lightning' | 'tornado';
+  rainIntensityMmH?: number; // Estimated rain rate in mm/h (e.g. for perturbation systems)
 }
 
 export interface NowcastCone {

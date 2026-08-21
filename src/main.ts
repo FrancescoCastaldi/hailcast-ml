@@ -639,43 +639,69 @@ class HailCastApp {
     if (this.appMode === mode) return;
     this.appMode = mode;
     
-    // Update active button
+    // Aggiorna classe attiva sui pulsanti
     document.getElementById('btnModeHail')?.classList.remove('active');
     document.getElementById('btnModeStorm')?.classList.remove('active');
     
+    const sidebarTitle = document.getElementById('sidebarMainTitle');
+    const statusText = document.getElementById('radarStatusText');
+
     if (mode === 'hail') {
       document.getElementById('btnModeHail')?.classList.add('active');
       document.body.classList.remove('mode-storm');
       document.body.classList.add('mode-hail');
-      const sidebarTitle = document.getElementById('sidebarMainTitle');
-      if (sidebarTitle) sidebarTitle.textContent = 'Temporali Attivi';
+      if (sidebarTitle) sidebarTitle.textContent = 'Temporali & Grandine Attivi';
+      if (statusText) statusText.textContent = 'RADAR GRANDINE: LIVE';
+      this.showToast('❄️ Modalità Grandine: visualizzazione nuclei MESH e inneschi temporaleschi', 'info');
     } else {
       document.getElementById('btnModeStorm')?.classList.add('active');
       document.body.classList.remove('mode-hail');
       document.body.classList.add('mode-storm');
-      const sidebarTitle = document.getElementById('sidebarMainTitle');
-      if (sidebarTitle) sidebarTitle.textContent = 'Perturbazioni Attive';
+      if (sidebarTitle) sidebarTitle.textContent = 'Fronti Perturbati & Pioggia';
+      if (statusText) statusText.textContent = 'RADAR PERTURBAZIONI: LIVE';
+      this.showToast('🌧️ Modalità Perturbazioni: visualizzazione fronti piovosi e mm/h', 'info');
     }
 
     this.updateUIForAppMode();
-    this.showToast(`Modalità ${mode === 'hail' ? 'Grandine' : 'Perturbazioni'} Attivata`, 'info');
   }
 
   private updateUIForAppMode(): void {
-    if (this.appMode === 'hail') {
-      this.radarMap.renderStormCells(this.currentStormCells);
-      this.alertFeed.renderStormCells(this.currentStormCells);
+    this.radarMap.setAppMode(this.appMode);
+
+    const cellsToRender = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
+    this.radarMap.renderStormCells(cellsToRender);
+    this.alertFeed.renderStormCells(cellsToRender);
+
+    // Centratura e zoom dinamico sulla mappa per inquadrare immediatamente le celle/perturbazioni attive
+    if (cellsToRender.length > 0) {
+      this.radarMap.fitToActiveCells(cellsToRender);
+    }
+
+    // In modalità Perturbazioni, nascondi gli inneschi grandinigeni per non confondere l'utente, e mostra invece solo i fronti
+    const genesisSidebarSection = document.getElementById('genesisForecastSection');
+    if (this.appMode === 'storm') {
+      this.radarMap.renderGenesisForecasts([]);
+      if (genesisSidebarSection) {
+        genesisSidebarSection.style.display = 'none';
+      }
     } else {
-      this.radarMap.renderStormCells(this.currentPerturbations);
-      this.alertFeed.renderStormCells(this.currentPerturbations);
+      this.updateGenesisForecasts(0);
+      if (genesisSidebarSection) {
+        genesisSidebarSection.style.display = 'block';
+      }
+    }
+
+    // Aggiorna conteggio elementi attivi
+    const countBadge = document.getElementById('activeCellsCount');
+    if (countBadge) {
+      countBadge.textContent = `${cellsToRender.length}`;
     }
     
     if (this.inspectedLocation) {
-      const cellsToAssess = this.appMode === 'hail' ? this.currentStormCells : this.currentPerturbations;
       const assessment = StormTracker.assessLocationRisk(
         this.inspectedLocation.name,
         this.inspectedLocation.coords,
-        cellsToAssess
+        cellsToRender
       );
       this.locationSearch.showRiskCard(assessment);
     }
