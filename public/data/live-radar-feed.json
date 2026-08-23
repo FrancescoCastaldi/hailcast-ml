@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-08-23T23:45:02.069Z",
-  "updatedEpoch": 1787528702069,
-  "generatedTimestamp": 1787528422,
+  "updatedAt": "2026-08-23T23:59:41.162Z",
+  "updatedEpoch": 1787529581162,
+  "generatedTimestamp": 1787529324,
   "host": "https://tilecache.rainviewer.com",
   "radarSources": {
     "rainviewer": {
@@ -24,10 +24,6 @@
   },
   "radar": {
     "past": [
-      {
-        "time": 1787521200,
-        "path": "/v2/radar/185e046ca430"
-      },
       {
         "time": 1787521800,
         "path": "/v2/radar/f48ae76a92d3"
@@ -75,6 +71,10 @@
       {
         "time": 1787528400,
         "path": "/v2/radar/2d5363a89d55"
+      },
+      {
+        "time": 1787529000,
+        "path": "/v2/radar/921f88722ba3"
       }
     ],
     "nowcast": []
@@ -289,10 +289,10 @@
       ],
       "isNew": false,
       "formationStage": "established",
-      "createdAt": 1787526002069,
+      "createdAt": 1787526881162,
       "ageMinutes": 45,
       "lifespanMinutes": 75,
-      "expiresAt": 1787530502069
+      "expiresAt": 1787531381162
     },
     {
       "id": "cell-sync-no_lomb_piem-3",
@@ -503,10 +503,10 @@
       ],
       "isNew": true,
       "formationStage": "new_initiation",
-      "createdAt": 1787528282069,
+      "createdAt": 1787529161162,
       "ageMinutes": 7,
       "lifespanMinutes": 90,
-      "expiresAt": 1787533682069
+      "expiresAt": 1787534561162
     },
     {
       "id": "cell-sync-emilia_rom-3",
@@ -717,10 +717,10 @@
       ],
       "isNew": true,
       "formationStage": "new_initiation",
-      "createdAt": 1787527862069,
+      "createdAt": 1787528741162,
       "ageMinutes": 14,
       "lifespanMinutes": 75,
-      "expiresAt": 1787532362069
+      "expiresAt": 1787533241162
     },
     {
       "id": "cell-sync-veneto_friuli-3",
@@ -931,10 +931,10 @@
       ],
       "isNew": false,
       "formationStage": "established",
-      "createdAt": 1787525642069,
+      "createdAt": 1787526521162,
       "ageMinutes": 51,
       "lifespanMinutes": 90,
-      "expiresAt": 1787531042069
+      "expiresAt": 1787531921162
     }
   ],
   "regionalObservatories": [
@@ -1052,15 +1052,15 @@
         "lng": 16.871
       },
       "current": {
-        "temperature": 26.5,
-        "humidity": 64,
-        "pressure": 1015.3,
-        "windSpeedKmh": 5.5,
-        "windGustsKmh": 13,
-        "windDirectionDeg": 247,
+        "temperature": 26.6,
+        "humidity": 61,
+        "pressure": 1015.1,
+        "windSpeedKmh": 5.8,
+        "windGustsKmh": 13.3,
+        "windDirectionDeg": 248,
         "precipitationMm": 0,
         "weatherCode": 0,
-        "cape": 20,
+        "cape": 0,
         "liftedIndex": 1.3
       }
     }
